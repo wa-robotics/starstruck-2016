@@ -21,10 +21,10 @@ task main()
   	LX = (abs(vexRT[Ch4]) > threshold) ? vexRT[Ch4] : 0;
   	RY = (abs(vexRT[Ch2]) > threshold) ? vexRT[Ch2] : 0;
   	RX = (abs(vexRT[Ch1]) > threshold) ? vexRT[Ch1] : 0;
-    motor[lDriveFront] = LY - LX;
-  	motor[lDriveBack] = LY + LX;
-  	motor[rDriveFront] = RY + RX;
-  	motor[rDriveBack] = RY - RX;
+    motor[lDriveFront] = LY + LX;
+  	motor[lDriveBack] = LY - LX;
+  	motor[rDriveFront] = RY - RX;
+  	motor[rDriveBack] = RY + RX;
   }\
 
 }
