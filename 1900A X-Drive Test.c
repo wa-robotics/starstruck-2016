@@ -18,16 +18,35 @@
 	BR - back right motor
 	BL - back left motor
 
+	Motion / Mechanics Notes
+
+	Entire left side is reversed so that robot can go forward
+	List (FL Speed, BL speed, BR speed, FR) - remember FL and BL are reversed
+	Forward: 127, 127, 127, 127 - both joysticks forward
+	Backwards: -127, -127, -127, -127 - both joysticks backwards
+	Strafe Left: -127, 127, 127, -127 -
+	Strafe Right: 127, -127, -127, 127
+	Rotate Left: -127, -127, 127, 127
+	Rotate Right: 127, 127, -127,-127
+
+
 ------------------------------------------------------*/
 
 task main()
 {
 	while(true){
 
+	// Normal Tank Controls
 	motor[FR] = vexRT[Ch2];
 	motor[BR] = vexRT[Ch2];
 	motor[FL] = vexRT[Ch3];
 	motor[FR] = vexRT[Ch3];
+
+	//Strafing Controls <- ->
+	motor[FR] = vexRT[Ch1];
+	motor[FL] = vexRT[Ch1];
+	motor[BR] = vexRT[Ch4];
+	motor[BL] = vexRT[Ch4];
 	}
 
 
