@@ -24,10 +24,10 @@
 	List (FL Speed, BL speed, BR speed, FR) - remember FL and BL are reversed
 	Forward: 127, 127, 127, 127 - both joysticks forward
 	Backwards: -127, -127, -127, -127 - both joysticks backwards
-	Strafe Left: -127, 127, 127, -127 -
-	Strafe Right: 127, -127, -127, 127
-	Rotate Left: -127, -127, 127, 127
-	Rotate Right: 127, 127, -127,-127
+	Strafe Left: -127, 127, 127, -127 - both joysticks left
+	Strafe Right: 127, -127, -127, 127 - both joysticks right
+	Rotate Left: -127, -127, 127, 127 - left joystick down right joystick up
+	Rotate Right: 127, 127, -127,-127 - left joystick up right joystick down
 
 
 ------------------------------------------------------*/
