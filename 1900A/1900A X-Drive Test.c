@@ -1,3 +1,5 @@
+#pragma config(Motor,  port2,           leftIntake,    tmotorVex393TurboSpeed_MC29, openLoop)
+#pragma config(Motor,  port3,           rightIntake,   tmotorVex393TurboSpeed_MC29, openLoop, reversed)
 #pragma config(Motor,  port4,           FL,            tmotorVex393TurboSpeed_MC29, openLoop)
 #pragma config(Motor,  port5,           FR,            tmotorVex393TurboSpeed_MC29, openLoop, reversed)
 #pragma config(Motor,  port6,           BR,            tmotorVex393TurboSpeed_MC29, openLoop)
@@ -7,11 +9,14 @@
 /*------------------------------------------------------
 
 Motor Pin Diagram:
-
-FL - front left motor
-FR - front right motor
-BR - back right motor
-BL - back left motor
+2. LI - left intake motor
+3. RI - right intake motor
+4. FL - front left motor
+5. FR - front right motor
+6. BR - back right motor
+7. BL - back left motor
+8. LFB - left four-bar motor
+9. RFB - right four-bar motor
 
 Motion / Mechanics Notes
 
@@ -27,7 +32,9 @@ Rotate Right: 127, 127, -127,-127 - left joystick up right joystick down
 
 ------------------------------------------------------*/
 
-int threshold = 15;
+int threshold = 15; //minimum joystick value
+int intakeStatusValue = 1; //used to keep track of status of intake (on/off)
+bool intakeStatus = false; //current status is false(off)
 
 task main()
 {
@@ -36,22 +43,30 @@ task main()
 	int RY = 0;
 	int RX = 0;
 
-  while(true )
-  {
-  	/*
-  	Ternary Statement: value = (true boolean) ? (false boolean) : value
-  	If the absolute value of one of these vexRT Channels is greater than the threshold, assign the value
-  	If it is NOT greater than threshold, make it 0
-  	*/
-  	LX = (abs(vexRT[Ch4]) > threshold) ? vexRT[Ch4] : 0;
-  	LY = (abs(vexRT[Ch3]) > threshold) ? vexRT[Ch3] : 0;
-  	RY = (abs(vexRT[Ch2]) > threshold) ? vexRT[Ch2] : 0;
-  	RX = (abs(vexRT[Ch1]) > threshold) ? vexRT[Ch1] : 0;
+	while(true )
+	{
+		/*
+		Ternary Statement: value = (true boolean) ? (false boolean) : value
+		If the absolute value of one of these vexRT Channels is greater than the threshold, assign the value
+		If it is NOT greater than threshold, make it 0
+		*/
+		LX = (abs(vexRT[Ch4]) > threshold) ? vexRT[Ch4] : 0;
+		LY = (abs(vexRT[Ch3]) > threshold) ? vexRT[Ch3] : 0;
+		RY = (abs(vexRT[Ch2]) > threshold) ? vexRT[Ch2] : 0;
+		RX = (abs(vexRT[Ch1]) > threshold) ? vexRT[Ch1] : 0;
 
-  	motor[FL] = LY + LX;
-  	motor[FR] = RY - RX;
-  	motor[BR] = RY + RX;
-  	motor[BL] = LY - LX;
+		motor[FL] = LY + LX;
+		motor[FR] = RY - RX;
+		motor[BR] = RY + RX;
+		motor[BL] = LY - LX;
 
+		if(vexRT[Btn6U] == 1){ //if Button 6U is pressed, turn the intake on
+			motor[rightIntake] = 127;
+			motor[leftIntake] = 127;
+		}
+		else if (vexRT[Btn6U] == 0){ //if the button is not being pressed, then turn the intake off
+			motor[rightIntake] = 0;
+			motor[leftIntake] = 0;
+		}
 	}
 }
