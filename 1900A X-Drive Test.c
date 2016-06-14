@@ -38,6 +38,7 @@ bool intakeStatus = false; //current status is false(off)
 
 task main()
 {
+	//Assign some starter values to the four movement integers
 	int LY = 0;
 	int LX = 0;
 	int RY = 0;
@@ -60,15 +61,15 @@ task main()
 		motor[BR] = RY + RX;
 		motor[BL] = LY - LX;
 
-		if(vexRT[Btn6U] == 1){
-			motor[rightIntake] = 127;
-			motor[leftIntake] = 127;
+		if(vexRT[Btn6U] == 1){ //Button 6U controls intake
+		motor[rightIntake] = 127;
+		motor[leftIntake] = 127;
 		}
-		else if(vexRT[Btn6D] == 1){
-			motor[rightIntake] = -127;
-			motor[leftIntake] = -127;
+		else if(vexRT[Btn6D] == 1){ //Button 6D controls the backards movement of the intake
+		motor[leftIntake] = -127;
+		motor[rightIntake] = -127;
 		}
-		else if ((vexRT[Btn6D] == 0) && (vexRT[Btn6U] == 0)){
+		else if (vexRT[Btn6U] == 0 && vexRT[Btn5U] == 0){ //if neither button is being pressed, turn all motors off
 		motor[rightIntake] = 0;
 		motor[leftIntake] = 0;
 		}
