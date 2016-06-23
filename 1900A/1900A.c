@@ -53,6 +53,7 @@ Four-Bar
 
 int threshold = 15; //minimum joystick value
 int fBPower = 75;
+int intakePwr = 127;
 
 task main()
 {
@@ -81,12 +82,12 @@ task main()
 		//Intake Controls
 
 		if(vexRT[Btn6U] == 1){ //if Button 6U is being pressed, intake stars
-			motor[rightIntake] = 127;
-			motor[leftIntake] = 127;
+			motor[rightIntake] = intakePwr;
+			motor[leftIntake] = intakePwr;
 		}
 		else if(vexRT[Btn6D] == 1){ //if button 6D
-			motor[rightIntake] = -127;
-			motor[leftIntake] = -127;
+			motor[rightIntake] = -intakePwr;
+			motor[leftIntake] = -intakePwr;
 		}
 		else if ((vexRT[Btn6D] == 0) && (vexRT[Btn6U] == 0)){ //if neither butto is begin pressed, turn the motor off
 		motor[rightIntake] = 0;
