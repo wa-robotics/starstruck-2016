@@ -1,3 +1,4 @@
+#pragma config(Sensor, dgtl1, catapultLimit,  sensorTouch)
 #pragma config(Motor,  port2,           catapult1,     tmotorVex393_MC29, openLoop)
 #pragma config(Motor,  port3,           catapult2,     tmotorVex393_MC29, openLoop)
 #pragma config(Motor,  port4,           catapult3,     tmotorVex393_MC29, openLoop)
@@ -36,7 +37,7 @@ task main()
   		motor[catapult3] = 127;
   		motor[catapult4] = 127;
   	}
-  	else if(vexRT[Btn5D] == 1)
+  	else if(vexRT[Btn5D] == 1  && !SensorValue[catapultLimit])
   	{
   		motor[catapult1] = -127;
   		motor[catapult2] = -127;
