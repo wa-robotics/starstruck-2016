@@ -1,6 +1,7 @@
 #pragma config(Sensor, dgtl1,  platformAttached, sensorTouch)
 #pragma config(Sensor, dgtl2,  catapultUp,     sensorTouch)
 #pragma config(Sensor, dgtl3,  platformSolenoid, sensorDigitalOut)
+#pragma config(Sensor, dgtl4,  intake,         sensorDigitalOut)
 #pragma config(Motor,  port2,           catapult1,     tmotorVex393_MC29, openLoop)
 #pragma config(Motor,  port3,           catapult2,     tmotorVex393_MC29, openLoop)
 #pragma config(Motor,  port4,           catapult3,     tmotorVex393_MC29, openLoop)
@@ -73,6 +74,14 @@ task main()
 	  	}
 	  	if (vexRT[Btn6D]) {
 	  		SensorValue[platformSolenoid] = 0;
+	  	}
+
+	  	if (vexRT[Btn8U]) {
+	  		SensorValue[intake] = 1;
+	  	}
+
+	  	if (vexRT[Btn8D]) {
+	  		SensorValue[intake] = 0;
 	  	}
 	  }
   	else { //7D is pressed)
