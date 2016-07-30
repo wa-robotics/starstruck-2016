@@ -1,7 +1,12 @@
+#pragma config(Sensor, in5,    frontLeftLF,    sensorLineFollower)
+#pragma config(Sensor, in6,    frontRightLF,   sensorLineFollower)
+#pragma config(Sensor, in8,    backRightLF,    sensorLineFollower)
+#pragma config(Sensor, in7,    backLeftLF,     sensorLineFollower)
 #pragma config(Sensor, dgtl1,  platformAttached, sensorTouch)
 #pragma config(Sensor, dgtl2,  catapultUp,     sensorTouch)
 #pragma config(Sensor, dgtl3,  platformSolenoid, sensorDigitalOut)
-#pragma config(Sensor, dgtl4,  intake,         sensorDigitalOut)
+#pragma config(Sensor, dgtl4,  openGate,       sensorDigitalOut)
+#pragma config(Sensor, dgtl5,  closeGate,      sensorDigitalOut)
 #pragma config(Motor,  port2,           catapult1,     tmotorVex393_MC29, openLoop)
 #pragma config(Motor,  port3,           catapult2,     tmotorVex393_MC29, openLoop)
 #pragma config(Motor,  port4,           catapult3,     tmotorVex393_MC29, openLoop)
@@ -14,10 +19,29 @@
 
 void setCatapultMotors(int power) {
 	motor[catapult1] = power;
-  motor[catapult2] = power;
-  motor[catapult3] = power;
-  motor[catapult4] = power;
+	motor[catapult2] = power;
+	motor[catapult3] = power;
+	motor[catapult4] = power;
 }
+
+//Sets the power of the left drivetrain motors
+void setLeftDtMotors(int power) {
+	motor[lDriveFront] = power;
+	motor[lDriveBack] = power;
+}
+
+//Sets the power of the right drivetrain motors
+void setRightDtMotors(int power) {
+	motor[rDriveFront] = power;
+	motor[rDriveBack] = power;
+}
+
+//Sets all drivetrain motors to power given
+void setDtMotors(int power) {
+	setLeftDtMotors(power);
+	setRightDtMotors(power);
+}
+
 bool platformReleased = false;
 task resetCatapult() {
 	setCatapultMotors(-127);
@@ -36,6 +60,83 @@ task resetCatapult() {
 }
 
 bool testMode = false;
+
+task lineTrackTest() {
+	int threshold = 500, //threshold for determining when line follower is off the line
+	normalMotorPower = 50,
+	highMotorPower = 100;
+	while (1) {
+		/*
+		string lastSeen = "";
+		if(SensorValue(rightLF) < lfThreshold || lastSeen == "right")
+		{
+		// counter-steer right:
+		setLeftDtMotors( 60);
+		motor[rDriveFront] = 60;
+		motor[rDriveBack] = 20;
+		writeDebugStreamLine("turning right, rightLF value: %d, left: %d, center: %d", SensorValue[rightLF], SensorValue[leftLF],SensorValue[midLF]);
+		lastSeen = "right";
+		}
+		// CENTER sensor sees dark:
+		if(SensorValue(midLF) < lfThreshold)
+		{
+		// go straight
+		setLeftDtMotors( 60);
+		setRightDtMotors(60);
+		writeDebugStreamLine("straight, ightLF value: %d, left: %d, center: %d", SensorValue[rightLF], SensorValue[leftLF],SensorValue[midLF]);
+		lastSeen = "center";
+		}
+		// LEFT sensor sees dark:
+		if(SensorValue(leftLF) < lfThreshold || lastSeen == "left")
+		{
+		// counter-steer left:
+		setRightDtMotors( 60);
+		motor[lDriveFront] = 60;
+		motor[lDriveBack] = 20;
+		writeDebugStreamLine("turning left, ightLF value: %d, left: %d, center: %d", SensorValue[rightLF], SensorValue[leftLF],SensorValue[midLF]);
+		lastSeen = "left";
+		}
+		*/
+		bool lFrontSlow = false,
+		lBackSlow = false,
+		rFrontSlow = false,
+		rBackSlow = false;
+		int slowSpeed = 50;
+		int fastSpeed = 127;
+
+		if (SensorValue[frontLeftLF] < threshold) {
+			lFrontSlow = true;
+		} else {
+			lFrontSlow = false;
+		}
+
+		if (SensorValue[backLeftLF] < threshold) {
+			lBackSlow = true;
+		} else {
+			lBackSlow = false;
+		}
+
+		if (SensorValue[frontRightLF] < threshold) {
+			rFrontSlow = true;
+		} else {
+			rFrontSlow = false;
+		}
+
+		if (SensorValue[backRightLF] < threshold) {
+			rBackSlow = true;
+		} else {
+			rBackSlow = false;
+		}
+
+		motor[lDriveFront] = lFrontSlow ? slowSpeed : fastSpeed;
+		motor[lDriveBack] = lBackSlow ? slowSpeed : fastSpeed;
+		motor[rDriveFront] = rFrontSlow ? slowSpeed : fastSpeed;
+		motor[rDriveBack] = rBackSlow ? slowSpeed : fastSpeed;
+
+		wait1Msec(25);
+	}
+}
+
 task main()
 {
 	int LY = 0;
@@ -43,64 +144,68 @@ task main()
 	int RY = 0;
 	int RX = 0;
 	int threshold = 15;
-  while(1)
-  {
-  	//for deadzones; when the joystick value for an axis is below the threshold, the motors controlled by that joystick will not move in that direction
-  	LY = (abs(vexRT[Ch3]) > threshold) ? vexRT[Ch3] : 0;
-  	LX = (abs(vexRT[Ch4]) > threshold) ? vexRT[Ch4] : 0;
-  	RY = (abs(vexRT[Ch2]) > threshold) ? vexRT[Ch2] : 0;
-  	RX = (abs(vexRT[Ch1]) > threshold) ? vexRT[Ch1] : 0;
-    motor[lDriveFront] = LY + LX;
-  	motor[lDriveBack] = LY - LX;
-  	motor[rDriveFront] = RY - RX;
-  	motor[rDriveBack] = RY + RX;
+	startTask(lineTrackTest);
+	stopTask(main);
+	while(1)
+	{
+		//for deadzones; when the joystick value for an axis is below the threshold, the motors controlled by that joystick will not move in that direction
+		LY = (abs(vexRT[Ch3]) > threshold) ? vexRT[Ch3] : 0;
+		LX = (abs(vexRT[Ch4]) > threshold) ? vexRT[Ch4] : 0;
+		RY = (abs(vexRT[Ch2]) > threshold) ? vexRT[Ch2] : 0;
+		RX = (abs(vexRT[Ch1]) > threshold) ? vexRT[Ch1] : 0;
+		motor[lDriveFront] = LY + LX;
+		motor[lDriveBack] = LY - LX;
+		motor[rDriveFront] = RY - RX;
+		motor[rDriveBack] = RY + RX;
 
-  	if (!vexRT[Btn7D] && !testMode) {
-	  	if(vexRT[Btn5U] == 1)
-	  	{
-	  		setCatapultMotors(127);
-	  	}
-	  	else if((vexRT[Btn5D] == 1  && !SensorValue[platformAttached]) || (vexRT[Btn5D] && vexRT[Btn8D]))
-	  	{
-	  		setCatapultMotors(-127);
-	  	}
-	  	else
-	  	{
-	  		setCatapultMotors(0);
-	  	}
+		if (!vexRT[Btn7D] && !testMode) {
+			if(vexRT[Btn5U] == 1)
+			{
+				setCatapultMotors(127);
+			}
+			else if((vexRT[Btn5D] == 1  && !SensorValue[platformAttached]) || (vexRT[Btn5D] && vexRT[Btn8D]))
+			{
+				setCatapultMotors(-127);
+			}
+			else
+			{
+				setCatapultMotors(0);
+			}
 
-	  	if (vexRT[Btn6U]) {
-	  		SensorValue[platformSolenoid] = 1;
-	  	}
-	  	if (vexRT[Btn6D]) {
-	  		SensorValue[platformSolenoid] = 0;
-	  	}
+			if (vexRT[Btn6U]) {
+				SensorValue[platformSolenoid] = 1;
+			}
+			if (vexRT[Btn6D]) {
+				SensorValue[platformSolenoid] = 0;
+			}
 
-	  	if (vexRT[Btn8U]) {
-	  		SensorValue[intake] = 1;
-	  	}
+			if (vexRT[Btn8U]) {
+				SensorValue[openGate] = 1;
+				SensorValue[closeGate] = 0;
+			}
 
-	  	if (vexRT[Btn8D]) {
-	  		SensorValue[intake] = 0;
-	  	}
-	  }
-  	else { //7D is pressed)
-  		//startTask(resetCatapult); //set the catapult motors to -127 to release the catapult and then start moving it down again; this is in a separate task so that the catapult will stop when
-  															//	it is supposed to even if the catapultUp condition (below) is never met
-  		setCatapultMotors(-127);
+			if (vexRT[Btn8D]) {
+				SensorValue[openGate] = 0;
+				SensorValue[closeGate] = 1;
+			}
+		}
+		else { //7D is pressed)
+			//startTask(resetCatapult); //set the catapult motors to -127 to release the catapult and then start moving it down again; this is in a separate task so that the catapult will stop when
+			//	it is supposed to even if the catapultUp condition (below) is never met
+			setCatapultMotors(-127);
 
-  		time1[T1] = 0;
-  		while (!SensorValue[catapultUp]/* && time1[T1] < 5000*/) { //wait for catapult to be completely up or up to 5 seconds
-  			wait1Msec(25);
-  		}
+			time1[T1] = 0;
+			while (!SensorValue[catapultUp]/* && time1[T1] < 5000*/) { //wait for catapult to be completely up or up to 5 seconds
+				wait1Msec(25);
+			}
 
-  		wait1Msec(100); //wait a little bit for things to settle out
-  		SensorValue[platformSolenoid] = 1; //drop the platform
-  		platformReleased = true;
+			wait1Msec(100); //wait a little bit for things to settle out
+			SensorValue[platformSolenoid] = 1; //drop the platform
+			platformReleased = true;
 
-  		wait1Msec(1000); //wait to give time for the platform to fall
+			wait1Msec(1000); //wait to give time for the platform to fall
 
-  		while(!SensorValue[platformAttached]) { //...and until the catapult is reattached to the platform
+			while(!SensorValue[platformAttached]) { //...and until the catapult is reattached to the platform
 				wait1Msec(25);
 			}
 
@@ -108,7 +213,7 @@ task main()
 			SensorValue[platformSolenoid] = 0;
 			platformReleased = false;
 
-  	}
-  }
+		}
+	}
 
 }
