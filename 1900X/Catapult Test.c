@@ -144,8 +144,9 @@ task main()
 	int RY = 0;
 	int RX = 0;
 	int threshold = 15;
-	startTask(lineTrackTest);
-	stopTask(main);
+	//startTask(lineTrackTest);
+	//stopTask(main);
+
 	while(1)
 	{
 		//for deadzones; when the joystick value for an axis is below the threshold, the motors controlled by that joystick will not move in that direction
