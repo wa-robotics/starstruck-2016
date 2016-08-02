@@ -4,50 +4,69 @@ typedef enum _LCDButton {
 
 typedef struct _Answer {
 		LCDButton button;
-		string text;
+		char text;
 		int functionToRun;
 		int nextMenuId;
 } Answer;
 
 typedef struct _LCDQuestion {
 		int id;
-		string question;
+		char question;
 		Answer left;
 		Answer center;
 		Answer right;
 	} LCDQuestion;
+LCDQuestion questions[1];
+void newQuestion(LCDQuestion& q, int menuNum, char* question, Answer* leftAnswer, Answer* centerAnswer, Answer* rightAnswer) {
+	q.id = menuNum;
+	q.question = (char) question;
 
-void newQuestion(LCDQuestion *q, int menuNum, char* question, char* leftAnswerText, int leftAnswerFunction, int leftNextMenu, char* centerAnswerText, int centerAnswerFunction, int centerNextMenu,char* rightAnswerText, int rightAnswerFunction, int rightNextMenu) {
-	q->id = menuNum;
-	q->question = question;
-
-	Answer left, center, right;
-	left.button = LEFT;
-	left.text = leftAnswerText;
-	left.functionToRun = leftAnswerFunction;
-	left.nextMenuId = leftNextMenu;
-
-	center.button = CENTER;
-	center.text = centerAnswerText;
-	center.functionToRun = centerAnswerFunction;
-	center.nextMenuId = centerNextMenu;
-
-	right.button = RIGHT;
-	right.text = rightAnswerText;
-	right.functionToRun = rightAnswerFunction;
-	right.nextMenuId = rightNextMenu;
-
-	q->left = left;
-	q->center = center;
-	q->right = right;
+	q.left = (Answer) leftAnswer;
+	q.center = (Answer)centerAnswer;
+	q.right = (Answer)rightAnswer;
 }
 
-LCDQuestion q1, q2, q3;
+Answer *getQuestionAnswer(char* name, int functionID, LCDButton btn, int nextID) {
+	Answer questionAnswer;
+	questionAnswer.button = btn;
+	questionAnswer.text = name;
+	questionAnswer.functionToRun = functionID;
+	questionAnswer.nextMenuId = nextID;
+	return questionAnswer;
+}
+
+void lcdExecuteFunction (int num) {
+	switch (num) {
+		case 1:
+			break;
+	}
+}
+
+LCDQuestion q1;
+
+task lcdWizard() {
+	int qId = 0;
+	string question, leftAns, centerAns, rightAns;
+	//while (1) {
+		//question = questions[0].question;
+		//leftAns = questions[qId].left.text;
+		//centerAns = questions[qId].center.text;
+		//rightAns = questions[qId].right.text;
+		//displayLCDCenteredString(0, question);
+		//displayLCDString(1,0,leftAns);
+		//displayLCDString(1,6,centerAns);
+		//displayLCDString(1,11,rightAns);
+		writeDebugStreamLine("%s %s %s %s",q1.question, leftAns, centerAns, rightAns);
+	//}
+}
+
 task main()
 {
-	newQuestion(q1,3,"Question","A1",0,0,"A2",0,0,"A3",0,0);
-	LCDQuestion test[5];
-	test[0] = q1;
+	newQuestion(q1,0,"Question",getQuestionAnswer("test",2,LEFT,3),getQuestionAnswer("test",2,CENTER,3),getQuestionAnswer("test",2,RIGHT,3));
+	//startTask(lcdWizard);
+	Answer test;
+	//test = (Answer) getQuestionAnswer("test",2,CENTER,3);
+	writeDebugStreamLine("%s",test.button);
 
-
+while(1){}
 }
