@@ -27,7 +27,7 @@ void newQuestion(LCDQuestion& q, int menuNum, char* question, Answer* leftAnswer
 }
 
 Answer *getQuestionAnswer(char* name, int functionID, LCDButton btn, int nextID) {
-	Answer questionAnswer;
+	static Answer questionAnswer;
 	questionAnswer.button = btn;
 	questionAnswer.text = name;
 	questionAnswer.functionToRun = functionID;
