@@ -1,3 +1,4 @@
+#pragma config(Sensor, in4,    catapultPot,    sensorPotentiometer)
 #pragma config(Sensor, in5,    frontLeftLF,    sensorLineFollower)
 #pragma config(Sensor, in6,    frontRightLF,   sensorLineFollower)
 #pragma config(Sensor, in7,    backLeftLF,     sensorLineFollower)
@@ -190,7 +191,8 @@ task main()
 				SensorValue[closeGate] = 1;
 			}
 		}
-		else { //7D is pressed)
+		//graph armPot, catapultUp, platformSolenoid, platformAttached v. time
+		else { //7D is pressed
 			//startTask(resetCatapult); //set the catapult motors to -127 to release the catapult and then start moving it down again; this is in a separate task so that the catapult will stop when
 			//	it is supposed to even if the catapultUp condition (below) is never met
 			setCatapultMotors(-127);
