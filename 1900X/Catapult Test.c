@@ -137,7 +137,14 @@ task lineTrackTest() {
 		wait1Msec(25);
 	}
 }
-
+task log () {
+	while (1) {
+		datalogAddValue(0, SensorValue[catapultPot]);
+		datalogAddValue(1, SensorValue[catapultUp]);
+		datalogAddValue(2, SensorValue[platformAttached]);
+		datalogAddValue(3, SensorValue[platformSolenoid]);
+	}
+}
 task main()
 {
 	int LY = 0;
@@ -145,9 +152,10 @@ task main()
 	int RY = 0;
 	int RX = 0;
 	int threshold = 15;
+	bool stopCatapult = false;
 	//startTask(lineTrackTest);
 	//stopTask(main);
-
+startTask(log);
 	while(1)
 	{
 		//for deadzones; when the joystick value for an axis is below the threshold, the motors controlled by that joystick will not move in that direction
@@ -193,28 +201,44 @@ task main()
 		}
 		//graph armPot, catapultUp, platformSolenoid, platformAttached v. time
 		else { //7D is pressed
-			//startTask(resetCatapult); //set the catapult motors to -127 to release the catapult and then start moving it down again; this is in a separate task so that the catapult will stop when
-			//	it is supposed to even if the catapultUp condition (below) is never met
-			setCatapultMotors(-127);
+				//startTask(resetCatapult); //set the catapult motors to -127 to release the catapult and then start moving it down again; this is in a separate task so that the catapult will stop when
+				//	it is supposed to even if the catapultUp condition (below) is never met
 
-			time1[T1] = 0;
-			while (!SensorValue[catapultUp]/* && time1[T1] < 5000*/) { //wait for catapult to be completely up or up to 5 seconds
-				wait1Msec(25);
-			}
+				//play warning tone and wait before starting
+				playImmediateTone(1100, 100); //duration in 10Msec
+				wait1Msec(1500);
 
-			wait1Msec(100); //wait a little bit for things to settle out
-			SensorValue[platformSolenoid] = 1; //drop the platform
-			platformReleased = true;
+				SensorValue[platformSolenoid] = 0; //make sure platform will be attached
+				SensorValue[openGate] = 1;
+				SensorValue[closeGate] = 0;
+				wait1Msec(500);
+        setCatapultMotors(-127); //start catapult motors to fire catapult
 
-			wait1Msec(1000); //wait to give time for the platform to fall
+				/*time1[T1] = 0;
+				while (!SensorValue[catapultUp]/* && time1[T1] < 5000*//*) { //wait for catapult to be completely up or up to 5 seconds
+					wait1Msec(25);
+				}
 
-			while(!SensorValue[platformAttached]) { //...and until the catapult is reattached to the platform
-				wait1Msec(25);
-			}
+				wait1Msec(100); //wait a little bit for things to settle out
+				SensorValue[platformSolenoid] = 1; //drop the platform
+				platformReleased = true;
 
-			setCatapultMotors(0);
-			SensorValue[platformSolenoid] = 0;
-			platformReleased = false;
+				wait1Msec(1000); //wait to give time for the platform to fall
+	*/
+				while(!SensorValue[catapultUp] || SensorValue[catapultPot] < 3700) { //when the catapult is up and the limit switch indicating this is activated, move on
+					wait1Msec(25);
+				}
+				SensorValue[platformSolenoid] = 1; //release platform
+				//setCatapultMotors(127);
+				//wait1Msec(125);
+
+				while (!SensorValue[platformAttached] || SensorValue[catapultPot] > 2300) { //when platform is attached and catapult is down, move one
+					wait1Msec(25);
+				}
+
+				setCatapultMotors(0); //stop moving catapult
+				SensorValue[platformSolenoid] = 0; //reattach platform
+				platformReleased = false;
 
 		}
 	}
