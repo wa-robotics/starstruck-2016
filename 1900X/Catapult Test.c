@@ -137,6 +137,7 @@ task lineTrackTest() {
 		wait1Msec(25);
 	}
 }
+
 task log () {
 	while (1) {
 		datalogAddValue(0, SensorValue[catapultPot]);
@@ -214,31 +215,36 @@ startTask(log);
 				wait1Msec(500);
         setCatapultMotors(-127); //start catapult motors to fire catapult
 
-				/*time1[T1] = 0;
-				while (!SensorValue[catapultUp]/* && time1[T1] < 5000*//*) { //wait for catapult to be completely up or up to 5 seconds
-					wait1Msec(25);
-				}
-
-				wait1Msec(100); //wait a little bit for things to settle out
-				SensorValue[platformSolenoid] = 1; //drop the platform
-				platformReleased = true;
-
-				wait1Msec(1000); //wait to give time for the platform to fall
-	*/
+        bool catapultUpTimedOut = false;
+        int catapultTimeOutTime = 3000; //in milliseconds; wait 3 seconds at most for the catapult to go all the way up
+        time1[T1] = 0; //start timing how long we've been waiting for the catapult to go all the way up
 				while(!SensorValue[catapultUp] || SensorValue[catapultPot] < 3700) { //when the catapult is up and the limit switch indicating this is activated, move on
-					wait1Msec(25);
-				}
-				SensorValue[platformSolenoid] = 1; //release platform
-				//setCatapultMotors(127);
-				//wait1Msec(125);
-
-				while (!SensorValue[platformAttached] || SensorValue[catapultPot] > 2300) { //when platform is attached and catapult is down, move one
+					if (time1[T1] > catapultTimeOutTime) {
+						catapultUpTimedOut = true;
+						break; //exit this while loop
+					}
 					wait1Msec(25);
 				}
 
+				if (!catapultUpTimedOut) { //if catapult up didn't time out
+					SensorValue[platformSolenoid] = 1; //release platform
+					//setCatapultMotors(127);
+					//wait1Msec(125);
+					time1[T1] = 0;
+					int catapultResetTimeOutTime = 7000; //check this value
+					while (!SensorValue[platformAttached] || SensorValue[catapultPot] > 2300) { //when platform is attached and catapult is down, move one
+						if (time1[T1] > catapultResetTimeOutTime) {
+							break; //exit this while loop
+						}
+						wait1Msec(25);
+					}
+				}
+
+				//if either wait operation times out, the catapult will stop moving and the platform solenoid will extend out; the variable platform released is not used
 				setCatapultMotors(0); //stop moving catapult
 				SensorValue[platformSolenoid] = 0; //reattach platform
 				platformReleased = false;
+
 
 		}
 	}
