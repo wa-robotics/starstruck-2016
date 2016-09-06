@@ -1,5 +1,6 @@
 #pragma config(Sensor, dgtl1,  drumLock,       sensorDigitalOut)
 #pragma config(Sensor, dgtl2,  drumPosEnc,     sensorQuadEncoder)
+#pragma config(Sensor, dgtl12, stop,           sensorTouch)
 #pragma config(Motor,  port1,           lDrive1,       tmotorVex393HighSpeed_HBridge, openLoop)
 #pragma config(Motor,  port2,           lDrive2,       tmotorVex393HighSpeed_MC29, openLoop)
 #pragma config(Motor,  port3,           rCatapult1,    tmotorVex393_MC29, openLoop)
@@ -49,8 +50,17 @@ void moveCatapultDrumDist (int encoderClicks) {
 
 task main()
 {
-	//moveCatapultDrumDist(360*7);
+	//moveCatapultDrumDist(360)
+	int reverse = 1;
+	setDrumMotors(127*reverse);
 	while (1) {
+		if (vexRT[Btn8U]) {
+			setDrumMotors(-127);
+		} else if (vexRT[Btn8D]) {
+			setDrumMotors(127);
+		} else {
+			setDrumMotors(0);
+		}
 		setLeftDtMotors(vexRT[Ch3]);
 		setRightDtMotors(vexRT[Ch2]);
 		wait1Msec(25);
