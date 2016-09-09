@@ -43,26 +43,41 @@ void moveCatapultDrumDist (int encoderClicks) {
 	writeDebugStreamLine("Start time: %f", time1[T1]);
 	while(abs(SensorValue[drumPosEnc]) < encoderClicks) {
 		setDrumMotors(127);
+		writeDebugStreamLine("E: %f, T: %f", SensorValue[drumPosEnc], time1[T1]);
+		wait1Msec(250);
 	}
 	writeDebugStreamLine("End time: %f", time1[T1]);
 	setDrumMotors(0);
 }
 
+bool DEBUG_ENABLE = true;
+
 task main()
 {
 	//moveCatapultDrumDist(360)
-	int reverse = 1;
-	setDrumMotors(127*reverse);
-	while (1) {
-		if (vexRT[Btn8U]) {
-			setDrumMotors(-127);
-		} else if (vexRT[Btn8D]) {
-			setDrumMotors(127);
-		} else {
-			setDrumMotors(0);
+	//int reverse = 1;
+	//setDrumMotors(127*reverse);
+
+	if (DEBUG_ENABLE) {
+		writeDebugStreamLine("Started")
+		wait1Msec(2000);
+		SensorValue[drumPosEnc] = 0;
+		time1[T1] = 0;
+		writeDebugStreamLine("E: %f, T: %f", SensorValue[drumPosEnc], time1[T1]);
+		moveCatapultDrumDist(360*14);
+	} else {
+		while (1) {
+			if (vexRT[Btn8U]) {
+				setDrumMotors(-127);
+			} else if (vexRT[Btn8D]) {
+				setDrumMotors(127);
+			} else {
+				setDrumMotors(0);
+			}
+			setLeftDtMotors(vexRT[Ch3]);
+			setRightDtMotors(vexRT[Ch2]);
+			wait1Msec(25);
 		}
-		setLeftDtMotors(vexRT[Ch3]);
-		setRightDtMotors(vexRT[Ch2]);
-		wait1Msec(25);
 	}
+
 }
