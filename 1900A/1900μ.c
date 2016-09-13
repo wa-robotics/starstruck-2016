@@ -12,24 +12,10 @@ task main()
 	while(true){
 
 		//Threshold Code (Prevent stalling)
-		if (vexRT[Ch2] <= 15){
-			motor[frontRight] = 0;
-			motor[backRight] = 0;
-			motor[frontLeft] = vexRT[Ch3];
-			motor[backLeft] = vexRT[Ch3];
-		}
-		else if (vexRT[Ch3] = 0){
-			motor[frontLeft] = 0;
-			motor[backLeft] = 0;
-			motor[frontRight] = vexRT[Ch2];
-			motor[backRight] = vexRT[Ch2];
-		}
-		else {
-			motor[frontLeft] = vexRT[Ch3];
-			motor[backLeft] = vexRT[Ch3];
-			motor[frontRight] = vexRT[Ch2];
-			motor[backRight] = vexRT[Ch2];
-		}
+		motor[frontRight] = vexRT[Ch2];
+		motor[backRight] = vexRT[Ch2];
+		motor[frontLeft] = vexRT[Ch3];
+		motor[backLeft] = vexRT[Ch3];
 
 	}
 
