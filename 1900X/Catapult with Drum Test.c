@@ -1,6 +1,7 @@
 #pragma config(Sensor, dgtl1,  drumLock,       sensorDigitalOut)
 #pragma config(Sensor, dgtl2,  drumPosEnc,     sensorQuadEncoder)
 #pragma config(Sensor, dgtl4,  activateDebug,  sensorTouch)
+#pragma config(Sensor, dgtl5,  drumZero,       sensorTouch)
 #pragma config(Sensor, dgtl12, stop,           sensorTouch)
 #pragma config(Motor,  port1,           lDriveFront,   tmotorVex393HighSpeed_HBridge, openLoop)
 #pragma config(Motor,  port2,           lDriveBack,    tmotorVex393HighSpeed_MC29, openLoop)
@@ -51,15 +52,32 @@ void moveCatapultDrumDist (int encoderClicks) {
 	setDrumMotors(0);
 }
 
-bool DEBUG_ENABLE = false;
+// !!!LIFT RATCHET FIRST!!!
+void resetDrumPosition() {
+	wait1Msec(1000); //one second to make sure the human has lifted the ratchet
+	while (!SensorValue[drumZero]) {
+		setDrumMotors(-127);
+	}
+	setDrumMotors(0);
+}
+
+void runDebugCode() {
+	writeDebugStreamLine("Encoder start position: %d",SensorValue[drumPosEnc]);
+	moveCatapultDrumDist(340);
+	writeDebugStreamLine("Encoder end position: %d",SensorValue[drumPosEnc]);
+}
+
+bool DEBUG_ENABLE = true;
 
 task main()
 {
 	//moveCatapultDrumDist(360)
 	//int reverse = 1;
 	//setDrumMotors(127*reverse);
-
-	if (DEBUG_ENABLE && SensorValue[activateDebug]) {
+	//runDebugCode()
+	bLCDBacklight = true;
+	clearLCDLine(0);
+	if (DEBUG_ENABLE && SensorValue[activateDebug] && false) {
 		writeDebugStreamLine("Started")
 		wait1Msec(2000);
 		SensorValue[drumPosEnc] = 0;
@@ -73,12 +91,19 @@ task main()
 			int RX = 0;
 			int threshold = 15;
 			while (1) {
+				displayLCDNumber(0,1,SensorValue[drumPosEnc],1);
 				if (vexRT[Btn8U]) {
 					setDrumMotors(-127);
-					} else if (vexRT[Btn8D]) {
+				} else if (vexRT[Btn8D]) {
 					setDrumMotors(127);
-					} else {
+				} else {
 					setDrumMotors(0);
+				}
+
+				if (vexRT[Btn7L] && DEBUG_ENABLE) {
+					resetDrumPosition();
+				} else if (vexRT[Btn7R] && DEBUG_ENABLE) {
+					moveCatapultDrumDist(500);
 				}
 
 
