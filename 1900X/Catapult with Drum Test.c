@@ -46,7 +46,8 @@ void moveCatapultDrumDist (int encoderClicks) {
 	while(abs(SensorValue[drumPosEnc]) < encoderClicks) {
 		setDrumMotors(127);
 		writeDebugStreamLine("E: %f, T: %f", SensorValue[drumPosEnc], time1[T1]);
-		wait1Msec(250);
+		displayLCDNumber(0,1,SensorValue[drumPosEnc],1);
+		wait1Msec(25);
 	}
 	writeDebugStreamLine("End time: %f", time1[T1]);
 	setDrumMotors(0);
@@ -92,6 +93,7 @@ task main()
 			int threshold = 15;
 			while (1) {
 				displayLCDNumber(0,1,SensorValue[drumPosEnc],1);
+				displayLCDNumber(1,0,SensorValue[drumZero],1);
 				if (vexRT[Btn8U]) {
 					setDrumMotors(-127);
 				} else if (vexRT[Btn8D]) {
