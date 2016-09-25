@@ -1,8 +1,8 @@
-#pragma config(Sensor, dgtl1,  drumLock,       sensorDigitalOut)
+#pragma config(Sensor, in1,    catapultPot,    sensorPotentiometer)
+#pragma config(Sensor, dgtl1,  drumRatchet,    sensorDigitalOut)
 #pragma config(Sensor, dgtl2,  drumPosEnc,     sensorQuadEncoder)
-#pragma config(Sensor, dgtl4,  activateDebug,  sensorTouch)
+#pragma config(Sensor, dgtl4,  platformDown,   sensorTouch)
 #pragma config(Sensor, dgtl5,  drumZero,       sensorTouch)
-#pragma config(Sensor, dgtl12, stop,           sensorTouch)
 #pragma config(Motor,  port1,           lDriveFront,   tmotorVex393HighSpeed_HBridge, openLoop)
 #pragma config(Motor,  port2,           lDriveBack,    tmotorVex393HighSpeed_MC29, openLoop)
 #pragma config(Motor,  port3,           rCatapult1,    tmotorVex393_MC29, openLoop)
@@ -38,7 +38,7 @@ void setRightDtMotors(float power) {
 //FORWARD ONLY - this function is not written to handle negative values yet and the drum will only go forward
 //automatically releases ratchet first
 void moveCatapultDrumDist (int encoderClicks) {
-	SensorValue[drumLock] = 1;
+	SensorValue[drumRatchet] = 1;
 	SensorValue[drumPosEnc] = 0;
 	wait1Msec(250);
 	time1[T1] = 0;
@@ -78,14 +78,14 @@ task main()
 	//runDebugCode()
 	bLCDBacklight = true;
 	clearLCDLine(0);
-	if (DEBUG_ENABLE && SensorValue[activateDebug] && false) {
-		writeDebugStreamLine("Started")
-		wait1Msec(2000);
-		SensorValue[drumPosEnc] = 0;
-		time1[T1] = 0;
-		writeDebugStreamLine("E: %f, T: %f", SensorValue[drumPosEnc], time1[T1]);
-		moveCatapultDrumDist(360*14);
-		} else {
+	//if (DEBUG_ENABLE && SensorValue[activateDebug] && false) {
+	//	writeDebugStreamLine("Started")
+	//	wait1Msec(2000);
+	//	SensorValue[drumPosEnc] = 0;
+	//	time1[T1] = 0;
+	//	writeDebugStreamLine("E: %f, T: %f", SensorValue[drumPosEnc], time1[T1]);
+	//	moveCatapultDrumDist(360*14);
+	//	} else {
 			int LY = 0;
 			int LX = 0;
 			int RY = 0;
@@ -118,7 +118,7 @@ task main()
 				motor[lDriveBack] = LY - LX;
 				motor[rDriveFront] = RY + RX;
 				motor[rDriveBack] = RY - RX;
-				wait1Msec(25);
-		}
+				wait1Msec(20);
+		//}
 	}
 }
