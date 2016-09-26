@@ -83,7 +83,7 @@ void resetDrumPosition() {
 	setRatchetPos(1);
 	wait1Msec(1000); //one second to make sure the human has lifted the ratchet
 	while (!SensorValue[drumZero]) {
-		setDrumMotors(127);
+		setDrumMotors(-127);
 	}
 	setDrumMotors(0);
 }
@@ -94,19 +94,36 @@ void runDebugCode() {
 	writeDebugStreamLine("Encoder end position: %d",SensorValue[drumPosEnc]);
 }
 
-int catapultPositions[3];
+int catapultPositions[4];
 
 bool DEBUG_ENABLE = true;
 
 void catapultInit() {
-	catapultPositions[0] = 500;
-	catapultPositions[1] = 1000;
-	catapultPositions[2] = 1500;
+	catapultPositions[0] = 0;
+	catapultPositions[1] = 500;
+	catapultPositions[2] = 1000;
+	catapultPositions[3] = 1500;
+}
+
+void setCatapultPosition(int pos) {
+	if (pos == 0) {
+		resetDrumPosition();
+	} else {
+		int currPos = SensorValue[drumPosEnc];
+		int desiredPos = catapultPositions[pos];
+		int distReq = desiredPos - currPos;
+		if (distReq < 0) { // move UP
+			moveCatapultDrumDist(abs(distReq), UP);
+		} else if (distReq > 0) {
+			moveCatapultDrumDist(abs(distReq),DOWN);
+		}
+	}
 }
 
 task main()
 {
-	catapultInit();
+	//setCatapultPosition(2);
+	//wait1Msec(3000);
 	//moveCatapultDrumDist(360)
 	//int reverse = 1;
 	//setDrumMotors(127*reverse);
