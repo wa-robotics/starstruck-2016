@@ -20,6 +20,8 @@
 
 const int FORWARD = 1;
 const int BACKWARD = -1;
+const int UP = 1
+const int DOWN = 0;
 
 void setDrumMotors (float power) {
 	motor[lCatapult1] = power;
@@ -40,11 +42,25 @@ void setRightDtMotors(float power) {
 	motor[rDriveBack] = power;
 }
 
+//if pos is 0(DOWN), the ratchet will be down
+//if pos is 1 (UP), the ratchet will be released, which may require moving the catapult down briefly to release the ratchet
+void setRatchetPos(int pos) {
+	if (pos == 1) {
+		setDrumMotors(-127)
+		wait1Msec(125);
+		SensorValue[drumRatchet] = 1;
+		setDrumMotors(0);
+	} else { //pos == 0
+		SensorValue[drumRatchet] = 0;
+	}
+}
+
 //full rev = 360*7
 //automatically releases ratchet first
 void moveCatapultDrumDist (int count, int direction) {
 	int target;
 	if (direction == FORWARD) {
+		setRatchetPos(DOWN)
 		target = SensorValue[drumPosEnc] + count;
 		while(SensorValue[drumPosEnc] < count) {
 			setDrumMotors(-127);
@@ -52,11 +68,7 @@ void moveCatapultDrumDist (int count, int direction) {
 		}
 	} else { //direction == BACKWARD
 		//move the catapult down a little to release the ratchet
-		setDrumMotors(-127)
-		wait1Msec(125);
-		SensorValue[drumRatchet] = 1;
-		setDrumMotors(0);
-
+		setRatchetPos(UP);
 		//move drum as requested
 		target = SensorValue[drumPosEnc] - count;
 		while(SensorValue[drumPosEnc] < count) {
@@ -69,6 +81,7 @@ void moveCatapultDrumDist (int count, int direction) {
 
 // !!!LIFT RATCHET FIRST!!!
 void resetDrumPosition() {
+	setRatchetPos(1);
 	wait1Msec(1000); //one second to make sure the human has lifted the ratchet
 	while (!SensorValue[drumZero]) {
 		setDrumMotors(127);
