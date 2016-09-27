@@ -1,9 +1,11 @@
 #pragma config(I2C_Usage, I2C1, i2cSensors)
 #pragma config(Sensor, in1,    catapultPot,    sensorPotentiometer)
-#pragma config(Sensor, dgtl1,  drumRatchet,    sensorDigitalOut)
+#pragma config(Sensor, dgtl1,  platformLock,   sensorDigitalOut)
 #pragma config(Sensor, dgtl2,  drumPosEnc,     sensorQuadEncoder)
 #pragma config(Sensor, dgtl4,  platformDown,   sensorTouch)
 #pragma config(Sensor, dgtl5,  drumZero,       sensorTouch)
+#pragma config(Sensor, dgtl6,  drumRatchet,    sensorDigitalOut)
+#pragma config(Sensor, dgtl7,  tongue,         sensorDigitalOut)
 #pragma config(Sensor, I2C_1,  ,               sensorQuadEncoderOnI2CPort,    , AutoAssign )
 #pragma config(Sensor, I2C_2,  ,               sensorQuadEncoderOnI2CPort,    , AutoAssign )
 #pragma config(Motor,  port1,           lDriveFront,   tmotorVex393HighSpeed_HBridge, openLoop, encoderPort, I2C_1)
@@ -45,11 +47,12 @@ void setRightDtMotors(float power) {
 void setRatchetPos(int pos) {
 	if (pos == 1) {
 		setDrumMotors(127)
-		wait1Msec(125);
-		SensorValue[drumRatchet] = 1;
+		wait1Msec(250);
+		SensorValue[drumRatchet] = 0;
+		wait1Msec(250);
 		setDrumMotors(0);
 	} else { //pos == 0
-		SensorValue[drumRatchet] = 0;
+		SensorValue[drumRatchet] = 1;
 	}
 }
 
@@ -58,9 +61,10 @@ void setRatchetPos(int pos) {
 void moveCatapultDrumDist (int count, int direction) {
 	int target;
 	if (direction == DOWN) {
-		setRatchetPos(DOWN)
+		setRatchetPos(DOWN);
 		target = SensorValue[drumPosEnc] + count;
-		while(SensorValue[drumPosEnc] < count) {
+		writeDebugStreamLine("down target: %d",target);
+		while(SensorValue[drumPosEnc] < target) {
 			setDrumMotors(127);
 			wait1Msec(25);
 		}
@@ -69,8 +73,8 @@ void moveCatapultDrumDist (int count, int direction) {
 		setRatchetPos(UP);
 		//move drum as requested
 		target = SensorValue[drumPosEnc] - count;
-		writeDebugStreamLine("%d",target);
-		while(SensorValue[drumPosEnc] < count) {
+		writeDebugStreamLine("up target %d",target);
+		while(SensorValue[drumPosEnc] < target) {
 			setDrumMotors(-127);
 			wait1Msec(25);
 		}
@@ -86,6 +90,7 @@ void resetDrumPosition() {
 		setDrumMotors(-127);
 	}
 	setDrumMotors(0);
+	SensorValue[drumPosEnc] = 0;
 }
 
 void runDebugCode() {
@@ -100,9 +105,9 @@ bool DEBUG_ENABLE = true;
 
 void catapultInit() {
 	catapultPositions[0] = 0;
-	catapultPositions[1] = 500;
-	catapultPositions[2] = 1000;
-	catapultPositions[3] = 1500;
+	catapultPositions[1] = 1000;
+	catapultPositions[2] = 1500;
+	catapultPositions[3] = 2000;
 }
 
 void setCatapultPosition(int pos) {
@@ -111,7 +116,10 @@ void setCatapultPosition(int pos) {
 	} else {
 		int currPos = SensorValue[drumPosEnc];
 		int desiredPos = catapultPositions[pos];
+		writeDebugStreamLine("Catapult desired position: %d",desiredPos);
+		writeDebugStreamLine("Current enc val: %d",SensorValue[drumPosEnc]);
 		int distReq = desiredPos - currPos;
+		writeDebugStreamLine("Dist req: %d",distReq);
 		if (distReq < 0) { // move UP
 			moveCatapultDrumDist(abs(distReq), UP);
 		} else if (distReq > 0) {
@@ -122,6 +130,12 @@ void setCatapultPosition(int pos) {
 
 task main()
 {
+	catapultInit();
+	//setCatapultPosition(0);
+	//wait1Msec(1000);
+	//SensorValue[tongue] = 1;
+	//setCatapultPosition(1);
+	//wait1Msec(2000);
 	//setCatapultPosition(2);
 	//wait1Msec(3000);
 	//moveCatapultDrumDist(360)
@@ -154,11 +168,38 @@ task main()
 					setDrumMotors(0);
 				}
 
-				if (vexRT[Btn7L] && DEBUG_ENABLE) {
-					resetDrumPosition();
-				} else if (vexRT[Btn7R] && DEBUG_ENABLE) {
-					moveCatapultDrumDist(DOWN,500);
+				//8U - reset
+				if (vexRT[Btn8U]) {
+					setCatapultPosition(0);
+				} else if (vexRT[Btn7D]) {
+				  setCatapultPosition(1);
+				} else if (vexRT[Btn7L]) {
+					setCatapultPosition(2);
+				} else if (vexRT[Btn7R]) {
+					setCatapultPosition(3);
 				}
+
+				//platform lock
+				if (vexRT[Btn5U]) {
+					SensorValue[platformLock] = 0;
+				} else if (vexRT[Btn5D]) {
+					SensorValue[platformLock] = 1;
+				}
+
+				//tongue
+				if (vexRT[Btn6U]) {
+					SensorValue[tongue] = 0;
+				} else if (vexRT[Btn6D]) {
+					SensorValue[tongue] = 1;
+				}
+
+				if (vexRT[Btn8L]) {
+					SensorValue[drumRatchet] = 0;
+				} else if (vexRT[Btn8R]) {
+					SensorValue[drumRatchet] = 1;
+				}
+
+
 
 
 				//for deadzones; when the joystick value for an axis is below the threshold, the motors controlled by that joystick will not move in that direction
@@ -171,6 +212,6 @@ task main()
 				motor[rDriveFront] = RY + RX;
 				motor[rDriveBack] = RY - RX;
 				wait1Msec(20);
-		//}
+
 	}
 }
