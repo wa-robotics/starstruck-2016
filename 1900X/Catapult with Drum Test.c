@@ -128,7 +128,7 @@ task main()
 {
 	catapultInit();
 
-	setCatapultPosition(0);
+	//setCatapultPosition(0);
 	//wait1Msec(1000);
 	//SensorValue[tongue] = 1;
 	//setCatapultPosition(1);
