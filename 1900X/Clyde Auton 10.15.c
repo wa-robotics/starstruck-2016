@@ -1,8 +1,8 @@
 //This file is included above task main() in Catapult with Drum Test.c
 
 float positionKp = 0.36, //proportional constant for positional PID
-			straighteningKpLeft = 0.4,//.43,//.195, //proportional constant for straightening response for the left side
-			straighteningKpRight = 0.4,//.22,//.16, //proportional constant for straightening response for the right side
+			straighteningKpLeft = 0.45,//.43,//.195, //proportional constant for straightening response for the left side
+			straighteningKpRight = 0.45,//.22,//.16, //proportional constant for straightening response for the right side
 			straighteningKpLeftTurn = 0.4,//.43,//.195, //proportional constant for straightening response for the left side when turning
 			straighteningKpRightTurn = 0.4,//.22,//.16, //proportional constant for straightening response for the right side when turning
 			positionKi = 0.000350, //integral constant
@@ -67,12 +67,12 @@ void driveDistance(int power, int encoderCounts, int direction) {
 						if (straighteningError > 0) { //left side is ahead, so slow it down
 							lPower = power - straighteningError*straighteningKpLeft;
 						} else { //otherwise, just set the right side to the power
-							rPower = power;
+							lPower = power;
 						}
 						if (straighteningError < 0) { //right side is ahead, so slow it down
-							rPower = power - straighteningError*straighteningKpRight;
+							rPower = power + straighteningError*straighteningKpRight;
 						} else { //otherwise, just set the right side to the power
-							lPower = power;
+							rPower = power;
 						}
 
 					setLeftDtMotors(lPower*lfMult,lPower*lbMult);
@@ -165,7 +165,7 @@ void rotateDegrees(int position, int direction) {//This function is for turning
 
 task auton()
 {
-	driveDistance(70,500,STRAIGHT)
+	driveDistance(70,1500,STRAIGHT)
 
 	//wait1Msec(5000);
 

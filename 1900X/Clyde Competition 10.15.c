@@ -169,6 +169,35 @@ void setCatapultPosition(int pos) {
 	}
 }
 
+void prepareCatapult() {
+	if (!SensorValue[platformDown] || SensorValue[drumPosEnc] > 15) { //if the platform is not down, get the platform down first
+		//add potentiometer check
+		resetDrumPosition(); //reset the drum to lower the platform
+	} else {
+
+	}
+}
+
+void fireCatapult() {
+	if (SensorValue[drumPosEnc] > 100) {
+		SensorValue[platformLock] = 0; //check this value; fire the catapult
+
+		while (SensorValue[catapultPot] < 1500) { //check this value;
+
+		}
+	}
+
+}
+
+
+task driverCatapult() {
+	if (vexRT[Btn8U]) {
+		prepareCatapult();
+	} else if (vexRT[Btn8D]) {
+		fireCatapult();
+	}
+}
+
 #include "Clyde Auton 10.15.c"
 
 task autonomous()
@@ -187,7 +216,7 @@ task usercontrol()
 	}
   	catapultInit();
 
-	setCatapultPosition(0);
+	//setCatapultPosition(0);
 	//wait1Msec(1000);
 	//SensorValue[tongue] = 1;
 	//setCatapultPosition(1);
@@ -265,8 +294,8 @@ task usercontrol()
 				RX = (abs(vexRT[Ch1]) > threshold) ? vexRT[Ch1] : 0;
 				motor[lDriveFront] = LY + LX;
 				motor[lDriveBack] = LY - LX;
-				motor[rDriveFront] = RY + RX;
-				motor[rDriveBack] = RY - RX;
+				motor[rDriveFront] = RY - RX;
+				motor[rDriveBack] = RY + RX;
 				wait1Msec(20);
 
 	}
