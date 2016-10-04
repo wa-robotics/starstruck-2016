@@ -1,8 +1,8 @@
 //This file is included above task main() in Catapult with Drum Test.c
 
 float positionKp = 0.36, //proportional constant for positional PID
-			straighteningKpLeft = 0.45,//.43,//.195, //proportional constant for straightening response for the left side
-			straighteningKpRight = 0.45,//.22,//.16, //proportional constant for straightening response for the right side
+			straighteningKpLeft = 0.48,//.43,//.195, //proportional constant for straightening response for the left side
+			straighteningKpRight = 0.48,//.22,//.16, //proportional constant for straightening response for the right side
 			straighteningKpLeftTurn = 0.4,//.43,//.195, //proportional constant for straightening response for the left side when turning
 			straighteningKpRightTurn = 0.4,//.22,//.16, //proportional constant for straightening response for the right side when turning
 			positionKi = 0.000350, //integral constant
@@ -30,7 +30,7 @@ void driveDistance(int power, int encoderCounts, int direction) {
 	straighteningError = 0,
 	errorSum = 0,
 	lastError = 0,
-	target = encoderCounts;
+	target = abs(encoderCounts);
 
 	float straighteningCorrection,
 	lPower,
@@ -51,15 +51,16 @@ void driveDistance(int power, int encoderCounts, int direction) {
 				power = -127;
 			}
 
-			if (encoderCounts < 0) {
-				lfMult = -1;
-				lbMult = -1;
-				rfMult = -1;
-				rbMult = -1;
-			}
+			//if (power < 0) {
+			//	lfMult = -1;
+			//	lbMult = -1;
+			//	rfMult = -1;
+			//	rbMult = -1;
+			//}
+
 
 			if (direction == STRAIGHT) {
-				while(encoderCounts > (nMotorEncoder[lDriveFront] + nMotorEncoder[rDriveFront])/2.0) {
+				while(encoderCounts > abs(nMotorEncoder[lDriveFront] + nMotorEncoder[rDriveFront])/2.0) {
 							//adjust the powers sent to each side if the encoder values don't match
 						straighteningError = nMotorEncoder[lDriveFront] - nMotorEncoder[rDriveFront];
 						writeDebugStreamLine("%d",straighteningError);
@@ -165,65 +166,11 @@ void rotateDegrees(int position, int direction) {//This function is for turning
 
 task auton()
 {
-	driveDistance(70,1500,STRAIGHT)
-
-	//wait1Msec(5000);
-
-//	bool buttonPressed = false;
-//	while(1) {
-//	if(vexRT[Btn8D] == 1) {
-//		if (!buttonPressed) {
-//			buttonPressed = true;
-//			driveDistancePID(0, FORWARD, 4000);
-//			buttonPressed = false;
-//		}
-//	}
-//}
-
-	//configure gyro.  normally done in pre_auton function
-	//SensorType[gyro] = sensorNone;
- // wait1Msec(500);
- // //Reconfigure Analog Port 8 as a Gyro sensor and allow time for ROBOTC to calibrate it
- // SensorType[gyro] = sensorGyro;
- // wait1Msec(2000);
-
-	//rotate left, negative target
-	//rotate right, positive target
-  //driveDistancePID(-300, ROTATE_LEFT, 1500);
-
-	//starting from red back tile
-	//motor[intake] = 127;
-	//driveDistancePID(450, FORWARD, 1250); //drive forward from the tile
-	//wait1Msec(250); //wait a bit to let things settle out before turning
-	//rotateDegrees(500,1); //turn left to face the blue side wall
-	//wait1Msec(250);
-	//driveDistancePID(725, FORWARD, 1750);
-	//wait1Msec(250);
-	//rotateDegrees(900,-1);
-
-	//driveDistancePID(-300, FORWARD,1000);
-	//driveDistancePID(200, FORWARD, 1000);
-	////rotateDegrees(75, -1);
-	//driveDistancePID(-300, FORWARD,1000);
-	//setLeftDtMotors(0);
-	//setRightDtMotors(0);
-	//wait1Msec(1500);
-
-  //starting from red side tile
-	//wait1Msec(7000);
-  //driveDistancePID(525, STRAIGHT, 1000); //move forward from tile
-  //driveDistancePID(285,ROTATE_RIGHT, 750); //turn towards blue net
-  //driveDistancePID(815,STRAIGHT,1250); //move forward towards blue net
-  //driveDistancePID(460,ROTATE_LEFT, 1250); //turn so intake faces ball stack on side wall
-  //motor[intake] = 127; //start the intake to prepare to pick up balls
-  //driveDistancePID(-445,STRAIGHT,1000); //first pass at ball stack
-  ////driveDistancePID doesn't stop motors when it's done.  Stop the motors here while we wait for a little to pick up balls on the first pass
-  //setLeftDtMotors(0);
-  //setRightDtMotors(0);
-  //wait1Msec(750);
-  //driveDistancePID(200,STRAIGHT,750);
-  //driveDistancePID(-300,STRAIGHT,750);
-  //wait1Msec(750);
-  //motor[intake] = 0;
-  //startTask(moveIntakeBack);
+	driveDistance(100,340,STRAIGHT);
+	wait1Msec(500);
+	driveDistance(-100,500,STRAIGHT);
+	driveDistance(127,170,STRAIGHT);
+	driveDistance(-127,170,STRAIGHT);
+	wait1Msec(500);
+	driveDistance(100,1600,STRAIGHT);
 }
