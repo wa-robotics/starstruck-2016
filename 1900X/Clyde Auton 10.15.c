@@ -9,7 +9,8 @@ float positionKp = 0.36, //proportional constant for positional PID
 			positionKd = 4; //derivative constant
 
 static int STRAIGHT = 2; //the 2 here shouldn't matter as long as no variables are multiplied by 'direction' in driveDistancePID
-static int STRAFE = 3; //don't multiply values by this variable!
+static int STRAFE_LEFT = 3; //don't multiply values by this variable!
+static int STRAFE_RIGHT = 4;
 static int ROTATE_LEFT = -1;
 static int ROTATE_RIGHT = 1;
 
@@ -43,27 +44,39 @@ void driveDistance(int power, int encoderCounts, int direction) {
 
 
 	time1[T1] = 0;
-	if (direction == STRAIGHT || direction == STRAFE) { //validate direction
+	if (direction == STRAIGHT || (direction == STRAFE_LEFT || direction == STRAFE_RIGHT)) { //validate direction
 			//limit the values of the power term to only be those that can be taken by the motors
 			if (power > 127) {
 				power = 127;
 			} else if (power < -127) {
 				power = -127;
 			}
+			writeDebugStreamLine("%d",sgn(power));
 
-			if (direction == STRAFE) {
-				lfMult = 1*sgn(power);
-				lbMult = -1*sgn(power);
-				rfMult = -1*sgn(power);
-				rbMult = 1*sgn(power);
+			writeDebugStreamLine("%d,%d,%d,%d",lfMult,lbMult,rfMult,rbMult);
+
+			if (power < 0 && direction == STRAIGHT) {
+				lfMult = -1;
+				lbMult = -1;
+				rfMult = -1;
+				rbMult = -1;
+			} else if (power > 0 && (direction == STRAFE_LEFT || direction == STRAFE_RIGHT)) {
+				lfMult = 1;
+				lbMult = -1;
+				rfMult = -1;
+				rbMult = 1;
+			} else if (power < 0 && (direction == STRAFE_LEFT || direction == STRAFE_RIGHT)) {
+				lfMult = -1;
+				lbMult = 1;
+				rfMult = 1;
+				rbMult = -1;
 			}
-
 
 			if (direction == STRAIGHT) {
 				while(encoderCounts > abs(nMotorEncoder[lDriveFront] + nMotorEncoder[rDriveFront])/2.0) {
 							//adjust the powers sent to each side if the encoder values don't match
 						straighteningError = nMotorEncoder[lDriveFront] - nMotorEncoder[rDriveFront];
-						writeDebugStreamLine("%d",straighteningError);
+
 
 						if (straighteningError > 0) { //left side is ahead, so slow it down
 							lPower = power - straighteningError*straighteningKpLeft;
@@ -81,11 +94,13 @@ void driveDistance(int power, int encoderCounts, int direction) {
 					wait1Msec(25);
 				}
 
-			} else if (direction == STRAFE) {  //UNTESTED
+			} else if (direction == STRAFE_LEFT) {
+
 					while(encoderCounts > (abs(nMotorEncoder[lDriveFront]) + abs(nMotorEncoder[rDriveFront]))/2.0) {
 							//adjust the powers sent to each side if the encoder values don't match
 						straighteningError = abs(nMotorEncoder[lDriveFront]) - abs(nMotorEncoder[rDriveFront]);
-						writeDebugStreamLine("%d",straighteningError);
+
+						//writeDebugStreamLine("%d,%d,%d,%d",lPower*lfMult,lPower*lbMult,rPower*rfMult,rPower*rbMult);
 						//positive powers:
 						//  if left side is ahead, straightening error is positive
 						// 	lPower will decrease
@@ -101,22 +116,61 @@ void driveDistance(int power, int encoderCounts, int direction) {
 						//  (-127) - (12)*(.3)*-1 = -127 + 4 = -123, slower power
 						//
 						if (straighteningError > 0) { //left side is ahead, so slow it down
-							lPower = power - straighteningError*straighteningKpLeft*sgn(power);
+							lPower = power - straighteningError*straighteningKpLeft*-1;
 						} else { //otherwise, just set the right side to the power
 							lPower = power;
 						}
 						if (straighteningError < 0) { //right side is ahead, so slow it down
-							rPower = power + straighteningError*straighteningKpRight*sgn(power);
+							rPower = power + straighteningError*straighteningKpRight*-1;
 						} else { //otherwise, just set the right side to the power
 							rPower = power;
 						}
 
-					setLeftDtMotors(lPower*lfMult,lPower*lbMult);
-					setRightDtMotors(rPower*rfMult,rPower*rbMult);
+					setLeftDtMotors(lPower*-1,lPower*1);
+					setRightDtMotors(rPower*1,rPower*-1);
 					wait1Msec(25);
 				}
-			}
 
+			//writeDebugStreamLine("%d,%f,%f,%f,%f,%f,%f,%f,%f",nPgmTime,target,error,nMotorEncoder[lDriveFront], nMotorEncoder[rDriveFront],pTerm,iTerm,dTerm,lPower,rPower);
+			setLeftDtMotors(0,0);
+			setRightDtMotors(0,0);
+
+	} else if (true || direction == STRAFE_RIGHT) {
+
+					while(encoderCounts > (abs(nMotorEncoder[lDriveFront]) + abs(nMotorEncoder[rDriveFront]))/2.0) {
+							//adjust the powers sent to each side if the encoder values don't match
+						straighteningError = abs(nMotorEncoder[lDriveFront]) - abs(nMotorEncoder[rDriveFront]);
+
+						//writeDebugStreamLine("%d,%d,%d,%d",lPower*lfMult,lPower*lbMult,rPower*rfMult,rPower*rbMult);
+						//positive powers:
+						//  if left side is ahead, straightening error is positive
+						// 	lPower will decrease
+						//  if right side is ahead, straightening error is negative
+						//  rPower will decrease
+						//negative powers:
+						//  if left side is ahead, straightening error is positive
+						//  power is negative, straighteningError is positive
+						//  power would go higher (more negative) because power - (positive error)
+						//  fix: multiply by sign of power - after this change
+						//  power is positive, straighteningError is still positive (as we want)
+						//  power is negative, straighteningError is multiplied by -1, so:
+						//  (-127) - (12)*(.3)*-1 = -127 + 4 = -123, slower power
+						//
+						if (straighteningError > 0) { //left side is ahead, so slow it down
+							lPower = power - straighteningError*straighteningKpLeft;
+						} else { //otherwise, just set the right side to the power
+							lPower = power;
+						}
+						if (straighteningError < 0) { //right side is ahead, so slow it down
+							rPower = power + straighteningError*straighteningKpRight;
+						} else { //otherwise, just set the right side to the power
+							rPower = power;
+						}
+
+					setLeftDtMotors(lPower*1,lPower*-1);
+					setRightDtMotors(rPower*-1,rPower*1);
+					wait1Msec(25);
+				}
 
 
 			//writeDebugStreamLine("%d,%f,%f,%f,%f,%f,%f,%f,%f",nPgmTime,target,error,nMotorEncoder[lDriveFront], nMotorEncoder[rDriveFront],pTerm,iTerm,dTerm,lPower,rPower);
@@ -159,7 +213,7 @@ void driveDistance(int power, int encoderCounts, int direction) {
 			setLeftDtMotors(lPower * direction, lPower * direction); //for a left turn, ROTATE_LEFT = -1 so this moves the left side backwards for a left turn. For a right turn will go forward since ROTATE_RIGHT = 1
 			setRightDtMotors(rPower * -1 * direction,rPower * -1 * direction); //same idea as for a left turn, except this side needs to go the opposite way as the left side in order to turn, hence the * -1 in the calculation
 			wait1Msec(25);
-
+		}
 	}
 }
 
@@ -202,11 +256,14 @@ task auton()
 {
 
 
-	driveDistance(100,340,STRAIGHT);
-	wait1Msec(500);
-	driveDistance(-100,500,STRAIGHT);
-	driveDistance(127,170,STRAIGHT);
-	driveDistance(-127,170,STRAIGHT);
-	wait1Msec(500);
-	driveDistance(100,1600,STRAIGHT);
+	//driveDistance(100,340,STRAIGHT); //push the preload forward
+	//wait1Msec(500);
+	//driveDistance(-100,500,STRAIGHT); //drop the platform
+	//driveDistance(127,170,STRAIGHT);
+	//driveDistance(-127,170,STRAIGHT);
+	//wait1Msec(500);
+	//driveDistance(100,1500,STRAIGHT); //collect the 4 stars
+	//wait1Msec(500);
+
+	driveDistance(100,1500,STRAFE_LEFT);
 }
