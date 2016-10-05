@@ -15,9 +15,9 @@ static int ROTATE_RIGHT = 1;
 
 //drivetrain movement functions
 
-//positive values will go forward or right
-//negative values go backwards or left
-//encoder counts is how many counts to go, see note about positive/negative values
+//positive powers will go forward or right
+//negative powers values go backwards or left
+//encoder counts is how many counts to go, always positive
 //power is the power to run the motors at before straightening is applied
 //time is a maximum time to complete the operation
 void driveDistance(int power, int encoderCounts, int direction) {
@@ -51,12 +51,12 @@ void driveDistance(int power, int encoderCounts, int direction) {
 				power = -127;
 			}
 
-			//if (power < 0) {
-			//	lfMult = -1;
-			//	lbMult = -1;
-			//	rfMult = -1;
-			//	rbMult = -1;
-			//}
+			if (direction == STRAFE) {
+				lfMult = 1*sgn(power);
+				lbMult = -1*sgn(power);
+				rfMult = -1*sgn(power);
+				rbMult = 1*sgn(power);
+			}
 
 
 			if (direction == STRAIGHT) {
@@ -81,6 +81,40 @@ void driveDistance(int power, int encoderCounts, int direction) {
 					wait1Msec(25);
 				}
 
+			} else if (direction == STRAFE) {  //UNTESTED
+					while(encoderCounts > (abs(nMotorEncoder[lDriveFront]) + abs(nMotorEncoder[rDriveFront]))/2.0) {
+							//adjust the powers sent to each side if the encoder values don't match
+						straighteningError = abs(nMotorEncoder[lDriveFront]) - abs(nMotorEncoder[rDriveFront]);
+						writeDebugStreamLine("%d",straighteningError);
+						//positive powers:
+						//  if left side is ahead, straightening error is positive
+						// 	lPower will decrease
+						//  if right side is ahead, straightening error is negative
+						//  rPower will decrease
+						//negative powers:
+						//  if left side is ahead, straightening error is positive
+						//  power is negative, straighteningError is positive
+						//  power would go higher (more negative) because power - (positive error)
+						//  fix: multiply by sign of power - after this change
+						//  power is positive, straighteningError is still positive (as we want)
+						//  power is negative, straighteningError is multiplied by -1, so:
+						//  (-127) - (12)*(.3)*-1 = -127 + 4 = -123, slower power
+						//
+						if (straighteningError > 0) { //left side is ahead, so slow it down
+							lPower = power - straighteningError*straighteningKpLeft*sgn(power);
+						} else { //otherwise, just set the right side to the power
+							lPower = power;
+						}
+						if (straighteningError < 0) { //right side is ahead, so slow it down
+							rPower = power + straighteningError*straighteningKpRight*sgn(power);
+						} else { //otherwise, just set the right side to the power
+							rPower = power;
+						}
+
+					setLeftDtMotors(lPower*lfMult,lPower*lbMult);
+					setRightDtMotors(rPower*rfMult,rPower*rbMult);
+					wait1Msec(25);
+				}
 			}
 
 
