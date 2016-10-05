@@ -94,9 +94,9 @@ void setRightDtMotors(float rFront, float rBack) {
 void setRatchetPos(int pos) {
 	if (pos == 1) {
 		setDrumMotors(127);
-		wait1Msec(250);
+		wait1Msec(250); //spin the drum downwards to relaese the ratchet
 		SensorValue[drumRatchet] = 0;
-		wait1Msec(250);
+		wait1Msec(350); //this time should be slightly longer since this period is crucial to the ratchet releasing properly
 		setDrumMotors(0);
 	} else { //pos == 0
 		SensorValue[drumRatchet] = 1;
@@ -139,12 +139,6 @@ void resetDrumPosition() {
 	SensorValue[drumPosEnc] = 0;
 }
 
-void runDebugCode() {
-	writeDebugStreamLine("Encoder start position: %d",SensorValue[drumPosEnc]);
-	moveCatapultDrumDist(DOWN, 340);
-	writeDebugStreamLine("Encoder end position: %d",SensorValue[drumPosEnc]);
-}
-
 int catapultPositions[4];
 
 
@@ -175,11 +169,26 @@ void setCatapultPosition(int pos) {
 }
 
 void prepareCatapult() {
-	if (!SensorValue[platformDown] || SensorValue[drumPosEnc] > 15) { //if the platform is not down, get the platform down first
-		//add potentiometer check
-		resetDrumPosition(); //reset the drum to lower the platform
-	} else {
+	//platformLock - 0 = out, 1 = in
+	//tongue - 0 = in, 1 = out
+	//drumRatchet - 0 = up, 1 = down
 
+	//if it doesn't look like the platform is down, release the lock so it will be able to get to the bottom
+	if (!SensorValue[platformDown]) {
+		SensorValue[platformLock] = 1;
+	}
+	//if the drum is not at 0, reset it; the encoder check is because the drum makes more than one rev in some cases and we still need to reset then
+	//  even if drumZero bumper switch is pressed
+	if (!SensorValue[drumZero] || SensorValue[drumPosEnc] > 100) {
+		SensorValue[tongue] = 0;
+		resetDrumPosition();
+	}
+
+	wait1Msec(250); //let things settle out
+
+	if (SensorValue[platformDown]) { //make sure the platform is down now, then lock the platform and stick out the tongue
+		SensorValue[platformLock] = 0; //lock the platform
+		SensorValue[tongue] = 1; //stick the tongue out
 	}
 }
 
@@ -224,59 +233,23 @@ void fireCatapult() {
 
 task driverCatapult() {
 	while(1) {
-	if (vexRT[Btn8U]) {
-			//prepareCatapult();
+		//this is set up such that movement functions will suspend this task while they execute, thus disabling other catapult controls in that time
+		if (vexRT[Btn8U]) {
+			prepareCatapult();
 		} else if (vexRT[Btn8D]) {
 			fireCatapult();
-		}
-		wait1Msec(25);
-	}
-}
-
-#include "Clyde Auton 10.15.c"
-
-task autonomous()
-{
-	startTask(auton);
-
-}
-
-const bool DEBUG_AUTON = false;
-
-task usercontrol()
-{
-	catapultInit();
-	startTask(driverCatapult);
-	if (DEBUG_AUTON) {
-		startTask(autonomous);
-		stopTask(usercontrol);
-	}
-	//resetDrumPosition();
-	bLCDBacklight = true;
-	clearLCDLine(0);
-	int LY = 0;
-	int LX = 0;
-	int RY = 0;
-	int RX = 0;
-	int threshold = 15;
-	while (1) {
-		displayLCDNumber(0,1,SensorValue[drumPosEnc],1);
-		displayLCDNumber(1,0,SensorValue[drumZero],1);
-		/*if (vexRT[Btn8U]) {
-			setDrumMotors(-127);
-		} else if (vexRT[Btn8D]) {
-			setDrumMotors(127);
-		} else {
-			setDrumMotors(0);
-		}*/
-
-		//8U - reset
-		if (vexRT[Btn7D] == 1) {
+		}else if (vexRT[Btn7D]) {
 		  setCatapultPosition(1);
-		} else if (vexRT[Btn7L] == 1) {
+		} else if (vexRT[Btn7L]) {
 			setCatapultPosition(2);
 		} else if (vexRT[Btn7R] == 1) {
 			setCatapultPosition(3);
+		}	else if (vexRT[Btn8L]) {
+			setDrumMotors(-127);
+		} else if (vexRT[Btn8R]) {
+			setDrumMotors(127);
+		} else {
+			setDrumMotors(0);
 		}
 
 		//platform lock
@@ -293,16 +266,46 @@ task usercontrol()
 			SensorValue[tongue] = 1;
 		}
 
-		if (vexRT[Btn8L]) {
-			SensorValue[drumRatchet] = 0;
-		} else if (vexRT[Btn8R]) {
-			SensorValue[drumRatchet] = 1;
-		}
+		wait1Msec(25);
+	}
+}
+
+#include "Clyde Auton 10.15.c"
+
+task autonomous()
+{
+	catapultInit(); //make sure we can use the catapult	in any autonomous play
+
+	//autonomous play selection goes here
+	startTask(auton);
+
+}
+
+const bool DEBUG_AUTON = false;
+
+task usercontrol()
+{
+	catapultInit();
+
+	startTask(driverCatapult); //make sure catapult can be controlled
+	if (DEBUG_AUTON) {
+		startTask(autonomous);
+		stopTask(usercontrol);
+	}
+	//resetDrumPosition();
+	bLCDBacklight = true;
+	clearLCDLine(0);
+	int LY = 0;
+	int LX = 0;
+	int RY = 0;
+	int RX = 0;
+	int threshold = 15;
+	while (1) {
+		displayLCDNumber(0,1,SensorValue[drumPosEnc],1);
+		displayLCDNumber(1,0,SensorValue[drumZero],1);
 
 
-
-
-		//for deadzones; when the joystick value for an axis is below the threshold, the motors controlled by that joystick will not move in that direction
+		//for deadzones; when the joystick value for an axis is below the threshold, the motors controlled by that joystick will be set to 0
 		LY = (abs(vexRT[Ch3]) > threshold) ? vexRT[Ch3] : 0;
 		LX = (abs(vexRT[Ch4]) > threshold) ? vexRT[Ch4] : 0;
 		RY = (abs(vexRT[Ch2]) > threshold) ? vexRT[Ch2] : 0;
