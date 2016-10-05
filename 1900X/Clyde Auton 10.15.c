@@ -200,6 +200,8 @@ void rotateDegrees(int position, int direction) {//This function is for turning
 
 task auton()
 {
+
+
 	driveDistance(100,340,STRAIGHT);
 	wait1Msec(500);
 	driveDistance(-100,500,STRAIGHT);
