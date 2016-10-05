@@ -281,7 +281,7 @@ task autonomous()
 
 }
 
-const bool DEBUG_AUTON = true;
+const bool DEBUG_AUTON = false;
 
 task usercontrol()
 {
