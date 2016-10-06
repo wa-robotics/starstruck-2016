@@ -37,14 +37,13 @@ void driveDistance(int power, int encoderCounts, int direction) {
 	lPower,
 	rPower;
 
-	int lfMult = 1,
-			lbMult = 1,
-			rfMult = 1,
-			rbMult = 1;
-
+	int lfMult,
+			lbMult,
+			rfMult,
+			rbMult;
 
 	time1[T1] = 0;
-	if (direction == STRAIGHT || (direction == STRAFE_LEFT || direction == STRAFE_RIGHT)) { //validate direction
+	if (direction == STRAIGHT || direction == STRAFE_LEFT || direction == STRAFE_RIGHT) { //validate direction
 			//limit the values of the power term to only be those that can be taken by the motors
 			if (power > 127) {
 				power = 127;
@@ -54,23 +53,20 @@ void driveDistance(int power, int encoderCounts, int direction) {
 			writeDebugStreamLine("%d",sgn(power));
 
 			writeDebugStreamLine("%d,%d,%d,%d",lfMult,lbMult,rfMult,rbMult);
-
-			if (power < 0 && direction == STRAIGHT) {
-				lfMult = -1;
-				lbMult = -1;
-				rfMult = -1;
-				rbMult = -1;
-			} else if (power > 0 && (direction == STRAFE_LEFT || direction == STRAFE_RIGHT)) {
-				lfMult = 1;
-				lbMult = -1;
-				rfMult = -1;
-				rbMult = 1;
-			} else if (power < 0 && (direction == STRAFE_LEFT || direction == STRAFE_RIGHT)) {
-				lfMult = -1;
-				lbMult = 1;
-				rfMult = 1;
-				rbMult = -1;
-			}
+		//if (power >= 0 && direction == STRAIGHT) {
+		//		writeDebugStreamLine("entered if statement");
+		//		lfMult = 1;
+		//		lbMult = 1;
+		//		rfMult = 1;
+		//		rbMult = 1;
+		//	}
+		//	else if (power < 0 && direction == STRAIGHT) {
+		//		writeDebugStreamLine("entered if statement");
+		//		lfMult = -1;
+		//		lbMult = -1;
+		//		rfMult = -1;
+		//		rbMult = -1;
+		//	}
 
 			if (direction == STRAIGHT) {
 				while(encoderCounts > abs(nMotorEncoder[lDriveFront] + nMotorEncoder[rDriveFront])/2.0) {
@@ -93,6 +89,9 @@ void driveDistance(int power, int encoderCounts, int direction) {
 					setRightDtMotors(rPower*rfMult,rPower*rbMult);
 					wait1Msec(25);
 				}
+
+				setLeftDtMotors(0,0);
+				setRightDtMotors(0,0);
 
 			} else if (direction == STRAFE_LEFT) {
 
@@ -135,7 +134,7 @@ void driveDistance(int power, int encoderCounts, int direction) {
 			setLeftDtMotors(0,0);
 			setRightDtMotors(0,0);
 
-	} else if (true || direction == STRAFE_RIGHT) {
+	} else if (direction == STRAFE_RIGHT) {
 
 					while(encoderCounts > (abs(nMotorEncoder[lDriveFront]) + abs(nMotorEncoder[rDriveFront]))/2.0) {
 							//adjust the powers sent to each side if the encoder values don't match
@@ -252,18 +251,49 @@ void rotateDegrees(int position, int direction) {//This function is for turning
 
 }
 
+void strafeNoStraightening(int frontPower, int backPower, int encoderCounts, int direction) {
+	nMotorEncoder[lDriveFront] = 0;
+	nMotorEncoder[rDriveFront] = 0;
+	if (direction == STRAFE_LEFT) {
+				while(encoderCounts > (abs(nMotorEncoder[lDriveFront]) + abs(nMotorEncoder[rDriveFront]))/2.0) {
+					setLeftDtMotors(frontPower*-1,backPower*1);
+					setRightDtMotors(frontPower*1,backPower*-1);
+					wait1Msec(25);
+				}
+
+			//writeDebugStreamLine("%d,%f,%f,%f,%f,%f,%f,%f,%f",nPgmTime,target,error,nMotorEncoder[lDriveFront], nMotorEncoder[rDriveFront],pTerm,iTerm,dTerm,lPower,rPower);
+			setLeftDtMotors(0,0);
+			setRightDtMotors(0,0);
+
+	} else if (direction == STRAFE_RIGHT) {
+
+		while(encoderCounts > (abs(nMotorEncoder[lDriveFront]) + abs(nMotorEncoder[rDriveFront]))/2.0) {
+			//adjust the powers sent to each side if the encoder values don't match
+			setLeftDtMotors(frontPower*1,backPower*-1);
+			setRightDtMotors(frontPower*-1,backPower*1);
+			wait1Msec(25);
+		}
+
+
+			//writeDebugStreamLine("%d,%f,%f,%f,%f,%f,%f,%f,%f",nPgmTime,target,error,nMotorEncoder[lDriveFront], nMotorEncoder[rDriveFront],pTerm,iTerm,dTerm,lPower,rPower);
+			setLeftDtMotors(0,0);
+			setRightDtMotors(0,0);
+
+	}
+}
+
 task auton()
 {
 
 
-	//driveDistance(100,340,STRAIGHT); //push the preload forward
-	//wait1Msec(500);
-	//driveDistance(-100,500,STRAIGHT); //drop the platform
-	//driveDistance(127,170,STRAIGHT);
-	//driveDistance(-127,170,STRAIGHT);
-	//wait1Msec(500);
-	//driveDistance(100,1500,STRAIGHT); //collect the 4 stars
-	//wait1Msec(500);
-
-	driveDistance(100,1500,STRAFE_LEFT);
+	driveDistance(100,340,STRAIGHT); //push the preload forward
+	wait1Msec(500);
+	driveDistance(-100,500,STRAIGHT); //500 drop the platform
+	driveDistance(127,170,STRAIGHT);
+	driveDistance(-127,170,STRAIGHT);
+	wait1Msec(500);
+	driveDistance(100,1500,STRAIGHT); //collect the 4 stars
+	wait1Msec(500);
+	strafeNoStraightening(55,127,1350,STRAFE_LEFT);
+	driveDistance(100,80,STRAIGHT);
 }
