@@ -27,20 +27,10 @@ void driveDistance(int power, int encoderCounts, int direction) {
 	nMotorEncoder[rDriveFront] = 0;
 	nMotorEncoder[lDriveFront] = 0;
 
-	int error = 0,
-	straighteningError = 0,
-	errorSum = 0,
-	lastError = 0,
-	target = abs(encoderCounts);
+	int straighteningError = 0;
 
-	float straighteningCorrection,
-	lPower,
+	float lPower,
 	rPower;
-
-	int lfMult,
-			lbMult,
-			rfMult,
-			rbMult;
 
 	time1[T1] = 0;
 	if (direction == STRAIGHT || direction == STRAFE_LEFT || direction == STRAFE_RIGHT) { //validate direction
@@ -50,27 +40,10 @@ void driveDistance(int power, int encoderCounts, int direction) {
 			} else if (power < -127) {
 				power = -127;
 			}
-			writeDebugStreamLine("%d",sgn(power));
-
-			writeDebugStreamLine("%d,%d,%d,%d",lfMult,lbMult,rfMult,rbMult);
-		//if (power >= 0 && direction == STRAIGHT) {
-		//		writeDebugStreamLine("entered if statement");
-		//		lfMult = 1;
-		//		lbMult = 1;
-		//		rfMult = 1;
-		//		rbMult = 1;
-		//	}
-		//	else if (power < 0 && direction == STRAIGHT) {
-		//		writeDebugStreamLine("entered if statement");
-		//		lfMult = -1;
-		//		lbMult = -1;
-		//		rfMult = -1;
-		//		rbMult = -1;
-		//	}
 
 			if (direction == STRAIGHT) {
 				while(encoderCounts > abs(nMotorEncoder[lDriveFront] + nMotorEncoder[rDriveFront])/2.0) {
-							//adjust the powers sent to each side if the encoder values don't match
+					//adjust the powers sent to each side if the encoder values don't match
 						straighteningError = nMotorEncoder[lDriveFront] - nMotorEncoder[rDriveFront];
 
 
@@ -84,9 +57,10 @@ void driveDistance(int power, int encoderCounts, int direction) {
 						} else { //otherwise, just set the right side to the power
 							rPower = power;
 						}
+						writeDebugStreamLine("lPower = %d, rPower = %d",lPower,rPower);
 
-					setLeftDtMotors(lPower*lfMult,lPower*lbMult);
-					setRightDtMotors(rPower*rfMult,rPower*rbMult);
+					setLeftDtMotors(lPower,lPower);
+					setRightDtMotors(rPower,rPower);
 					wait1Msec(25);
 				}
 
@@ -99,21 +73,6 @@ void driveDistance(int power, int encoderCounts, int direction) {
 							//adjust the powers sent to each side if the encoder values don't match
 						straighteningError = abs(nMotorEncoder[lDriveFront]) - abs(nMotorEncoder[rDriveFront]);
 
-						//writeDebugStreamLine("%d,%d,%d,%d",lPower*lfMult,lPower*lbMult,rPower*rfMult,rPower*rbMult);
-						//positive powers:
-						//  if left side is ahead, straightening error is positive
-						// 	lPower will decrease
-						//  if right side is ahead, straightening error is negative
-						//  rPower will decrease
-						//negative powers:
-						//  if left side is ahead, straightening error is positive
-						//  power is negative, straighteningError is positive
-						//  power would go higher (more negative) because power - (positive error)
-						//  fix: multiply by sign of power - after this change
-						//  power is positive, straighteningError is still positive (as we want)
-						//  power is negative, straighteningError is multiplied by -1, so:
-						//  (-127) - (12)*(.3)*-1 = -127 + 4 = -123, slower power
-						//
 						if (straighteningError > 0) { //left side is ahead, so slow it down
 							lPower = power - straighteningError*straighteningKpLeft*-1;
 						} else { //otherwise, just set the right side to the power
@@ -178,8 +137,6 @@ void driveDistance(int power, int encoderCounts, int direction) {
 
 	} else if (direction == ROTATE_LEFT || direction == ROTATE_RIGHT) {
 			//update error terms
-			error = target - (abs(nMotorEncoder[lDriveFront]) + abs(nMotorEncoder[rDriveFront]))/2; //need to use absolute values here because one of
-			errorSum += error;
 
 			//limit the values of the power term to only be those that can be taken by the motors
 			if (power > 127) {
@@ -188,7 +145,6 @@ void driveDistance(int power, int encoderCounts, int direction) {
 				power = -127;
 			}
 
-			lastError = error; //update last error
 
 			//apply a slew rate to limit acceleration/deceleration
 
@@ -285,7 +241,7 @@ void strafeNoStraightening(int frontPower, int backPower, int encoderCounts, int
 task auton()
 {
 
-
+	writeDebugStreamLine("ran");
 	driveDistance(100,340,STRAIGHT); //push the preload forward
 	wait1Msec(500);
 	driveDistance(-100,500,STRAIGHT); //500 drop the platform
