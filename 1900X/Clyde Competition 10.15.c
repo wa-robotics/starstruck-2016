@@ -145,9 +145,9 @@ int catapultPositions[4];
 
 void catapultInit() {
 	catapultPositions[0] = 0;
-	catapultPositions[1] = 2000;
-	catapultPositions[2] = 2300;
-	catapultPositions[3] = 2775;
+	catapultPositions[1] = 1500;
+	catapultPositions[2] = 2650;
+	catapultPositions[3] = 2780;
 }
 
 void setCatapultPosition(int pos) {

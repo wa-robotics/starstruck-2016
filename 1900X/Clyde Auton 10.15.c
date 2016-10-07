@@ -240,24 +240,32 @@ void strafeNoStraightening(int frontPower, int backPower, int encoderCounts, int
 
 task auton()
 {
-
+	//resetDrumPosition();
+	//wait10Msec(10000);
 	writeDebugStreamLine("ran");
 	SensorValue[tongue] = 1;
-	SensorValue[platformLock] = 0;
-	setCatapultPosition(1)
-	wait1Msec(10000);
-
-	//actual autonomous
-	driveDistance(100,340,STRAIGHT); //push the preload forward
-	wait1Msec(500);
-	driveDistance(-100,500,STRAIGHT); //500 drop the platform
-	driveDistance(127,190,STRAIGHT);
+	SensorValue[platformLock] = 1;
+	driveDistance(127,500,STRAIGHT); //500 drop the platform
 	driveDistance(-127,190,STRAIGHT);
-	wait1Msec(500);
-	driveDistance(100,1500,STRAIGHT); //collect the 4 stars
-	wait1Msec(500);
-	strafeNoStraightening(55,127,550,STRAFE_LEFT);
-	driveDistance(100,80,STRAIGHT);
+	wait10Msec(50);
+	setCatapultPosition(1);
+	wait10Msec(50);
+	driveDistance(100,1500,STRAIGHT);
+	driveDistance(-127,300,STRAIGHT);
+	driveDistance(100,1000,STRAFE_LEFT);
+	driveDistance(127,300,STRAIGHT);
+	driveDistance(100,1500,STRAFE_LEFT);
+	//actual autonomous
+	//driveDistance(100,340,STRAIGHT); //push the preload forward
+	//wait1Msec(500);
+	//driveDistance(-100,500,STRAIGHT); //500 drop the platform
+	//driveDistance(127,190,STRAIGHT);
+	//driveDistance(-127,190,STRAIGHT);
+	//wait1Msec(500);
+	//driveDistance(100,1500,STRAIGHT); //collect the 4 stars
+	//wait1Msec(500);
+	//strafeNoStraightening(55,127,550,STRAFE_LEFT);
+	//driveDistance(100,80,STRAIGHT);
 
 	wait10Msec(50);
 	fireCatapult();
