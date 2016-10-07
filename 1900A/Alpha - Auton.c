@@ -64,9 +64,14 @@ void forward(int power, int counts){//FL, FR, BR, BL
 		getDriveEncoderAverage();
 		setDrivePower(127, 127,127,127);
 	}
+}
 
-
-
+void backward(int power, int counts){//FL, FR, BR, BL
+	zeroEncoders();
+	while( encoderAverage < counts){
+		getDriveEncoderAverage();
+		setDrivePower(-127, -127,-127,-127);
+	}
 }
 
 void strafeLeft(int power, int counts){//FL, FR, BR, BL
@@ -103,23 +108,65 @@ void rotate (int power, int counts, int direction){
 	}
 }
 
+void doThaShimmy(){
+	back(127, 250);
+	forward(127, 250);
+	back(127, 250);
+	forward(127, 250);
 
-task catapult () { //task to run the catapult motors at the same time as the drivetrain
-	while(true){
-		if(vexRT[Btn5U] == 1){ //temporary drive controls
-			setCatapultPower(catPower);
+}
+void setCatapultPower(int power){ //function that sets the power for catapult motors (real quick and easy)
+	motor[rightCatFront] = power;
+	motor[rightCatBack] = power;
+	motor[leftCatFront] = power;
+	motor[leftCatBack] = power;
+
+}
+void rotCatExact(int power, int counts, int direction){
+	if(sgn(direction) == 1){//means down
+		zeroEncoders();
+		while(encoderAverage < counts){//FL, FR, BR, BL
+			setCatapultPower(127);
+
 		}
-		else if (vexRT[Btn5D] == 1){
-			setCatapultPower(-catPower);
-		}
-		else {
-			setCatapultPower(0);
+
+	}
+	else if (sgn(direction) == -1){//means pull her up
+		zeroEncoders();
+		while(encoderAverage < counts){//FL, FR, BR, BL
+			setCatapultPower(-127);
+
 		}
 	}
 }
-
 task main()
 {
+	/*---------------------------------------
+	 Play One: Move forward and get three stars, lift up platform to secure stars, move back to clear cube,
+	 strafe right until almost touching fence. Rotate 90 degrees counter-clockwise and launch stars. Turn 160
+	 degrees counterclockwise to knock stars off fence. Assuming three far zone stars and two close stars, we get
+
+	 Total: 8 points + possible autonomous bonus
+
+	 Play Two:
+	 Do the shimmy, back up, strafe right, then move forward to get cube, lift cube up, rotate 90 degrees
+	 counter-clockwise and fire cube. Rotate 160ish degrees to knocks stars off
+
+	 Total: 6 points + autonomous bonus
+	 ---------------------------------------*/
+
+	 //Play One
+
+	 //Shimmy Dance
+		doThaShimmy();
+		forward(127, 1350) // get stars
+		rotCatExact(127, 500, -1); //pull catapult up a little bit to save stars
+		backward(127, 1400); //goes backward to clear cube
+		strafeRight(127, 1900); //strafe right to get to the fence
+		rotate(127, 500, -1); //rotate to get into firing position
+		rotCatExact(127, 600, 1); //fire catapult
+		rotate(127, 750, -1); //rotate to knock off stars
+
 
 
 
