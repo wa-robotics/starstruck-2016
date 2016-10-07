@@ -92,7 +92,7 @@ void setRightDtMotors(float rFront, float rBack) {
 //if pos is 0(DOWN), the ratchet will be down
 //if pos is 1 (UP), the ratchet will be released, which may require moving the catapult down briefly to release the ratchet
 void setRatchetPos(int pos) {
-	if (pos == 1) {
+	if (pos == UP) {
 		setDrumMotors(127);
 		wait1Msec(250); //spin the drum downwards to relaese the ratchet
 		SensorValue[drumRatchet] = 0;
@@ -147,7 +147,7 @@ void catapultInit() {
 	catapultPositions[0] = 0;
 	catapultPositions[1] = 2000;
 	catapultPositions[2] = 2300;
-	catapultPositions[3] = 2500;
+	catapultPositions[3] = 2775;
 }
 
 void setCatapultPosition(int pos) {
@@ -244,13 +244,13 @@ task driverCatapult() {
 			setCatapultPosition(2);
 		} else if (vexRT[Btn7R] == 1) {
 			setCatapultPosition(3);
-		}	else if (vexRT[Btn8L]) {
+		}/*	else if (vexRT[Btn8L]) {
 			setDrumMotors(-127);
 		} else if (vexRT[Btn8R]) {
 			setDrumMotors(127);
 		} else {
 			setDrumMotors(0);
-		}
+		}*/
 
 		//platform lock
 		if (vexRT[Btn5U]) {
@@ -281,17 +281,19 @@ task autonomous()
 
 }
 
-const bool DEBUG_AUTON = false;
+const bool DEBUG_AUTON = true;
 
 task usercontrol()
 {
 	catapultInit();
 
-	startTask(driverCatapult); //make sure catapult can be controlled
+	 //make sure catapult can be controlled
 	if (DEBUG_AUTON) {
 		startTask(autonomous);
 		stopTask(usercontrol);
 	}
+	startTask(driverCatapult);
+
 	//resetDrumPosition();
 	bLCDBacklight = true;
 	clearLCDLine(0);

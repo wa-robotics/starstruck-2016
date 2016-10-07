@@ -2,7 +2,7 @@
 
 float positionKp = 0.36, //proportional constant for positional PID
 			straighteningKpLeft = 0.48,//.43,//.195, //proportional constant for straightening response for the left side
-			straighteningKpRight = 0.63,//.22,//.16, //proportional constant for straightening response for the right side
+			straighteningKpRight = 0.55,//.22,//.16, //proportional constant for straightening response for the right side
 			straighteningKpLeftTurn = 0.4,//.43,//.195, //proportional constant for straightening response for the left side when turning
 			straighteningKpRightTurn = 0.4,//.22,//.16, //proportional constant for straightening response for the right side when turning
 			positionKi = 0.000350, //integral constant
@@ -242,8 +242,12 @@ task auton()
 {
 
 	writeDebugStreamLine("ran");
-	resetDrumPosition();
 	SensorValue[tongue] = 1;
+	SensorValue[platformLock] = 0;
+	setCatapultPosition(1)
+	wait1Msec(10000);
+
+	//actual autonomous
 	driveDistance(100,340,STRAIGHT); //push the preload forward
 	wait1Msec(500);
 	driveDistance(-100,500,STRAIGHT); //500 drop the platform
@@ -254,7 +258,7 @@ task auton()
 	wait1Msec(500);
 	strafeNoStraightening(55,127,550,STRAFE_LEFT);
 	driveDistance(100,80,STRAIGHT);
-	setCatapultPosition(2);
-	wait10Msec(100)
-	SensorValue[platformLock] = 1;
+
+	wait10Msec(50);
+	fireCatapult();
 }
