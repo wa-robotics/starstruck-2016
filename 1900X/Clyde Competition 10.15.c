@@ -236,13 +236,15 @@ task driverCatapult() {
 		//this is set up such that movement functions will suspend this task while they execute, thus disabling other catapult controls in that time
 		if (vexRT[Btn8U]) {
 			prepareCatapult();
-		} else if (vexRT[Btn8D]) {
+		} else if (vexRT[Btn5D]) {
 			fireCatapult();
-		}else if (vexRT[Btn7D]) {
-		  setCatapultPosition(1);
+		} else if (vexRT[Btn7D]) {
+			setCatapultPosition(0);
 		} else if (vexRT[Btn7L]) {
+		  setCatapultPosition(1);
+		} else if (vexRT[Btn7U]) {
 			setCatapultPosition(2);
-		} else if (vexRT[Btn7R] == 1) {
+		} else if (vexRT[Btn7R]) {
 			setCatapultPosition(3);
 		}/*	else if (vexRT[Btn8L]) {
 			setDrumMotors(-127);
@@ -258,6 +260,12 @@ task driverCatapult() {
 		} else if (vexRT[Btn5D]) {
 			SensorValue[platformLock] = 1;
 		}
+
+		//6U/6D manual drum control
+		//8D toggle hang lock
+		//8U toggle tongue
+		//5U ratchet
+		//8U held platform lock
 
 		//tongue
 		if (vexRT[Btn6U]) {
@@ -281,11 +289,12 @@ task autonomous()
 
 }
 
-const bool DEBUG_AUTON = true;
+const bool DEBUG_AUTON = false;
 
 task usercontrol()
 {
 	catapultInit();
+	//resetDrumPosition();
 
 	 //make sure catapult can be controlled
 	if (DEBUG_AUTON) {
@@ -306,6 +315,9 @@ task usercontrol()
 		displayLCDNumber(0,1,SensorValue[drumPosEnc],1);
 		displayLCDNumber(1,0,SensorValue[drumZero],1);
 
+
+		//8L/8R circle strafe
+		//like strafenostraightening(55/127)
 
 		//for deadzones; when the joystick value for an axis is below the threshold, the motors controlled by that joystick will be set to 0
 		LY = (abs(vexRT[Ch3]) > threshold) ? vexRT[Ch3] : 0;
