@@ -238,7 +238,28 @@ void strafeNoStraightening(int frontPower, int backPower, int encoderCounts, int
 	}
 }
 
-task auton()
+task autonSkills()
+{
+	driveDistance(-100,650,STRAIGHT);
+	driveDistance(-127,250,STRAIGHT); //500 drop the platform
+	driveDistance(127,190,STRAIGHT);
+	setCatapultPosition(3);
+	fireCatapult();
+	setCatapultPosition(3);
+	fireCatapult();
+	setCatapultPosition(3);
+	fireCatapult();
+	wait10Msec(50);
+	rotateDegrees(180, 1);
+	SensorValue[platformLock] = 1;
+	setCatapultPosition(1);
+	driveDistance(100, 790, STRAIGHT);
+	driveDistance(-127,300,STRAIGHT);
+	driveDistance(100,1000,STRAFE_LEFT);
+	driveDistance(127,300,STRAIGHT);
+	driveDistance(100,1375,STRAFE_LEFT);
+}
+task autonFence()
 {
 	//resetDrumPosition();
 	//wait10Msec(10000);
@@ -254,7 +275,7 @@ task auton()
 	driveDistance(-127,300,STRAIGHT);
 	driveDistance(100,1000,STRAFE_LEFT);
 	driveDistance(127,300,STRAIGHT);
-	driveDistance(100,1500,STRAFE_LEFT);
+	driveDistance(100,1375,STRAFE_LEFT);
 	//actual autonomous
 	//driveDistance(100,340,STRAIGHT); //push the preload forward
 	//wait1Msec(500);

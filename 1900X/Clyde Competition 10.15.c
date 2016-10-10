@@ -146,7 +146,7 @@ int catapultPositions[4];
 void catapultInit() {
 	catapultPositions[0] = 0;
 	catapultPositions[1] = 1500;
-	catapultPositions[2] = 2650;
+	catapultPositions[2] = 2600;
 	catapultPositions[3] = 2780;
 }
 
@@ -283,13 +283,16 @@ task driverCatapult() {
 task autonomous()
 {
 	catapultInit(); //make sure we can use the catapult	in any autonomous play
-
 	//autonomous play selection goes here
-	startTask(auton);
+	//startTask(autonFence);
+	//startTask(autonSkills);
+	//setCatapultPosition(3);
+	//fireCatapult();
+	resetDrumPosition();
 
 }
 
-const bool DEBUG_AUTON = false;
+const bool DEBUG_AUTON = true;
 
 task usercontrol()
 {
