@@ -94,7 +94,7 @@ void setRightDtMotors(float rFront, float rBack) {
 void setRatchetPos(int pos) {
 	if (pos == UP) {
 		setDrumMotors(127);
-		wait1Msec(250); //spin the drum downwards to relaese the ratchet
+		wait1Msec(100); //spin the drum downwards to relaese the ratchet
 		SensorValue[drumRatchet] = 0;
 		wait1Msec(350); //this time should be slightly longer since this period is crucial to the ratchet releasing properly
 		setDrumMotors(0);
@@ -131,7 +131,7 @@ void moveCatapultDrumDist (int count, int direction) {
 
 void resetDrumPosition() {
 	setRatchetPos(1);
-	wait1Msec(1000); //should probably reduce this time; one second to make sure the human has lifted the ratchet
+	wait1Msec(400); //should probably reduce this time; one second to make sure the human has lifted the ratchet
 	writeDebugStreamLine("resetDrumPosition called");
 	while (!SensorValue[drumZero] || SensorValue[drumPosEnc] > 100) {
 		writeDebugStreamLine("Inside while loop: SensorValue[drumZero] = %d, SensorValue[drumPosEnc] = %d",SensorValue[drumZero],SensorValue[drumPosEnc]);
@@ -290,9 +290,9 @@ task autonomous()
 	//autonomous play selection goes here
 	//startTask(autonFence);
 	//startTask(autonSkills);
-	//setCatapultPosition(3);
+	//setCatapultPosition(2);
 	//fireCatapult();
-	resetDrumPosition();
+	//resetDrumPosition();
 
 }
 
