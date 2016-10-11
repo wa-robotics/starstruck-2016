@@ -131,11 +131,15 @@ void moveCatapultDrumDist (int count, int direction) {
 
 void resetDrumPosition() {
 	setRatchetPos(1);
-	wait1Msec(1000); //one second to make sure the human has lifted the ratchet
+	wait1Msec(1000); //should probably reduce this time; one second to make sure the human has lifted the ratchet
+	writeDebugStreamLine("resetDrumPosition called");
 	while (!SensorValue[drumZero] || SensorValue[drumPosEnc] > 100) {
+		writeDebugStreamLine("Inside while loop: SensorValue[drumZero] = %d, SensorValue[drumPosEnc] = %d",SensorValue[drumZero],SensorValue[drumPosEnc]);
 		setDrumMotors(-127);
 	}
+	writeDebugStreamLine("Exited while loop");
 	setDrumMotors(0);
+	writeDebugStreamLine("Set drum motors to 0");
 	SensorValue[drumPosEnc] = 0;
 }
 
@@ -209,7 +213,7 @@ void fireCatapult() {
 		}
 
 		//once catapult is up, start resetting the drum
-		resetDrumPosition();
+		resetDrumPosition(); //this should be inside the next if statement
 
 		if (!catapultUpTimedOut) { //if catapult up didn't time out
 			time1[T1] = 0;
