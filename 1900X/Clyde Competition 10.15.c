@@ -7,6 +7,7 @@
 #pragma config(Sensor, dgtl5,  drumZero,       sensorTouch)
 #pragma config(Sensor, dgtl6,  drumRatchet,    sensorDigitalOut)
 #pragma config(Sensor, dgtl7,  tongue,         sensorDigitalOut)
+#pragma config(Sensor, dgtl8,  hangLock,       sensorDigitalOut)
 #pragma config(Sensor, I2C_1,  ,               sensorQuadEncoderOnI2CPort,    , AutoAssign )
 #pragma config(Sensor, I2C_2,  ,               sensorQuadEncoderOnI2CPort,    , AutoAssign )
 #pragma config(Motor,  port2,           lDriveFront,   tmotorVex393HighSpeed_MC29, openLoop, encoderPort, I2C_1)
@@ -34,16 +35,6 @@ bool DEBUG_ENABLE = true;
 
 //Main competition background code...do not modify!
 #include "..\Vex_Competition_Includes.c"
-
-/*---------------------------------------------------------------------------*/
-/*                          Pre-Autonomous Functions                         */
-/*                                                                           */
-/*  You may want to perform some actions before the competition starts.      */
-/*  Do them in the following function.  You must return from this function   */
-/*  or the autonomous and usercontrol tasks will not be started.  This       */
-/*  function is only called once after the cortex has been powered on and    */
-/*  not every time that the robot is disabled.                               */
-/*---------------------------------------------------------------------------*/
 
 void pre_auton()
 {
@@ -133,7 +124,7 @@ void resetDrumPosition() {
 	setRatchetPos(1);
 	wait1Msec(400); //should probably reduce this time; one second to make sure the human has lifted the ratchet
 	writeDebugStreamLine("resetDrumPosition called");
-	while (!SensorValue[drumZero] || SensorValue[drumPosEnc] > 100) {
+	while (!SensorValue[drumZero] || SensorValue[drumPosEnc] > 100 || vexRT[Btn6D]) {
 		writeDebugStreamLine("Inside while loop: SensorValue[drumZero] = %d, SensorValue[drumPosEnc] = %d",SensorValue[drumZero],SensorValue[drumPosEnc]);
 		setDrumMotors(-127);
 	}
@@ -213,9 +204,10 @@ void fireCatapult() {
 		}
 
 		//once catapult is up, start resetting the drum
-		resetDrumPosition(); //this should be inside the next if statement
+		 //this should be inside the next if statement
 
 		if (!catapultUpTimedOut) { //if catapult up didn't time out
+			resetDrumPosition();
 			time1[T1] = 0;
 			int catapultResetTimeOutTime = 7000; //check this value
 			while (!SensorValue[platformDown] || SensorValue[catapultPot] > 2550) { //when platform is attached and catapult is down, move one; CHECK VAL
@@ -234,12 +226,44 @@ void fireCatapult() {
 
 }
 
+void toggleSolenoid(int sensor) {
+	int currVal = SensorValue[sensor],
+			newVal = abs(currVal - 1); //If currVal is 1, newVal is 0.  If currVal is 0, newVal is abs(-1) = 1
+
+	SensorValue[sensor] = newVal;
+}
+
+//press tongue
+//hold platform lock
+task button8UController() {
+	while(1) {
+		if (vexRT[Btn8U]) {
+			time1[T1] = 0;
+			while (vexRT[Btn8U]) {
+					if (time1[T1] >= 500) { break; }
+					wait1Msec(50); //don't hog the CPU
+			}
+			if (time1[T1] >= 500) { //toggle platform lock
+				toggleSolenoid(platformLock);
+				while (vexRT[Btn8U]) { //wait to continue until the button is released so the action only gets triggered once
+					wait1Msec(50);
+				}
+			} else {
+				toggleSolenoid(tongue);
+			}
+
+		}
+	}
+}
 
 task driverCatapult() {
+	bool btn8UPressed = false,
+			 btn8DPressed  = false,
+			 btn5UPressed = false;
 	while(1) {
 		//this is set up such that movement functions will suspend this task while they execute, thus disabling other catapult controls in that time
 		if (vexRT[Btn8U]) {
-			prepareCatapult();
+			//prepareCatapult();
 		} else if (vexRT[Btn5D]) {
 			fireCatapult();
 		} else if (vexRT[Btn7D]) {
@@ -250,6 +274,8 @@ task driverCatapult() {
 			setCatapultPosition(2);
 		} else if (vexRT[Btn7R]) {
 			setCatapultPosition(3);
+		} else if (vexRT[Btn6D]) {
+			resetDrumPosition();
 		}/*	else if (vexRT[Btn8L]) {
 			setDrumMotors(-127);
 		} else if (vexRT[Btn8R]) {
@@ -259,23 +285,36 @@ task driverCatapult() {
 		}*/
 
 		//platform lock
-		if (vexRT[Btn5U]) {
+		/*if (vexRT[Btn5U]) {
 			SensorValue[platformLock] = 0;
 		} else if (vexRT[Btn5D]) {
 			SensorValue[platformLock] = 1;
-		}
+		}*/
 
 		//6U/6D manual drum control
-		//8D toggle hang lock
+		//8D done. toggle hang lock
 		//8U toggle tongue
 		//5U ratchet
 		//8U held platform lock
 
-		//tongue
-		if (vexRT[Btn6U]) {
-			SensorValue[tongue] = 0;
-		} else if (vexRT[Btn6D]) {
-			SensorValue[tongue] = 1;
+
+
+
+
+		//hang lock
+		if (vexRT[Btn8D] && !btn8DPressed) {
+			toggleSolenoid(hangLock);
+			btn8DPressed = true;
+		} else if (!vexRT[Btn8D] && btn8DPressed) {
+			btn8DPressed = false;
+		}
+
+		//drum ratchet
+		if (vexRT[Btn5U] && !btn5UPressed) {
+			toggleSolenoid(drumRatchet);
+			btn5UPressed = true;
+		} else if (!vexRT[Btn5U] && btn5UPressed) {
+			btn5UPressed = false;
 		}
 
 		wait1Msec(25);
@@ -296,20 +335,21 @@ task autonomous()
 
 }
 
-const bool DEBUG_AUTON = true;
+const bool DEBUG_AUTON = false;
 
 task usercontrol()
 {
-	catapultInit();
-	//resetDrumPosition();
+	catapultInit(); //make sure catapult can be controlled
 
-	 //make sure catapult can be controlled
+	//setCatapultPosition(0);
+	//wait1Msec(1000);
+	//fireCatapult();
 	if (DEBUG_AUTON) {
 		startTask(autonomous);
 		stopTask(usercontrol);
 	}
 	startTask(driverCatapult);
-
+	startTask(button8UController);
 	//resetDrumPosition();
 	bLCDBacklight = true;
 	clearLCDLine(0);
@@ -336,6 +376,5 @@ task usercontrol()
 		motor[rDriveFront] = RY - RX;
 		motor[rDriveBack] = RY + RX;
 		wait1Msec(20);
-
 	}
 }
