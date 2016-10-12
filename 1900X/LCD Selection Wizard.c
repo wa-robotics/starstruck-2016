@@ -24,6 +24,8 @@ task lcdSelection();
 task stopLcdSelectionMonitor() {
 	while(1) {
 		if (abs(vexRT[Ch1]) > 35 || abs(vexRT[Ch2]) > 35 || abs(vexRT[Ch3]) > 35 || abs(vexRT[Ch4]) > 35) {
+			clearLCDLine(0);
+			clearLCDLine(1);
 			stopTask(lcdSelection);
 			stopTask(stopLcdSelectionMonitor);
 		}
