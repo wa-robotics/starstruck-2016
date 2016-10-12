@@ -27,15 +27,14 @@
 
 // This code is for the VEX cortex platform
 #pragma platform(VEX2)
-bool DEBUG_ENABLE = true;
 
 // Select Download method as "competition"
 //ENABLE THIS LATER
-//#pragma competitionControl(Competition)
+#pragma competitionControl(Competition)
 
 //Main competition background code...do not modify!
 #include "..\Vex_Competition_Includes.c"
-
+#include "LCD Selection Wizard.c"
 void pre_auton()
 {
   // Set bStopTasksBetweenModes to false if you want to keep user created tasks
@@ -49,6 +48,7 @@ void pre_auton()
 	bDisplayCompetitionStatusOnLcd = false;
 	bLCDBacklight = true;
 
+	startTask(lcdSelection);
   // All activities that occur before the competition starts
   // Example: clearing encoders, setting servo positions, ...
 
@@ -83,13 +83,13 @@ void setRightDtMotors(float rFront, float rBack) {
 //if pos is 0(DOWN), the ratchet will be down
 //if pos is 1 (UP), the ratchet will be released, which may require moving the catapult down briefly to release the ratchet
 void setRatchetPos(int pos) {
-	if (pos == UP) {
+	if (pos == UP && SensorValue[drumRatchet] == DOWN) { //if the new position is UP, the current position should be DOWN (0); should really verify this using a limit switch since the solenoid doesn't guarantee the position
 		setDrumMotors(127);
 		wait1Msec(100); //spin the drum downwards to relaese the ratchet
 		SensorValue[drumRatchet] = 0;
 		wait1Msec(350); //this time should be slightly longer since this period is crucial to the ratchet releasing properly
 		setDrumMotors(0);
-	} else { //pos == 0
+	} else { //pos == 0 (DOWN)
 		SensorValue[drumRatchet] = 1;
 	}
 }
@@ -124,7 +124,7 @@ void resetDrumPosition() {
 	setRatchetPos(1);
 	wait1Msec(400); //should probably reduce this time; one second to make sure the human has lifted the ratchet
 	writeDebugStreamLine("resetDrumPosition called");
-	while (!SensorValue[drumZero] || SensorValue[drumPosEnc] > 100 || vexRT[Btn6D]) {
+	while (!SensorValue[drumZero] || SensorValue[drumPosEnc] > 100 || vexRT[Btn7D]) {
 		writeDebugStreamLine("Inside while loop: SensorValue[drumZero] = %d, SensorValue[drumPosEnc] = %d",SensorValue[drumZero],SensorValue[drumPosEnc]);
 		setDrumMotors(-127);
 	}
@@ -204,8 +204,6 @@ void fireCatapult() {
 		}
 
 		//once catapult is up, start resetting the drum
-		 //this should be inside the next if statement
-
 		if (!catapultUpTimedOut) { //if catapult up didn't time out
 			resetDrumPosition();
 			time1[T1] = 0;
@@ -275,7 +273,7 @@ task driverCatapult() {
 		} else if (vexRT[Btn7R]) {
 			setCatapultPosition(3);
 		} else if (vexRT[Btn6D]) {
-			resetDrumPosition();
+			prepareCatapult();
 		}/*	else if (vexRT[Btn8L]) {
 			setDrumMotors(-127);
 		} else if (vexRT[Btn8R]) {
@@ -326,6 +324,20 @@ task driverCatapult() {
 task autonomous()
 {
 	catapultInit(); //make sure we can use the catapult	in any autonomous play
+
+	if (autonChoices.waitTime > 0) {
+		wait1Msec(autonChoices.waitTime*1000);
+	}
+
+	if (autonChoices.startingTile == "left") {
+			startTask(autonFence);
+	} else if (autonChoices.startingTile == "right") {
+		startTask(autonFence);
+	} else if (autonChoices.startingTile == "programmingSkills") {
+		startTask(autonSkills);
+	}
+
+
 	//autonomous play selection goes here
 	//startTask(autonFence);
 	//startTask(autonSkills);
@@ -345,6 +357,9 @@ task usercontrol()
 	//wait1Msec(1000);
 	//fireCatapult();
 	if (DEBUG_AUTON) {
+		//to select the play
+		autonChoices.waitTime = 0; //time in seconds, so 0,1,3 are values supported by LCD selection wizard
+		autonChoices.startingTile = "left";
 		startTask(autonomous);
 		stopTask(usercontrol);
 	}
@@ -362,19 +377,24 @@ task usercontrol()
 		displayLCDNumber(0,1,SensorValue[drumPosEnc],1);
 		displayLCDNumber(1,0,SensorValue[drumZero],1);
 
-
 		//8L/8R circle strafe
-		//like strafenostraightening(55/127)
-
-		//for deadzones; when the joystick value for an axis is below the threshold, the motors controlled by that joystick will be set to 0
-		LY = (abs(vexRT[Ch3]) > threshold) ? vexRT[Ch3] : 0;
-		LX = (abs(vexRT[Ch4]) > threshold) ? vexRT[Ch4] : 0;
-		RY = (abs(vexRT[Ch2]) > threshold) ? vexRT[Ch2] : 0;
-		RX = (abs(vexRT[Ch1]) > threshold) ? vexRT[Ch1] : 0;
-		motor[lDriveFront] = LY + LX;
-		motor[lDriveBack] = LY - LX;
-		motor[rDriveFront] = RY - RX;
-		motor[rDriveBack] = RY + RX;
-		wait1Msec(20);
+		if (vexRT[Btn8L]) {
+			setLeftDtMotors(-55,127);
+			setRightDtMotors(55,-127);
+		} else if (vexRT[Btn8R]) {
+			setLeftDtMotors(55,-127);
+			setRightDtMotors(-55,127);
+		} else {
+			//for deadzones; when the joystick value for an axis is below the threshold, the motors controlled by that joystick will be set to 0
+			LY = (abs(vexRT[Ch3]) > threshold) ? vexRT[Ch3] : 0;
+			LX = (abs(vexRT[Ch4]) > threshold) ? vexRT[Ch4] : 0;
+			RY = (abs(vexRT[Ch2]) > threshold) ? vexRT[Ch2] : 0;
+			RX = (abs(vexRT[Ch1]) > threshold) ? vexRT[Ch1] : 0;
+			motor[lDriveFront] = LY + LX;
+			motor[lDriveBack] = LY - LX;
+			motor[rDriveFront] = RY - RX;
+			motor[rDriveBack] = RY + RX;
+			wait1Msec(20);
+		}
 	}
 }
