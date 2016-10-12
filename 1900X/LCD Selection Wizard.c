@@ -19,14 +19,21 @@ void waitForRelease() {
 	}
 }
 
+task lcdSelection();
+
+task stopLcdSelectionMonitor() {
+	while(1) {
+		if (abs(vexRT[Ch1]) > 35 || abs(vexRT[Ch2]) > 35 || abs(vexRT[Ch3]) > 35 || abs(vexRT[Ch4]) > 35) {
+			stopTask(lcdSelection);
+			stopTask(stopLcdSelectionMonitor);
+		}
+		wait1Msec(250);
+	}
+}
 
 task lcdSelection()
 {
-	if (nSysTime > 5000 || abs(vexRT[Ch1]) > 35 || abs(vexRT[Ch2]) > 35 || abs(vexRT[Ch3]) > 35 || abs(vexRT[Ch4]) > 35) {
-		bDisplayCompetitionStatusOnLcd = true;
-		stopTask(lcdSelection);
-	}
-
+	startTask(stopLcdSelectionMonitor);
 	bDisplayCompetitionStatusOnLcd = false;
 	bLCDBacklight = true;
 	clearLCDLine(0);
