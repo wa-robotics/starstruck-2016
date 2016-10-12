@@ -258,11 +258,7 @@ task main()
 	int LX = 0;
 	int RY = 0;
 	int RX = 0;
-
-	while(true )
-	{
-		startTask(catapult);
-		if(hasAutonPlayed == false){
+	while(hasAutonPlayed == false){
 			if(vexRT[Btn8R] == 1){ //Starts the fence play ***3 POINTS***
 				//Play One
 
@@ -307,6 +303,12 @@ task main()
 
 			}
 		}
+
+
+	startTask(catapult);
+	while(true )
+	{
+
 		/*
 		Ternary Statement: value = (true boolean) ? (false boolean) : value
 		If the absolute value of one of these vexRT Channels is greater than the threshold, assign the value
