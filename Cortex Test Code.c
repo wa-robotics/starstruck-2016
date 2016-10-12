@@ -12,7 +12,7 @@
 
 //program for quickly verifying that all ports on a Cortex work
 
-int speed = 0;
+int speed = 127;
 
 task main()
 {
