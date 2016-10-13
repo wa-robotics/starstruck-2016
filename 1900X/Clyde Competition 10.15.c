@@ -83,7 +83,7 @@ void setRightDtMotors(float rFront, float rBack) {
 //if pos is 0(DOWN), the ratchet will be down
 //if pos is 1 (UP), the ratchet will be released, which may require moving the catapult down briefly to release the ratchet
 void setRatchetPos(int pos) {
-	if (pos == UP && SensorValue[drumRatchet] == DOWN) { //if the new position is UP, the current position should be DOWN (0); should really verify this using a limit switch since the solenoid doesn't guarantee the position
+	if (pos == UP) { //if the new position is UP, the current position should be DOWN (0); should really verify this using a limit switch since the solenoid doesn't guarantee the position
 		setDrumMotors(127);
 		wait1Msec(100); //spin the drum downwards to relaese the ratchet
 		SensorValue[drumRatchet] = 0;
@@ -133,16 +133,16 @@ void resetDrumPosition() {
 	writeDebugStreamLine("Set drum motors to 0");
 	SensorValue[drumPosEnc] = 0;
 }
-
+//evan is a poop
 int catapultPositions[4];
 
 
 
 void catapultInit() {
 	catapultPositions[0] = 0;
-	catapultPositions[1] = 1500;
-	catapultPositions[2] = 2600;
-	catapultPositions[3] = 2780;
+	catapultPositions[1] = 1700;
+	catapultPositions[2] = 2200;
+	catapultPositions[3] = 2480;
 }
 
 void setCatapultPosition(int pos) {
@@ -187,7 +187,24 @@ void prepareCatapult() {
 	}
 }
 
+int nextDrumPosition = -1;
+task getNextDrumPosition() {
+	while(1) {
+		if (vexRT[Btn7D]) {
+			nextDrumPosition = 0;
+		} else if (vexRT[Btn7L]) {
+		  nextDrumPosition = 1;
+		} else if (vexRT[Btn7U]) {
+			nextDrumPosition = 2;
+		} else if (vexRT[Btn7R]) {
+			nextDrumPosition = 3;
+		}
+		wait1Msec(75);
+	}
+}
+
 void fireCatapult() {
+	startTask(getNextDrumPosition);
 	if (SensorValue[drumPosEnc] > 100) {
 		SensorValue[tongue] = 0; //move the tongue in before shooting; it will stay out until the platform is all the way up
 		SensorValue[platformLock] = 1; //release the platform to fire objects
@@ -195,7 +212,7 @@ void fireCatapult() {
     bool catapultUpTimedOut = false;
     int catapultTimeOutTime = 3000; //in milliseconds; wait 3 seconds at most for the catapult to go all the way up
     time1[T1] = 0; //start timing how long we've been waiting for the catapult to go all the way up
-		while(SensorValue[catapultPot] < 2550) { //when the catapult is up - CHECK VAL
+		while(SensorValue[catapultPot] < 2300) { //when the catapult is up - CHECK VAL
 			if (time1[T1] > catapultTimeOutTime) {
 				catapultUpTimedOut = true;
 				break; //exit this while loop
@@ -203,24 +220,34 @@ void fireCatapult() {
 			wait1Msec(25);
 		}
 
+
 		//once catapult is up, start resetting the drum
 		if (!catapultUpTimedOut) { //if catapult up didn't time out
 			resetDrumPosition();
 			time1[T1] = 0;
-			int catapultResetTimeOutTime = 7000; //check this value
-			while (!SensorValue[platformDown] || SensorValue[catapultPot] > 2550) { //when platform is attached and catapult is down, move one; CHECK VAL
+			int catapultResetTimeOutTime = 6000; //check this value
+			while (!SensorValue[platformDown] || SensorValue[catapultPot] > 700) { //when platform is attached and catapult is down, move one; CHECK VAL
 				if (time1[T1] > catapultResetTimeOutTime) {
 					break; //exit this while loop
 				}
 				wait1Msec(25);
 			}
-		}
+			//if either wait operation times out, the catapult will stop moving and the platform solenoid will extend out; the variable platform released is not used
+			SensorValue[platformLock] = 0; //reattach platform
+			SensorValue[tongue] = 1;
 
-		//if either wait operation times out, the catapult will stop moving and the platform solenoid will extend out; the variable platform released is not used
-		SensorValue[platformLock] = 0; //reattach platform
-		SensorValue[tongue] = 1;
-
+			//move to new drum position
+			stopTask(getNextDrumPosition);
+			if (nextDrumPosition >= 0 && nextDrumPosition <= 3) { //validate next drum position value
+				wait1Msec(250); //let things settle out
+				setCatapultPosition(nextDrumPosition);
+			}
+		} else {
+			stopTask(getNextDrumPosition); //make sure we always stop this task so that pushing a set catapult button won't affect the next position chosen for this function
 		}
+		nextDrumPosition = -1; //make sure that next time we fire, nothing happens if no button is pressed
+
+	}
 
 }
 
@@ -294,7 +321,9 @@ task driverCatapult() {
 		//8U toggle tongue
 		//5U ratchet
 		//8U held platform lock
-
+		if (vexRT[Btn6U]) {
+			SensorValue[drumPosEnc] = 0;
+		}
 
 
 
@@ -352,10 +381,12 @@ const bool DEBUG_AUTON = false;
 task usercontrol()
 {
 	catapultInit(); //make sure catapult can be controlled
-
-	//setCatapultPosition(0);
+	//setCatapultPosition(1);
 	//wait1Msec(1000);
-	//fireCatapult();
+	//while(SensorValue[drumZero] == 0) {
+	//	setDrumMotors(-127);
+	//}
+	//setDrumMotors(0);
 	if (DEBUG_AUTON) {
 		//to select the play
 		autonChoices.waitTime = 0; //time in seconds, so 0,1,3 are values supported by LCD selection wizard
