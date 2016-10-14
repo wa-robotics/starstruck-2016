@@ -21,7 +21,7 @@
 
 /*----------------------------------------------------------------------------------------------------------
 
-																			Variable Library
+Variable Library
 
 ----------------------------------------------------------------------------------------------------------*/
 
@@ -83,7 +83,7 @@ void driveCatTime(int power, int time){
 
 /*----------------------------------------------------------------------------------------------------------
 
-														Maneuver Functions (for autonomous) - encoder based
+Maneuver Functions (for autonomous) - encoder based
 
 ----------------------------------------------------------------------------------------------------------*/
 
@@ -174,7 +174,7 @@ void rotCatExact(int power, int counts, int direction){
 
 /*----------------------------------------------------------------------------------------------------------
 
-												Miscellaneous Functions - Cutting Motors, resets, etc.
+Miscellaneous Functions - Cutting Motors, resets, etc.
 
 ----------------------------------------------------------------------------------------------------------*/
 void cutMotors(){
@@ -275,7 +275,7 @@ task main()
 	int LX = 0;
 	int RY = 0;
 	int RX = 0;
-	/*while(hasAutonPlayed == false){
+	while(hasAutonPlayed == false){
 		if(vexRT[Btn8R] == 1){ //Starts the fence play ***3 POINTS***
 			//Play One
 
@@ -319,9 +319,13 @@ task main()
 			backwards(127, 500);
 
 		}
+		else if (vexRT[Btn8L] == 1){
+			hasAutonPlayed = true;
+
+		}
 	}
 
-*/
+
 	startTask(catapult);
 	while(true )
 	{
