@@ -155,7 +155,7 @@ void catapultInit() {
 	catapultPositions[0] = 0;
 	catapultPositions[1] = 1700;
 	catapultPositions[2] = 2200;
-	catapultPositions[3] = 2480;
+	catapultPositions[3] = 2750; //2480
 }
 
 void setCatapultPosition(int pos) {
@@ -394,7 +394,9 @@ const bool DEBUG_AUTON = false;
 task usercontrol()
 {
 	catapultInit(); //make sure catapult can be controlled
-	//setCatapultPosition(1);
+	wait1Msec(5000);
+	setCatapultPosition(3);
+	//prepareCatapult();
 	//wait1Msec(1000);
 	//while(SensorValue[drumZero] == 0) {
 	//	setDrumMotors(-127);
@@ -445,7 +447,6 @@ task usercontrol()
 					if(vexRT[Btn6D] == 1)
 					{
 						SensorValue[drumPosEnc] = 0;
-						sensorValue[tongue] = 0;
 					}
 					if(vexRT[Btn5D] == 1)
 					{
