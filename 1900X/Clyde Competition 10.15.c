@@ -93,7 +93,20 @@ void setRatchetPos(int pos) {
 		SensorValue[drumRatchet] = 1;
 	}
 }
+void drumResetForward() {
+	while(vexRT[Btn5D] == 1) {
+  	setDrumMotors(127);
+ 	}
+  setDrumMotors(0);
+}
 
+void drumResetBackward() {
+	setRatchetPos(1)
+	while(vexRT[Btn5U] == 1) {
+  	setDrumMotors(-127);
+ 	}
+  setDrumMotors(0);
+}
 //full rev = 360*7
 //automatically releases ratchet first
 void moveCatapultDrumDist (int count, int direction) {
@@ -289,7 +302,7 @@ task driverCatapult() {
 		//this is set up such that movement functions will suspend this task while they execute, thus disabling other catapult controls in that time
 		if (vexRT[Btn8U]) {
 			//prepareCatapult();
-		} else if (vexRT[Btn5D]) {
+		} else if (vexRT[Btn5D] && vexRT[Btn6U] == 0) {
 			fireCatapult();
 		} else if (vexRT[Btn7D]) {
 			setCatapultPosition(0);
@@ -299,7 +312,7 @@ task driverCatapult() {
 			setCatapultPosition(2);
 		} else if (vexRT[Btn7R]) {
 			setCatapultPosition(3);
-		} else if (vexRT[Btn6D]) {
+		} else if (vexRT[Btn6D] && vexRT[Btn6U] == 0) {
 			prepareCatapult();
 		}/*	else if (vexRT[Btn8L]) {
 			setDrumMotors(-127);
@@ -337,10 +350,10 @@ task driverCatapult() {
 		}
 
 		//drum ratchet
-		if (vexRT[Btn5U] && !btn5UPressed) {
+		if (vexRT[Btn5U] && !btn5UPressed && vexRT[Btn6U] == 0) {
 			toggleSolenoid(drumRatchet);
 			btn5UPressed = true;
-		} else if (!vexRT[Btn5U] && btn5UPressed) {
+		} else if (!vexRT[Btn5U] && btn5UPressed && vexRT[Btn6U] == 0) {
 			btn5UPressed = false;
 		}
 
@@ -426,6 +439,24 @@ task usercontrol()
 			motor[rDriveFront] = RY - RX;
 			motor[rDriveBack] = RY + RX;
 			wait1Msec(20);
+
+			if (vexRT[Btn6U]) {
+				while (vexRT[Btn6U]) {
+					if(vexRT[Btn6D] == 1)
+					{
+						SensorValue[drumPosEnc] = 0;
+						sensorValue[tongue] = 0;
+					}
+					if(vexRT[Btn5D] == 1)
+					{
+						drumResetForward();
+					}
+					else if(vexRT[Btn5U] == 1)
+					{
+						drumResetBackward();
+					}
+				}
+			}
 		}
 	}
 }
