@@ -1,9 +1,9 @@
 #pragma config(I2C_Usage, I2C1, i2cSensors)
 #pragma config(Sensor, in1,    AutonSelector,  sensorPotentiometer)
-#pragma config(Sensor, dgtl1,  DRFL1,          sensorQuadEncoder)
-#pragma config(Sensor, dgtl3,  DRFR1,          sensorQuadEncoder)
-#pragma config(Sensor, dgtl5,  DRBR1,          sensorQuadEncoder)
-#pragma config(Sensor, dgtl7,  DRBL1,          sensorQuadEncoder)
+#pragma config(Sensor, dgtl1,  DRFLED1,        sensorQuadEncoder)
+#pragma config(Sensor, dgtl3,  DRFRED1,        sensorQuadEncoder)
+#pragma config(Sensor, dgtl5,  DRBRED1,        sensorQuadEncoder)
+#pragma config(Sensor, dgtl7,  DRBLED1,        sensorQuadEncoder)
 #pragma config(Sensor, dgtl9,  armLock,        sensorDigitalOut)
 #pragma config(Sensor, dgtl10, liftLock,       sensorDigitalOut)
 #pragma config(Sensor, dgtl11, FBBotLim,       sensorTouch)
@@ -34,63 +34,121 @@
 
 //Main competition background code...do not modify!
 #include "..\Vex_Competition_Includes.c"
-#include "Alpha Functions and Variables.c"
+
+int threshold = 15;
+const int forward = 1;
+const int strafeRight = 2;
+const int strafeLeft = 3;
+const int backwards = 4;
+float wheelCircumference = 3.25*PI;
+float revolutions = 0;
+float averageEncoderValue = 0;
+
+void zeroEncoders(){
+	nMotorEncoder[DRFLED1] = 0;
+	nMotorEncoder[DRFRED1] = 0;
+	nMotorEncoder[DRBRED1] = 0;
+	nMotorEncoder[DRBLED1] = 0;
+}
+void setFBMotors(int speed){ //automatically sets the four bar power (reduce clutter)
+	motor[RFBT] = speed;
+	motor[RFBB] = speed;
+	motor[LFBT] = speed;
+	motor[LFBB] = speed;
+
+}
+void setDriveMotors(int speed){
+	motor[FL] = speed;
+	motor[FR] = speed;
+	motor[BR] = speed;
+	motor[BL] = speed;
+}
+float getDTEncoderAverage(){
+	averageEncoderValue = (abs(SensorValue(DRFLED1)) + abs(SensorValue(DRFRED1)) + abs(SensorValue(DRBRED1)) + abs(SensorValue(DRBLED1)))/4;
+	return averageEncoderValue;
+}
+void move(int direction, int speed, int distance){
+	revolutions = distance/wheelCircumference;
+	switch (direction) {
+	case forward:
+	zeroEncoders();
+	while(getDTEncoderAverage() < distance){}
+		break;
+	case strafeLeft:
+	while(getDTEncoderAverage() < distance){}
+	zeroEncoders();
+		break;
+	case strafeRight:
+	while(getDTEncoderAverage() < distance){}
+	zeroEncoders();
+		break;
+	case backwards:
+	while(getDTEncoderAverage() < distance){}
+	zeroEncoders();
+		break;
+	default:
+		setDriveMotors(0);
+
+	}
+}
 
 void pre_auton()
 {
-  // Set bStopTasksBetweenModes to false if you want to keep user created tasks
-  // running between Autonomous and Driver controlled modes. You will need to
-  // manage all user created tasks if set to false.
-  bStopTasksBetweenModes = true;
+	// Set bStopTasksBetweenModes to false if you want to keep user created tasks
+	// running between Autonomous and Driver controlled modes. You will need to
+	// manage all user created tasks if set to false.
+	bStopTasksBetweenModes = true;
 
 	// Set bDisplayCompetitionStatusOnLcd to false if you don't want the LCD
 	// used by the competition include file, for example, you might want
 	// to display your team name on the LCD in this function.
 	// bDisplayCompetitionStatusOnLcd = false;
 
-  // All activities that occur before the competition starts
-  // Example: clearing encoders, setting servo positions, ...
+	// All activities that occur before the competition starts
+	// Example: clearing encoders, setting servo positions, ...
 }
 task FBControl(){
 	//Four Bar Control
-		if(vexRT(Btn5U) == 1 && SensorValue(FBTopLim) == 0){ //move FB up
-			setFBMotors(127);
-		}
-		else if (vexRT(Btn5U) == 1 && SensorValue(FBTopLim) == 1){ //limits FB
-			setFBMotors(0);
-		}
-		else if (vexRT[Btn5D] == 1 && SensorValue(FBBotLim) == 0){ //move FB
-			setFBMotors(-127);
-		}
-		else if (vexRT[Btn5D] == 1 && SensorValue(FBBotLim) == 01){ //limits FB
-			setFBMotors(0);
-		}
-		else {
-			setFBMotors(0);
-		}
+	if(vexRT(Btn5U) == 1 && SensorValue(FBTopLim) == 0){ //move FB up
+		setFBMotors(127);
+	}
+	else if (vexRT(Btn5U) == 1 && SensorValue(FBTopLim) == 1){ //limits FB
+		setFBMotors(0);
+	}
+	else if (vexRT[Btn5D] == 1 && SensorValue(FBBotLim) == 0){ //move FB
+		setFBMotors(-127);
+	}
+	else if (vexRT[Btn5D] == 1 && SensorValue(FBBotLim) == 01){ //limits FB
+		setFBMotors(0);
+	}
+	else {
+		setFBMotors(0);
+	}
 
 }
+
+
 task autonomous()
 {
-  // ..........................................................................
-  // Insert user code here.
-  // ..........................................................................
+	// ..........................................................................
+	// Insert user code here.
+	// ..........................................................................
 
-  // Remove this function call once you have "real" code.
-  AutonomousCodePlaceholderForTesting();
+	// Remove this function call once you have "real" code.
+	AutonomousCodePlaceholderForTesting();
 }
 
 task usercontrol()
 {
-  // User control code here, inside the loop
+	// User control code here, inside the loop
 	startTask(FBControl);
-  while (true)
-  {
+	while (true)
+	{
 		//Drivetrain controls and threshold (15)
 		motor[FL] = (abs(vexRT[Ch3]) > threshold) ? vexRT[Ch3] : 0;
 		motor[BL] = (abs(vexRT[Ch3]) > threshold) ? vexRT[Ch3] : 0;
 		motor[FR] = (abs(vexRT[Ch2]) > threshold) ? vexRT[Ch2] : 0;
 		motor[BR] = (abs(vexRT[Ch2]) > threshold) ? vexRT[Ch2] : 0;
 
-  }
+	}
 }
