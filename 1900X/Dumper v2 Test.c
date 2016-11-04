@@ -1,3 +1,5 @@
+#pragma config(Sensor, dgtl1,  platformDown,   sensorTouch)
+#pragma config(Sensor, dgtl2,  platformLock,   sensorDigitalOut)
 #pragma config(Motor,  port2,           lDriveFront,   tmotorVex393TurboSpeed_MC29, openLoop)
 #pragma config(Motor,  port3,           lDriveBack,    tmotorVex393TurboSpeed_MC29, openLoop)
 #pragma config(Motor,  port4,           leftDump12,    tmotorVex393HighSpeed_MC29, openLoop)
@@ -25,15 +27,60 @@ void setRightDtMotors(int power) {
 	motor[rDriveBack] = power;
 }
 
+task platformLockController() {
+	bool platformLocked = false;
+	int IN = 1;
+	int OUT = 0;
+	while(1) {
+		if(SensorValue[platformLock]) {
+			platformLocked = false;
+		} else {
+			platformLocked = true;
+		}
+
+		if(vexRT[Btn5D]) {
+			setDumpMotors(-127);
+			if(platformLocked)
+			{
+				SensorValue[platformLock] = IN;
+			}
+		} else if(vexRT[Btn5U]) {
+			if(platformLocked) {
+				SensorValue[platformLock] = IN;
+				wait1Msec(200);
+			}
+			setDumpMotors(127);
+
+		} else {
+			setDumpMotors(0);
+		}
+
+		if(SensorValue[platformDown] && !platformLocked && !vexRT[Btn5U]) {
+			SensorValue[platformLock] = OUT;
+		}
+		if(vexRT[Btn6D]) {
+			SensorValue[platformLock] = OUT;
+		} else if(vexRT[Btn6U])
+		{
+			SensorValue[platformLock] = OUT;
+		}
+	}
+}
+
 task main()
 {
+	startTask(platformLockController);
 	int threshold = 15; //for joystick deadzones
+	int compensationPower = 0;
 	while(1) {
-		setDumpMotors(vexRT[Btn6U]*127 - vexRT[Btn6D]*127);
-		if (abs(vexRT[Ch3]) > threshold) { setLeftDtMotors(vexRt[Ch3]); }
-		else { setLeftDtMotors(0); }
-		if (abs(vexRT[Ch2]) > threshold) { setRightDtMotors(vexRt[Ch2]); }
-		else { setRightDtMotors(0); }
+
+		//setDumpMotors(vexRT[Btn6U]*127 - vexRT[Btn6D]*127);
+		if (abs(vexRT[Ch3]) > threshold) {
+			setLeftDtMotors(vexRT[Ch3]);
+		}
+		else { setLeftDtMotors(compensationPower); }
+		if (abs(vexRT[Ch2]) > threshold) { setRightDtMotors(vexRT[Ch2]); }
+		else { setRightDtMotors(compensationPower); }
 	}
 
 
