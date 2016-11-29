@@ -26,10 +26,10 @@ float revolutions = 0;
 float averageEncoderValue = 0;
 
 void zeroEncoders(){ //Zeros Encoders
-	nMotorEncoder[DRFLED1] = 0;
-	nMotorEncoder[DRFRED1] = 0;
-	nMotorEncoder[DRBRED1] = 0;
-	nMotorEncoder[DRBLED1] = 0;
+	SensorValue[DRFLED1] = 0;
+	SensorValue[DRFRED1] = 0;
+	SensorValue[DRBRED1] = 0;
+	SensorValue[DRBLED1] = 0;
 }
 void setFBMotors(int speed){ //automatically sets the four bar power (reduce clutter)
 	motor[RFBT] = speed;
@@ -45,64 +45,99 @@ void setDriveMotors(int FLSpeed, int FRspeed, int BRspeed, int BLspeed){
 	motor[BR] = BRspeed;
 	motor[BL] = BLspeed;
 }
+
+void Break(int direction){
+	if (direction == forward){
+		setDriveMotors(-127,-127,-127,-127);
+		wait10Msec(20);
+	}
+	else {
+		setDriveMotors(127,127,127,127);
+		wait10Msec(20);
+	}
+}
 float getDTEncoderAverage(){
 	averageEncoderValue = (abs(SensorValue(DRFLED1)) + abs(SensorValue(DRFRED1)) + abs(SensorValue(DRBRED1)) + abs(SensorValue(DRBLED1)))/4;
 	return averageEncoderValue;
 }
 void move(int direction, int speed, int distance){
-	revolutions = distance/wheelCircumference;
+	revolutions = 360*(distance/wheelCircumference);
 	switch (direction) {
 
 	case forward:
 		zeroEncoders();
-		while(getDTEncoderAverage() < distance){
+		while(getDTEncoderAverage() < revolutions){
 			setDriveMotors(127,127,127, 127);
+			Break(forward);
 		}
 		break;
 
 	case strafeLeft:
 		zeroEncoders();
-		while(getDTEncoderAverage() < distance){
+		while(getDTEncoderAverage() < revolutions){
 			setDriveMotors(-127, 127, 127, -127);
 		}
 		break;
 
 	case strafeRight:
 		zeroEncoders();
-		while(getDTEncoderAverage() < distance){
+		while(getDTEncoderAverage() < revolutions){
 			setDriveMotors(127, -127, -127, 127);
 		}
 		break;
 
 	case backwards:
 		zeroEncoders();
-		while(getDTEncoderAverage() < distance){
+		while(getDTEncoderAverage() < revolutions){
 			setDriveMotors(-127, -127, -127, -127);
+			Break(backwards);
 		}
 		break;
 
 	default:
 		setDriveMotors(0,0,0,0);
+		zeroEncoders();
 
 	}
-	setDriveMotors(0,0,0,0);
 	zeroEncoders();
 }
-
+void encoderTest(int ticks){
+	zeroEncoders();
+	while(getDTEncoderAverage() < ticks){
+		setDriveMotors(127,127,127, 127);
+	}
+}
 task main()
 {
 	while(true){
 
-	move(forward, 127, 24);
-	while (true) //Start User Control for easy debug)
-	{
-		//Drivetrain controls and threshold (15)
-		//Need to convert ternary statements at some point or another
-		motor[FL] = vexRT[Ch3];
-		motor[BL] = vexRT[Ch3];
-		motor[FR] = vexRT[Ch2];
-		motor[BR] = vexRT[Ch2];
-	}
+
+		while (true) //Start User Control for easy debug)
+		{
+			//Drivetrain controls and threshold (15)
+			//Need to convert ternary statements at some point or another
+			motor[FL] = vexRT[Ch3];
+			motor[BL] = vexRT[Ch3];
+			motor[FR] = vexRT[Ch2];
+			motor[BR] = vexRT[Ch2];
+			//Four-Bar Motor Controls (2 bottom motors on either side are y-cabeled FYI
+			if (vexRT[Btn6U] == 1 && vexRT[Btn6D] == 0){ //UP
+				setFBMotors(127);
+			}
+			else if (vexRT[Btn6U] == 0 && vexRT[Btn6D] == 1){ //DOWN
+				setFBMotors(-127);
+			}
+			else { //IDLE
+				setFBMotors(0);
+			}
+
+			if (vexRT[Btn5U] == 1){
+				move(forward, 127, 24);
+				zeroEncoders();
+				move(backwards, 127, 24);
+				zeroEncoders();
+			}
+		}
 
 	}
 
