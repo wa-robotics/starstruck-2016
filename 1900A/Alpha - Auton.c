@@ -1,14 +1,17 @@
+#pragma config(I2C_Usage, I2C1, i2cSensors)
 #pragma config(Sensor, in1,    AutonSelector,  sensorPotentiometer)
 #pragma config(Sensor, dgtl1,  DRFLED1,        sensorQuadEncoder)
 #pragma config(Sensor, dgtl3,  DRFRED1,        sensorQuadEncoder)
 #pragma config(Sensor, dgtl5,  DRBRED1,        sensorQuadEncoder)
 #pragma config(Sensor, dgtl7,  DRBLED1,        sensorQuadEncoder)
+#pragma config(Sensor, I2C_1,  ,               sensorQuadEncoderOnI2CPort,    , AutoAssign )
+#pragma config(Sensor, I2C_2,  ,               sensorQuadEncoderOnI2CPort,    , AutoAssign )
 #pragma config(Motor,  port2,           FR,            tmotorVex393TurboSpeed_MC29, openLoop, reversed)
 #pragma config(Motor,  port3,           FL,            tmotorVex393TurboSpeed_MC29, openLoop, reversed)
 #pragma config(Motor,  port4,           LFBB,          tmotorVex393HighSpeed_MC29, openLoop, reversed)
-#pragma config(Motor,  port5,           LFBT,          tmotorVex393HighSpeed_MC29, openLoop, reversed)
+#pragma config(Motor,  port5,           LFBT,          tmotorVex393HighSpeed_MC29, openLoop, reversed, encoderPort, I2C_1)
 #pragma config(Motor,  port6,           RFBB,          tmotorVex393HighSpeed_MC29, openLoop)
-#pragma config(Motor,  port7,           RFBT,          tmotorVex393HighSpeed_MC29, openLoop)
+#pragma config(Motor,  port7,           RFBT,          tmotorVex393HighSpeed_MC29, openLoop, encoderPort, I2C_2)
 #pragma config(Motor,  port8,           liftMotors,    tmotorVex393HighSpeed_MC29, openLoop)
 #pragma config(Motor,  port9,           BR,            tmotorVex393TurboSpeed_MC29, openLoop, reversed)
 #pragma config(Motor,  port10,          BL,            tmotorVex393TurboSpeed_HBridge, openLoop)
@@ -16,14 +19,17 @@
 
 //Switch Cases
 const int forward = 1;
-const int strafeRight = 2;
-const int strafeLeft = 3;
+const int turnRight = 2;
+const int turnLeft = 3;
 const int backwards = 4;
+const int up = 5;
+const int down= 6;
 
 //Encoder Variables
 float wheelCircumference = 3.25*PI;
 float revolutions = 0;
 float averageEncoderValue = 0;
+int speedMCounts = 392; //number of counts per rotation for VEX High Speed Motor
 
 void zeroEncoders(){ //Zeros Encoders
 	SensorValue[DRFLED1] = 0;
@@ -39,7 +45,7 @@ void setFBMotors(int speed){ //automatically sets the four bar power (reduce clu
 
 }
 
-void setDriveMotors(int FLSpeed, int FRspeed, int BRspeed, int BLspeed){
+void setDriveMotors(int FLSpeed, int FRspeed, int BRspeed, int BLspeed){ //int FLSpeed, int FRspeed, int BRspeed, int BLspeed
 	motor[FL] = FLspeed;
 	motor[FR] = FRspeed;
 	motor[BR] = BRspeed;
@@ -49,16 +55,41 @@ void setDriveMotors(int FLSpeed, int FRspeed, int BRspeed, int BLspeed){
 void Break(int direction){
 	if (direction == forward){
 		setDriveMotors(-127,-127,-127,-127);
-		wait10Msec(20);
+		wait10Msec(7);
 	}
 	else {
 		setDriveMotors(127,127,127,127);
-		wait10Msec(20);
+		wait10Msec(7);
 	}
 }
 float getDTEncoderAverage(){
 	averageEncoderValue = (abs(SensorValue(DRFLED1)) + abs(SensorValue(DRFRED1)) + abs(SensorValue(DRBRED1)) + abs(SensorValue(DRBLED1)))/4;
 	return averageEncoderValue;
+}
+float getFBEncoderAverage(){
+
+}
+void moveFB(int direction, int degrees){
+	int pinionTeeth = 12;
+	int largeGearTeeth = 84;
+	int percentGearTurned = degrees/360;
+	int lGearTeethUsed = largeGearTeeth*percentGearTurned;
+	int pinionRots = lGearTeethUsed/pinionTeeth;
+	float ticks = pinionRots*speedMCounts;
+	if(direction == up){
+		while(getFBEncoderAverage() < ticks){
+			setFBMotors(127);
+		}
+		if(direction == down){
+			while(getFBEncoderAverage() < ticks){
+				setFBMotors(-127);
+			}
+		}
+		else {
+			setFBMotors(0);
+		}
+
+	}
 }
 void move(int direction, int speed, int distance){
 	revolutions = 360*(distance/wheelCircumference);
@@ -68,18 +99,19 @@ void move(int direction, int speed, int distance){
 		zeroEncoders();
 		while(getDTEncoderAverage() < revolutions){
 			setDriveMotors(127,127,127, 127);
-			Break(forward);
 		}
+		zeroEncoders();
+		Break(forward);
 		break;
 
-	case strafeLeft:
+	case turnLeft: //int FLSpeed, int FRspeed, int BRspeed, int BLspeed
 		zeroEncoders();
 		while(getDTEncoderAverage() < revolutions){
 			setDriveMotors(-127, 127, 127, -127);
 		}
 		break;
 
-	case strafeRight:
+	case turnRight: //int FLSpeed, int FRspeed, int BRspeed, int BLspeed
 		zeroEncoders();
 		while(getDTEncoderAverage() < revolutions){
 			setDriveMotors(127, -127, -127, 127);
@@ -90,8 +122,9 @@ void move(int direction, int speed, int distance){
 		zeroEncoders();
 		while(getDTEncoderAverage() < revolutions){
 			setDriveMotors(-127, -127, -127, -127);
-			Break(backwards);
+
 		}
+		Break(backwards);
 		break;
 
 	default:
@@ -107,40 +140,215 @@ void encoderTest(int ticks){
 		setDriveMotors(127,127,127, 127);
 	}
 }
-task main()
-{
-	while(true){
+void doTheShimmy(){ //release the platform on plays that require that
 
-
-		while (true) //Start User Control for easy debug)
-		{
-			//Drivetrain controls and threshold (15)
-			//Need to convert ternary statements at some point or another
-			motor[FL] = vexRT[Ch3];
-			motor[BL] = vexRT[Ch3];
-			motor[FR] = vexRT[Ch2];
-			motor[BR] = vexRT[Ch2];
-			//Four-Bar Motor Controls (2 bottom motors on either side are y-cabeled FYI
-			if (vexRT[Btn6U] == 1 && vexRT[Btn6D] == 0){ //UP
-				setFBMotors(127);
-			}
-			else if (vexRT[Btn6U] == 0 && vexRT[Btn6D] == 1){ //DOWN
-				setFBMotors(-127);
-			}
-			else { //IDLE
-				setFBMotors(0);
-			}
-
-			if (vexRT[Btn5U] == 1){
-				move(forward, 127, 24);
-				zeroEncoders();
-				move(backwards, 127, 24);
-				zeroEncoders();
-			}
-		}
-
-	}
-
-
+	int shimmyDistance = 1.5;
+	move(forward, 127, shimmyDistance);
+	Break(forward);
+	move(backwards, 127, shimmyDistance);
+	Break(backwards);
+	move(forward, 127, shimmyDistance);
+	Break(forward);
+	move(backwards, 127, shimmyDistance);
+	Break(backwards);
+	move(forward, 127, shimmyDistance);
+	Break(forward);
+	move(backwards, 127, shimmyDistance);
+	Break(backwards);
+	move(forward, 127, shimmyDistance);
+	Break(forward);
+	move(backwards, 127, shimmyDistance);
+	Break(backwards);
 
 }
+//Auton Selector Wizard
+int getPTVal(){
+	int sectorRange = 260/7; //Sector 1 would range between 0 and 37.14 degrees
+	float PTVal = SensorValue(AutonSelector);
+	float sectorID = PTVal / sectorRange;
+
+	if (sectorID >= 0 && sectorID <1){ //Left Fence Play
+		sectorID = 0;
+	}
+	else if (sectorID >= 1 && sectorID <2){//Right Fence Play
+		sectorID =  1;
+	}
+	else if (sectorID >= 2 && sectorID <3){//Left Star Play
+		sectorID =  2;
+	}
+	else if (sectorID >= 3 && sectorID <4){//Right Star Play
+		sectorID =  3;
+	}
+	else if (sectorID >= 4 && sectorID <5){//Left Cube Play
+		sectorID =  4;
+	}
+	else if (sectorID >= 5 && sectorID <6){//Right Cube Play
+		sectorID =  5;
+	}
+	else if (sectorID >= 6 && sectorID <7){ //skills play
+		sectorID =  6;
+	}
+	return sectorID;
+}
+	/*------------------------------------------------------------------------
+
+	Autonomous Play #1 - Fence
+
+	Play-by-Play
+
+	Pre-Match
+	1. Place robot FORWARD FACING
+	2. Set dial to LFen or RFen to run playImmediateTone
+
+	(A) Left Field
+
+	1. Rotate four-bar 80 degrees up (positive speed value)
+	2. Move forward 40 inches (give or take) which knocks off two stars (+2 points)
+	3. Move backwards 3.25 inches (1 wheel rotation)
+	4. Rotate 90 degrees clockwise
+	5. Move forward 15 inches and knock off 1-2 more stars
+	6. Stop
+
+	(B) Right Field
+
+	1. Rotate four-bar 80 degrees up (positive speed value)
+	2. Move forward 40 inches (give or take) which knocks off two stars (+2 points)
+	3. Move backwards 3.25 inches (1 wheel rotation)
+	4. Rotate 90 degrees counterclockwise
+	5. Move forward 15 inches and knock off 1-2 more stars
+	6. Stop
+
+	Total Points: 2
+	------------------------------------------------------------------------*/
+
+
+	/*------------------------------------------------------------------------
+
+	Autonomous Play #2 - Scoring Stars in the Far Zone
+
+	Pre-Match
+	1. Place robot facing right (left field) or left (right field)
+	2. Set dial to LStar or RStar to run playImmediateTone
+
+	(A) Left Field
+
+	1. Move backwards 12 inches
+	2. Do the shimmy to lower platform
+	3. Move forward 36 inches
+	4. Lift platform 30 degree or until stars clear the fence (+6 pts)
+	5. Move backward 36" (to clear cube)
+	6. Rotate 90 degrees clockwise
+	7. Move backwards roughly 38 inches
+	9. Lower platform 30 degrees then rotate 90 deg up to score in far zone (+6 pts)
+
+	(B) Right Field
+
+	1. Move backwards 12 inches
+	2. Do the shimmy to lower platform
+	3. Move forward 36 inches
+	4. Lift platform 30 degree or until stars clear the fence (+6 pts)
+	5. Move backward 36" (to clear cube)
+	6. Rotate 90 degrees counterclockwise
+	7. Move backwards roughly 38 inches
+	9. Lower platform 30 degrees then rotate 90 deg up to score in far zone (+6 pts)
+
+	Total Points: 12
+	------------------------------------------------------------------------*/
+
+
+	/*------------------------------------------------------------------------
+
+	Autonomous Play #3 - Scoring Stars and Cubes in the Far Zone
+
+	Pre-Match
+	1. Place robot facing right (left field) or left (right field)
+	2. Set dial to LCube or RCube to run playImmediateTone
+
+	(A) Left Field
+
+	1. Move backwards 12 inches
+	2. Do the shimmy to lower platform
+	3. Move forward 36 inches
+	4. Lift platform 30 degree or until stars clear the fence (+6 pts)
+	5. Move backward 36" (to clear cube)
+	6. Rotate 90 degrees clockwise
+	7. Move backwards roughly 38 inches
+	9. Lower platform 30 degrees then rotate 90 deg up to score in far zone (+6 pts)
+	10. Lower platform 60 degrees
+	11. Rotate 45 degrees clockwise
+	12. Move forward 30" or until in line with the cube
+	12. Rotate 135 degree counter-clockwise
+	13. Lower platform 30 degrees, or until resting on ground
+	14. Move forward to pick up cube
+	15. Move platform up 20 degrees, slowly (+2 pts)
+	16. Rotate 90 degrees clockwise, slowly
+	17. Move forward 25" or so
+	18. Lower platform 20 degrees, then rotate up quickly 90 degrees to score (+4 pts)
+
+	(B) Right Field
+
+	1. Move backwards 12 inches
+	2. Do the shimmy to lower platform
+	3. Move forward 36 inches
+	4. Lift platform 30 degree or until stars clear the fence (+6 pts)
+	5. Move backward 36" (to clear cube)
+	6. Rotate 90 degrees counterclockwise
+	7. Move backwards roughly 38 inches
+	9. Lower platform 30 degrees then rotate 90 deg up to score in far zone (+6 pts)
+	10. Lower platform 60 degrees
+	11. Rotate 45 degrees counter-clockwise
+	12. Move forward 30" or until in line with the cube
+	12. Rotate 135 degree clockwise
+	13. Lower platform 30 degrees, or until resting on ground
+	14. Move forward to pick up cube
+	15. Move platform up 20 degrees, slowly (+2 pts)
+	16. Rotate 90 degrees counter-clockwise, slowly
+	17. Move forward 25" or so
+	18. Lower platform 20 degrees, then rotate up quickly 90 degrees to score (+4 pts)
+
+	Total Points: 18
+	------------------------------------------------------------------------*/
+
+	task main()
+	{
+		/*Auton Switching Wizard
+		switch getPTVal(){
+		case 0:
+
+		break;
+		case 1:
+
+		break;
+		case 2:
+
+		break;
+		case 3:
+
+		break;
+		case 4:
+
+		break;
+		case 5:
+
+		break;
+		case 6:
+
+		break;
+
+		default:
+		setDriveMotors(0,0,0,0);
+		}
+
+		*/
+
+		/*move(backwards, 50, 18);
+		doTheShimmy();
+		move(forward, 50, 48);*/
+		move(forward, 50, 6.5);
+		setFBMotors(127);
+		wait1Msec(100);
+		move(forward, 50, 39);
+
+
+
+	}
