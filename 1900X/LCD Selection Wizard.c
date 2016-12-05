@@ -1,11 +1,5 @@
-
-
-typedef struct LcdResponse {
-	string startingTile;
-	int waitTime;
-} LcdResponse;
-
-LcdResponse autonChoices;
+string startingTile = "";
+int waitTime = -1;
 
 void waitForPress() {
 	while(nLCDButtons == 0) {
@@ -42,7 +36,7 @@ task lcdSelection()
 	clearLCDLine(1);
 
 	displayLCDCenteredString(0,"Starting tile:");
-	displayLCDCenteredString(1,"Left  Sk.  Right");
+	displayLCDCenteredString(1,"Stars  Sk.  Fence");
 	waitForPress();
 	int startingTileBtn = nLCDButtons;
 	waitForRelease();
@@ -54,31 +48,31 @@ task lcdSelection()
 
 	switch (startingTileBtn) {
 		case 1:
-			autonChoices.startingTile = "left";
+			startingTile = "stars";
 			break;
 		case 2:
-			autonChoices.startingTile = "programmingSkills";
+			startingTile = "programmingSkills";
 			break;
-		case 3:
-			autonChoices.startingTile = "right";
+		case 4:
+			startingTile = "fence";
 			break;
 	}
 
 	switch (waitTimeBtn) {
 		case 1:
-			autonChoices.waitTime = 0;
+			waitTime = 0;
 			break;
 		case 2:
-			autonChoices.waitTime = 1;
+			waitTime = 1;
 			break;
-		case 3:
-			autonChoices.waitTime = 3;
+		case 4:
+			waitTime = 3;
 			break;
 	}
 
-	displayLCDString(0,0,autonChoices.startingTile);
+	displayLCDString(0,0,startingTile);
 	displayLCDString(0,6,"wait");
-	displayLCDNumber(0,11,autonChoices.waitTime);
+	displayLCDNumber(0,12,waitTime);
 	displayLCDCenteredString(1,"selected");
 
 }

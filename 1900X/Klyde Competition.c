@@ -367,15 +367,15 @@ task autonomous()
 {
 	catapultInit(); //make sure we can use the catapult	in any autonomous play
 
-	if (autonChoices.waitTime > 0) {
-		wait1Msec(autonChoices.waitTime*1000);
+	if (waitTime > 0) {
+		wait1Msec(waitTime*1000);
 	}
 
-	if (autonChoices.startingTile == "left") {
-			startTask(autonFenceLeft);
-	} else if (autonChoices.startingTile == "right") {
+	if (startingTile == "stars") {
 		startTask(autonFenceLeft);
-	} else if (autonChoices.startingTile == "programmingSkills") {
+	} else if (startingTile == "fence") {
+		startTask(autonKnockStars);
+	} else if (startingTile == "programmingSkills") {
 		startTask(autonSkills);
 	}
 
@@ -411,11 +411,13 @@ task driverDump()
 		}
 		else if(vexRT[Btn5U])
 		{
-			setDrumMotors(127);
 			if(platformLocked)
 			{
 				sensorValue[platformLock] = 1;
 			}
+			//wait1Msec(150); //give time for platform to release
+			setDrumMotors(127);
+
 		}
 		else
 		{
@@ -435,7 +437,7 @@ task driverDump()
 		}
 	}
 }
-const bool DEBUG_AUTON = true;
+const bool DEBUG_AUTON = false;
 
 task usercontrol()
 {
@@ -448,8 +450,8 @@ task usercontrol()
 	//setDrumMotors(0);
 	if (DEBUG_AUTON) {
 		//to select the play
-		autonChoices.waitTime = 0; //time in seconds, so 0,1,3 are values supported by LCD selection wizard
-		autonChoices.startingTile = "left";
+		waitTime = 0; //time in seconds, so 0,1,3 are values supported by LCD selection wizard
+		startingTile = "stars";
 		startTask(autonomous);
 		stopTask(usercontrol);
 	}

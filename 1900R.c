@@ -55,17 +55,17 @@ void moveForward(float rotations)
 		motor[DRB] = 127;
 	}
 	stopMotors();
-	
 
-	
+
+
 }
 
 task drive() //drive train controler comands
 {
-	motor[DLF] = vexRT[Ch3];
-	motor[DLB] = vexRT[Ch3];
-	motor[DRF] = vexRT[Ch2];
-	motor[DRB] = vexRT[Ch2];
+	motor[DLF] = vexRT[Ch3]/2;
+	motor[DLB] = vexRT[Ch3]/2;
+	motor[DRF] = vexRT[Ch2]/2;
+	motor[DRB] = vexRT[Ch2]/2;
 }
 
 task arm()//arm controler comands: raise arm
@@ -144,6 +144,7 @@ void pre_auton()
 
 task autonomous()
 {
+	/*
   wait1Msec(2000);
 
   int lowerarm; //Varables
@@ -152,7 +153,7 @@ task autonomous()
   lowerarm = 720;
   armhit = 400;
   distance = 650;
-  
+
   moveForward(1.1);
   stopMotors();
   wait1Msec(2000);
@@ -164,9 +165,9 @@ task autonomous()
 			motor[AR2] = -127;
 			motor[AR0] = -127;
 			motor[AL0] = -127;
-			
+
 		}
-	stopMotors();
+	stopMotors();*/
 }
 
 /*---------------------------------------------------------------------------*/
@@ -181,13 +182,13 @@ task autonomous()
 
 task usercontrol()
 {
-	
+
 
   // User control code here, inside the loop
 	while(1)
 	{
 		startTask (drive);
 		startTask (arm);
-	
+
 	}
 }

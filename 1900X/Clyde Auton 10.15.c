@@ -238,8 +238,21 @@ void strafeNoStraightening(int frontPower, int backPower, int encoderCounts, int
 	}
 }
 
+task dumpAutonSkills() {
+		setDrumMotors(127);
+		wait1Msec(700);
+		setDrumMotors(0);
+		wait1Msec(125);
+		setDrumMotors(-127);
+		while (!SensorValue[platformDown]) {
+			wait1Msec(25);
+		}
+		setDrumMotors(0);
+}
+
 task autonSkills()
 {
+	/*
 	driveDistance(-100,650,STRAIGHT);
 	driveDistance(-127,250,STRAIGHT); //500 drop the platform
 	driveDistance(127,190,STRAIGHT);
@@ -258,6 +271,25 @@ task autonSkills()
 	driveDistance(100,1000,STRAFE_LEFT);
 	driveDistance(127,300,STRAIGHT);
 	driveDistance(100,1375,STRAFE_LEFT);
+	*/
+
+	//drop the platform
+	driveDistance(-127,500,STRAIGHT);
+	driveDistance(127,260,STRAIGHT);
+
+	for (int i = 1; i <= 4; i++) {
+		wait1Msec(2000); //2 seconds to load
+
+		startTask(dumpAutonSkills); //start dumping
+		driveDistance(-127,1500,STRAIGHT); //start driving back
+
+		while (!SensorValue[platformDown]) { //don't continue until the platform is down
+			wait1Msec(25);
+		}
+
+		driveDistance(127,1500,STRAIGHT); //drive back to tile
+	}
+
 }
 task autonFenceLeft()
 {
@@ -287,7 +319,7 @@ task autonFenceLeft()
 	driveDistance(100,1500,STRAIGHT); //collect the 4 stars
 	wait1Msec(500);
 	setDrumMotors(127);
-	wait10Msec(50);
+	wait10Msec(30);
 	setDrumMotors(0);
 	wait10Msec(50);
 	driveDistance(-100,1100,STRAIGHT);
@@ -325,4 +357,19 @@ task autonFenceLeft()
 
 	//wait10Msec(50);
 	//fireCatapult();*/
+}
+
+task autonKnockStars() {
+	driveDistance(127,260,STRAIGHT);
+	driveDistance(-127,260,STRAIGHT);
+	sensorValue[platformLock] = 1;
+	wait1Msec(500);
+	setDrumMotors(127);
+	wait10Msec(70);
+	setDrumMotors(0);
+	driveDistance(127,1500,STRAIGHT);
+	wait1Msec(500);
+	driveDistance(125,500,STRAFE_RIGHT);
+	wait1Msec(500);
+	driveDistance(125,800,STRAFE_LEFT);
 }
