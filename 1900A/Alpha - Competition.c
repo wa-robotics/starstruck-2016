@@ -142,14 +142,15 @@ task FBControl(){ //task for the Four-Bar control
 }
 task liftControl (){//task for the lift control
 	while(true){
-	if(vexRT[Btn5U] == 1 && vexRT[Btn5D] == 0){
-		setLiftMotors(127);
-	}
-	else if (vexRT[Btn5U] == 0 && vexRT[Btn5D] == 1){
-		setLiftMotors(-127);
-	}
-	else {
-		setLiftMotors(10);
+		if(vexRT[Btn5U] == 1 && vexRT[Btn5D] == 0){
+			setLiftMotors(127);
+		}
+		else if (vexRT[Btn5U] == 0 && vexRT[Btn5D] == 1){
+			setLiftMotors(-127);
+		}
+		else {
+			setLiftMotors(10);
+		}
 	}
 }
 task usercontrol()
