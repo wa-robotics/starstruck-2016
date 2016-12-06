@@ -80,6 +80,8 @@ task platformLockController() {
 			}
 			setDumpMotors(127);
 
+		} else if (!platformDown) { //compensation power when lift is up
+			setDumpMotors(-12);
 		} else {
 			setDumpMotors(0);
 		}
@@ -87,24 +89,110 @@ task platformLockController() {
 		if(SensorValue[platformDown] && !platformLocked && !vexRT[Btn5U]) {
 			SensorValue[platformLock] = OUT;
 		}
-		if(vexRT[Btn6D]) {
+		if(vexRT[Btn8D]) {
 			SensorValue[platformLock] = OUT;
-		} else if(vexRT[Btn6U])
+		} else if(vexRT[Btn8U])
 		{
-			SensorValue[platformLock] = OUT;
+			SensorValue[platformLock] = IN;
 		}
 	}
 }
 
 #include "Dumper v2 Auton.c"
 
+task autonomous() {
+
+}
+
 task usercontrol()
 {
+	sensorValue[hangLock] = 0;
+	//sensorValue[platformLock] = 1;
+	//setDumpMotors(40)
+	//wait10Msec(5);
+	//setDumpMotors(0);
+	sensorValue[rDriveEnc] = 0;
+	wait10Msec(50);
+	while(sensorValue[rDriveEnc] > -2100)
+	{
+		setRightDtMotors(-75);
+		setLeftDtMotors(-75);
+	}
+	//setDumpMotors(-50);
+	//wait10Msec(18);
+	//setDumpMotors(0);
+	while(sensorValue[rDriveEnc] > -2775)
+	{
+		setLeftDtMotors(-124.5);
+		setRightDtMotors(-26.5);
+	}
+	setLeftDtMotors(0);
+	setRightDtMotors(0);
+	//start play 2
+	wait10Msec(50);
+	while(sensorValue[rDriveEnc] < -2275)
+	{
+		setLeftDtMotors(85);
+		setRightDtMotors(85);
+	}
+	setLeftDtMotors(0);
+	setRightDtMotors(0);
+	wait10Msec(50);
+	SensorValue[rDriveEnc] = 0;
+	while(sensorValue[rDriveEnc] > -350)
+	{
+		setLeftDtMotors(85);
+		setRightDtMotors(-85);
+	}
+	setLeftDtMotors(0);
+	setRightDtMotors(0);
+	wait10Msec(50);
+	SensorValue[rDriveEnc] = 0;
+	while(sensorValue[rDriveEnc] < 1300)
+	{
+		setLeftDtMotors(85);
+		setRightDtMotors(85);
+	}
+	setLeftDtMotors(0);
+	setRightDtMotors(0);
+	SensorValue[platformLock] = 1;
+	wait10Msec(34);
+	setDumpMotors(18);
+	wait10Msec(25);
+	setDumpMotors(-12);
+	SensorValue[rDriveEnc] = 0;
+	wait10Msec(50);
+	while(sensorValue[rDriveEnc] < 600)
+	{
+		setLeftDtMotors(-60);
+		setRightDtMotors(60);
+	}
+	setLeftDtMotors(0);
+	setRightDtMotors(0);
+	wait10Msec(50);
+	SensorValue[rDriveEnc] = 0;
+	while(sensorValue[rDriveEnc] > -230)
+	{
+		setLeftDtMotors(-60);
+		setRightDtMotors(-60);
+	}
+	setLeftDtMotors(0);
+	setRightDtMotors(0);
+	setDumpMotors(100);
+	wait10Msec(50);
+	setDumpMotors(0);
 	startTask(platformLockController);
 	int threshold = 15; //for joystick deadzones
 	int compensationPower = 0;
 	while(1) {
-
+		if(vexRT[Btn6U])
+		{
+			SensorValue[hangLock] = 1;
+		}
+		else if(vexRT[Btn6D])
+		{
+			SensorValue[hangLock] = 0;
+		}
 		//setDumpMotors(vexRT[Btn6U]*127 - vexRT[Btn6D]*127);
 		if (abs(vexRT[Ch3]) > threshold) {
 			setLeftDtMotors(vexRT[Ch3]);
@@ -113,5 +201,4 @@ task usercontrol()
 		if (abs(vexRT[Ch2]) > threshold) { setRightDtMotors(vexRT[Ch2]); }
 		else { setRightDtMotors(compensationPower); }
 	}
-
 }
