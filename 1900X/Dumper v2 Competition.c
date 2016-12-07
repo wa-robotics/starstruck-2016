@@ -82,7 +82,7 @@ task platformLockController() {
 			setDumpMotors(127);
 
 		} else if (!platformDown) { //compensation power when lift is up
-			setDumpMotors(-16);
+			setDumpMotors(-20);
 		} else {
 			setDumpMotors(0);
 		}
@@ -115,11 +115,50 @@ task autonomous() {
 
 }
 
+task drivetrainController() {
+	int lYRequested,
+			rYRequested,
+			lYLastSent = 0,
+			rYLastSent = 0,
+			lY,
+			rY,
+			slewRateLimit = 15,
+			threshold = 15;
+	while(true) {
+		lYRequested = vexRT[Ch3];
+		rYRequested = vexRT[Ch2];
+		if (abs(lYRequested - lYLastSent) > slewRateLimit) { //if the new power requested is greater than the slew rate limit
+			if (lYRequested > lYLastSent) {
+				lY += slewRateLimit; //only increase the power by the max allowed by the slew rate
+			} else {
+				lY -= slewRateLimit; //only decrease the power by the max allowed by the slew rate
+			}
+		} else {
+			lY = (lYRequested == 0) ? 0 : lY;
+		}
+		lYLastSent = lY;
+		if (abs(rYRequested - rYLastSent) > slewRateLimit) {
+			if (rYRequested > rYLastSent) {
+				rY += slewRateLimit;
+			} else {
+				rY -= slewRateLimit;
+			}
+		} else {
+			rY = (rYRequested == 0) ? 0 : rY;
+		}
+		rYLastSent = rY;
+		motor[lDriveFront] = (abs(lY) > threshold) ? lY : 0;
+		motor[lDriveBack] = (abs(lY) > threshold) ? lY : 0;
+		motor[rDriveFront] = (abs(rY) > threshold) ? rY : 0;
+		motor[rDriveBack] = (abs(rY) > threshold) ? rY : 0;
+		wait1Msec(15);
+	}
+}
+
 task usercontrol()
 {
 	startTask(platformLockController);
-	int threshold = 15; //for joystick deadzones
-	int compensationPower = 0;
+	startTask(drivetrainController);
 	while(1) {
 		if(vexRT[Btn6U])
 		{
@@ -129,12 +168,5 @@ task usercontrol()
 		{
 			SensorValue[hangLock] = 0;
 		}
-		//setDumpMotors(vexRT[Btn6U]*127 - vexRT[Btn6D]*127);
-		if (abs(vexRT[Ch3]) > threshold) {
-			setLeftDtMotors(vexRT[Ch3]);
-		}
-		else { setLeftDtMotors(compensationPower); }
-		if (abs(vexRT[Ch2]) > threshold) { setRightDtMotors(vexRT[Ch2]); }
-		else { setRightDtMotors(compensationPower); }
 	}
 }
