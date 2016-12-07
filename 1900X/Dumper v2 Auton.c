@@ -144,11 +144,106 @@ task autonSkills()
 
 }
 
-task autonFenceLeft()
+task autonKnockStarsRight() //go to the fence and knock 3 stars off
 {
-
+	SensorValue[hangLock] = 0;
+	//sensorValue[platformLock] = 1;
+	//setDumpMotors(40)
+	//wait10Msec(5);
+	//setDumpMotors(0);
+	SensorValue[rDriveEnc] = 0;
+	wait10Msec(50);
+	while(SensorValue[rDriveEnc] > -2100)
+	{
+		setRightDtMotors(-75);
+		setLeftDtMotors(-75);
+	}
+	//setDumpMotors(-50);
+	//wait10Msec(18);
+	//setDumpMotors(0);
+	while(SensorValue[rDriveEnc] > -2775)
+	{
+		setLeftDtMotors(-124.5);
+		setRightDtMotors(-26.5);
+	}
+	setLeftDtMotors(0);
+	setRightDtMotors(0);
 }
 
-task autonKnockStars() {
-
+task autonStarsCubeRight() { //knock the stars off the fence (play 1 code same as autonKnockStarsRight), then pick up cube and score it
+	SensorValue[hangLock] = 0;
+	//sensorValue[platformLock] = 1;
+	//setDumpMotors(40)
+	//wait10Msec(5);
+	//setDumpMotors(0);
+	SensorValue[rDriveEnc] = 0;
+	wait10Msec(50);
+	while(SensorValue[rDriveEnc] > -2100)
+	{
+		setRightDtMotors(-75);
+		setLeftDtMotors(-75);
+	}
+	//setDumpMotors(-50);
+	//wait10Msec(18);
+	//setDumpMotors(0);
+	while(SensorValue[rDriveEnc] > -2775)
+	{
+		setLeftDtMotors(-124.5);
+		setRightDtMotors(-26.5);
+	}
+	setLeftDtMotors(0);
+	setRightDtMotors(0);
+	//start play 2
+	wait10Msec(50);
+	while(SensorValue[rDriveEnc] < -2275)
+	{
+		setLeftDtMotors(85);
+		setRightDtMotors(85);
+	}
+	setLeftDtMotors(0);
+	setRightDtMotors(0);
+	wait10Msec(50);
+	SensorValue[rDriveEnc] = 0;
+	while(SensorValue[rDriveEnc] > -350)
+	{
+		setLeftDtMotors(85);
+		setRightDtMotors(-85);
+	}
+	setLeftDtMotors(0);
+	setRightDtMotors(0);
+	wait10Msec(50);
+	SensorValue[rDriveEnc] = 0;
+	while(SensorValue[rDriveEnc] < 1300)
+	{
+		setLeftDtMotors(85);
+		setRightDtMotors(85);
+	}
+	setLeftDtMotors(0);
+	setRightDtMotors(0);
+	SensorValue[platformLock] = 1;
+	wait10Msec(34);
+	setDumpMotors(18);
+	wait10Msec(25);
+	setDumpMotors(-12);
+	SensorValue[rDriveEnc] = 0;
+	wait10Msec(50);
+	while(SensorValue[rDriveEnc] < 600)
+	{
+		setLeftDtMotors(-60);
+		setRightDtMotors(60);
+	}
+	setLeftDtMotors(0);
+	setRightDtMotors(0);
+	wait10Msec(50);
+	SensorValue[rDriveEnc] = 0;
+	while(SensorValue[rDriveEnc] > -230)
+	{
+		setLeftDtMotors(-60);
+		setRightDtMotors(-60);
+	}
+	setLeftDtMotors(0);
+	setRightDtMotors(0);
+	setDumpMotors(100);
+	wait10Msec(50);
+	setDumpMotors(0);
 }

@@ -1,4 +1,5 @@
 #pragma config(Sensor, in1,    catPot,         sensorPotentiometer)
+#pragma config(Sensor, in2,    autonSelectPot, sensorPotentiometer)
 #pragma config(Sensor, dgtl1,  hangLock,       sensorDigitalOut)
 #pragma config(Sensor, dgtl2,  platformLock,   sensorDigitalOut)
 #pragma config(Sensor, dgtl3,  rDriveEnc,      sensorQuadEncoder)
@@ -101,86 +102,21 @@ task platformLockController() {
 #include "Dumper v2 Auton.c"
 
 task autonomous() {
+	const int AUTON_STARS_CUBE_RIGHT = 2000,
+						AUTON_STARS_RIGHT = 0;
+
+	int autonSelection = SensorValue[autonSelectPot];
+
+	if (autonSelection >= AUTON_STARS_CUBE_RIGHT) {
+		startTask(autonStarsCubeRight);
+	} else if (autonSelection >= AUTON_STARS_RIGHT) {
+		startTask(autonKnockStarsRight);
+	}
 
 }
 
 task usercontrol()
 {
-	sensorValue[hangLock] = 0;
-	//sensorValue[platformLock] = 1;
-	//setDumpMotors(40)
-	//wait10Msec(5);
-	//setDumpMotors(0);
-	sensorValue[rDriveEnc] = 0;
-	wait10Msec(50);
-	while(sensorValue[rDriveEnc] > -2100)
-	{
-		setRightDtMotors(-75);
-		setLeftDtMotors(-75);
-	}
-	//setDumpMotors(-50);
-	//wait10Msec(18);
-	//setDumpMotors(0);
-	while(sensorValue[rDriveEnc] > -2775)
-	{
-		setLeftDtMotors(-124.5);
-		setRightDtMotors(-26.5);
-	}
-	setLeftDtMotors(0);
-	setRightDtMotors(0);
-	//start play 2
-	wait10Msec(50);
-	while(sensorValue[rDriveEnc] < -2275)
-	{
-		setLeftDtMotors(85);
-		setRightDtMotors(85);
-	}
-	setLeftDtMotors(0);
-	setRightDtMotors(0);
-	wait10Msec(50);
-	SensorValue[rDriveEnc] = 0;
-	while(sensorValue[rDriveEnc] > -350)
-	{
-		setLeftDtMotors(85);
-		setRightDtMotors(-85);
-	}
-	setLeftDtMotors(0);
-	setRightDtMotors(0);
-	wait10Msec(50);
-	SensorValue[rDriveEnc] = 0;
-	while(sensorValue[rDriveEnc] < 1300)
-	{
-		setLeftDtMotors(85);
-		setRightDtMotors(85);
-	}
-	setLeftDtMotors(0);
-	setRightDtMotors(0);
-	SensorValue[platformLock] = 1;
-	wait10Msec(34);
-	setDumpMotors(18);
-	wait10Msec(25);
-	setDumpMotors(-12);
-	SensorValue[rDriveEnc] = 0;
-	wait10Msec(50);
-	while(sensorValue[rDriveEnc] < 600)
-	{
-		setLeftDtMotors(-60);
-		setRightDtMotors(60);
-	}
-	setLeftDtMotors(0);
-	setRightDtMotors(0);
-	wait10Msec(50);
-	SensorValue[rDriveEnc] = 0;
-	while(sensorValue[rDriveEnc] > -230)
-	{
-		setLeftDtMotors(-60);
-		setRightDtMotors(-60);
-	}
-	setLeftDtMotors(0);
-	setRightDtMotors(0);
-	setDumpMotors(100);
-	wait10Msec(50);
-	setDumpMotors(0);
 	startTask(platformLockController);
 	int threshold = 15; //for joystick deadzones
 	int compensationPower = 0;
