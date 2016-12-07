@@ -236,7 +236,7 @@ task autonStarsCubeRight() { //knock the stars off the fence (play 1 code same a
 	setRightDtMotors(0);
 	wait10Msec(50);
 	SensorValue[rDriveEnc] = 0;
-	while(SensorValue[rDriveEnc] > -230)
+	while(SensorValue[rDriveEnc] > -242)
 	{
 		setLeftDtMotors(-60);
 		setRightDtMotors(-60);
