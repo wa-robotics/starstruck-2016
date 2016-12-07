@@ -82,7 +82,7 @@ task platformLockController() {
 			setDumpMotors(127);
 
 		} else if (!platformDown) { //compensation power when lift is up
-			setDumpMotors(-12);
+			setDumpMotors(-16);
 		} else {
 			setDumpMotors(0);
 		}
