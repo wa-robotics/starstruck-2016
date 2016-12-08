@@ -4,6 +4,7 @@
 #pragma config(Sensor, dgtl3,  DRFRED1,        sensorQuadEncoder)
 #pragma config(Sensor, dgtl5,  DRBRED1,        sensorQuadEncoder)
 #pragma config(Sensor, dgtl7,  DRBLED1,        sensorQuadEncoder)
+#pragma config(Sensor, dgtl9,  plfmStop,       sensorTouch)
 #pragma config(Sensor, I2C_1,  ,               sensorQuadEncoderOnI2CPort,    , AutoAssign )
 #pragma config(Sensor, I2C_2,  ,               sensorQuadEncoderOnI2CPort,    , AutoAssign )
 #pragma config(Motor,  port1,           LLM,           tmotorVex393HighSpeed_HBridge, openLoop, reversed)
@@ -27,80 +28,281 @@
 //Main competition background code...do not modify!
 #include "..\Vex_Competition_Includes.c"
 
-int threshold = 15;
+void setLiftMotors(int speed){
+	motor[LLM] = speed;
+	motor[RLM] = speed;
+}
+
+//Switch Cases
 const int forward = 1;
-const int strafeRight = 2;
-const int strafeLeft = 3;
+const int turnRight = 2;
+const int turnLeft = 3;
 const int backwards = 4;
+const int up = 5;
+const int down= 6;
+
+const int wt =950;
+const int fbs = 40;
+const	float tsp = 80;
+const	int fbbs = 20;
+
+//Encoder Variables
 float wheelCircumference = 3.25*PI;
 float revolutions = 0;
 float averageEncoderValue = 0;
+int speedMCounts = 392; //number of counts per rotation for VEX High Speed Motor
 
-void zeroEncoders(){
-	nMotorEncoder[DRFLED1] = 0;
-	nMotorEncoder[DRFRED1] = 0;
-	nMotorEncoder[DRBRED1] = 0;
-	nMotorEncoder[DRBLED1] = 0;
+void zeroEncoders(){ //Zeros Encoders
+	SensorValue[DRFLED1] = 0;
+	SensorValue[DRFRED1] = 0;
+	SensorValue[DRBRED1] = 0;
+	SensorValue[DRBLED1] = 0;
+	nMotorEncoder(LFBT) = 0;
+	nMotorEncoder(RFBT) = 0;
 }
 void setFBMotors(int speed){ //automatically sets the four bar power (reduce clutter)
-	motor[LFBB] = speed;
-	motor[LFBT] = speed;
 	motor[RFBT] = speed;
 	motor[RFBB] = speed;
+	motor[LFBT] = speed;
+	motor[LFBB] = speed;
 
 }
-void setDriveMotors(int FLSpeed, int FRspeed, int BRspeed, int BLspeed){
+
+void setDriveMotors(int FLSpeed, int FRspeed, int BRspeed, int BLspeed){ //int FLSpeed, int FRspeed, int BRspeed, int BLspeed
 	motor[FL] = FLspeed;
 	motor[FR] = FRspeed;
 	motor[BR] = BRspeed;
 	motor[BL] = BLspeed;
 }
-void setLiftMotors(int speed){
-	motor[LLM] = speed;
-	motor[RLM] = speed;
+
+void Break(int direction){
+	switch (direction) {
+	case forward:
+		setDriveMotors(-127,-127,-127,-127);
+		wait10Msec(7);
+		break;
+
+	case turnLeft:
+		setDriveMotors(127, -127, -127, 127);
+		wait10Msec(7);
+		break;
+
+	case turnRight:
+		setDriveMotors(-127, 127, 127, -127);
+		wait10Msec(7);
+		break;
+
+	case backwards:
+		setDriveMotors(127,127,127,127);
+		wait10Msec(7);
+		break;
+
+	default:
+		setDriveMotors(0,0,0,0);
+	}
 }
 float getDTEncoderAverage(){
 	averageEncoderValue = (abs(SensorValue(DRFLED1)) + abs(SensorValue(DRFRED1)) + abs(SensorValue(DRBRED1)) + abs(SensorValue(DRBLED1)))/4;
 	return averageEncoderValue;
 }
-void move(int direction, int speed, int distance){
-	revolutions = distance/wheelCircumference;
+float getFBEncoderAverage(){
+	float average = (abs(nMotorEncoder[LFBT]) + abs(nMotorEncoder[RFBT])) / 2;
+	return average;
+}
+void moveFB(int direction, int ticks, int speed){
+	zeroEncoders();
+	float wt = 2;
+	if(direction == up){
+		while(getFBEncoderAverage() < ticks){
+			if (getFBEncoderAverage() == ticks - 100 && speed != 127){
+				setFBMotors(speed - 20);
+			}
+			else {
+				setFBMotors(speed);
+			}
+		}
+		setFBMotors(-127);
+		wait10Msec(wt);
+	}
+	else if(direction == down){
+		while(getFBEncoderAverage() < ticks){
+			if (getFBEncoderAverage() == ticks - 100){
+				setFBMotors(speed + 20);
+			}
+			else {
+				setFBMotors(-speed);
+			}
+
+		}
+		setFBMotors(127);
+		wait10Msec(wt);
+	}
+	else {
+		setFBMotors(0);
+	}
+}
+void move(int direction, int speed, int distance, int FBbreakspd){
+	revolutions = 360*(distance/wheelCircumference);
 	switch (direction) {
 
 	case forward:
 		zeroEncoders();
-		while(getDTEncoderAverage() < distance){
+		while(getDTEncoderAverage() < revolutions){
 			setDriveMotors(127,127,127, 127);
+			setFBMotors(FBbreakspd);
 		}
+		zeroEncoders();
+		Break(forward);
 		break;
 
-	case strafeLeft:
+	case turnLeft: //int FLSpeed, int FRspeed, int BRspeed, int BLspeed
 		zeroEncoders();
-		while(getDTEncoderAverage() < distance){
+		while(getDTEncoderAverage() < revolutions){
 			setDriveMotors(-127, 127, 127, -127);
+			setFBMotors(FBbreakspd);
+
 		}
+		Break(turnLeft);
 		break;
 
-	case strafeRight:
+	case turnRight: //int FLSpeed, int FRspeed, int BRspeed, int BLspeed
 		zeroEncoders();
-		while(getDTEncoderAverage() < distance){
+		while(getDTEncoderAverage() < revolutions){
 			setDriveMotors(127, -127, -127, 127);
+			setFBMotors(FBbreakspd);
 		}
+		Break(turnRight);
 		break;
 
 	case backwards:
 		zeroEncoders();
-		while(getDTEncoderAverage() < distance){
+		while(getDTEncoderAverage() < revolutions){
 			setDriveMotors(-127, -127, -127, -127);
+			setFBMotors(FBbreakspd);
+
 		}
+		Break(backwards);
 		break;
 
 	default:
 		setDriveMotors(0,0,0,0);
+		zeroEncoders();
 
 	}
+	zeroEncoders();
+}
+void encoderTest(int ticks){
+	zeroEncoders();
+	while(getDTEncoderAverage() < ticks){
+		setDriveMotors(127,127,127, 127);
+	}
+}
+void doTheShimmy(){ //release the platform on plays that require that
+
+	int shimmyDistance = 2.5;
+	move(forward, 127, shimmyDistance,0 );
+	move(backwards, 127, shimmyDistance, 0);
+	move(forward, 127, shimmyDistance, 0);
+	move(backwards, 127, shimmyDistance, 0);
+	move(forward, 127, shimmyDistance, 0);
+	move(backwards, 127, shimmyDistance, 0);
+
+
+}
+//Auton Selector Wizard
+int getPTVal(){
+	//Please place the knob on the dial at zero before starting the play
+	SensorValue(AutonSelector) = 0;
+	int sectorRange = 360/5; //Sector 1 would range between 0 and 37.14 degrees
+	float PTVal = SensorValue(AutonSelector);
+	float sectorID = PTVal / sectorRange;
+
+	if (sectorID >= 0 && sectorID <1){ //Left Fence Play
+		sectorID = 0;
+	}
+	else if (sectorID >= 1 && sectorID <2){//Right Fence Play
+		sectorID =  1;
+	}
+	else if (sectorID >= 2 && sectorID <3){//Left Star Play
+		sectorID =  2;
+	}
+	else if (sectorID >= 3 && sectorID <4){//Right Star Play
+		sectorID =  3;
+	}
+	else if (sectorID >= 4 && sectorID <5){//Skills Auton
+		sectorID =  4;
+	}
+	return sectorID;
 }
 
+//Auton Play Functions
+void leftFence(){
+	//LFence Play
+
+	//Raise Four-Bar (Uses time at the moment)
+	moveFB(up,750, 75);
+	setFBMotors(0);
+	wait10Msec(1);
+	move(forward, 75, 55, 0); //Move forward to knock off stars
+	move(backwards, 75, 15, 0); //Move back to give room to turn
+	move(turnLeft, tsp, 10.5,0); //rotate 90 deg to the left
+	move(forward, 75, 10,0); //Move forward to align with the third star
+	move(turnRight, tsp, 10.5,0); //Rotate 90 deg to the right
+	move(forward, 75, 30,0); //Move forward to knock of third star
+	move(backwards, 75, 20,0);
+}
+void rightFence(){
+	//RFence
+	//Raise Four-Bar (Uses time at the moment)
+	moveFB(up,750, 75);
+	setFBMotors(0);
+	wait10Msec(1);
+	move(forward, 75, 55, 0); //Move forward to knock off stars
+	move(backwards, 75, 15, 0); //Move back to give room to turn
+	move(turnRight, tsp, 10.5,0); //rotate 90 deg to the left
+	move(forward, 75, 10,0); //Move forward to align with the third star
+	move(turnLeft, tsp, 10.5,0); //Rotate 90 deg to the right
+	move(forward, 75, 30,0); //Move forward to knock of third star
+	move(backwards, 75, 20,0);
+}
+void leftStar(){
+	//Left Square Star Shooting
+	move(backwards, 50, 5, 0); //move back to allow room to release platform
+	dotheShimmy(); //release the platform
+	move(forward, 75, 45, 0); //move to pick up stars
+	//Secure the stars by lifting up the platform
+	setDriveMotors(0,0,0,0);
+	moveFB(up, 400, 120);
+	move(backwards, 127, 25, fbbs);
+	//Get in position to launch the stars
+	move(turnRight, 40, 11.5, fbbs); //Rotate 90 degrees clockwise
+	move(backwards, 10, 45, fbbs); //Drive backwards toward the fence
+	setDriveMotors(0,0,0,0);
+	wait10Msec(2);
+	//Launch the stars
+	moveFB(up, 600, 127);
+
+}
+void rightStar(){
+	//Left Square Star Shooting
+	move(backwards, 50, 5, 0); //move back to allow room to release platform
+	dotheShimmy(); //release the platform
+	move(forward, 75, 45, 0); //move to pick up stars
+	//Secure the stars by lifting up the platform
+	setDriveMotors(0,0,0,0);
+	moveFB(up, 400, 120);
+	move(backwards, 127, 25, fbbs);
+	//Get in position to launch the stars
+	move(turnLeft, 40, 11.5, fbbs); //Rotate 90 degrees clockwise
+	move(backwards, 10, 45, fbbs); //Drive backwards toward the fence
+	setDriveMotors(0,0,0,0);
+	wait10Msec(2);
+	//Launch the stars
+	moveFB(up, 600, 127);
+}
+void autonSkills(){
+
+}
 void pre_auton()
 {
 	// Set bStopTasksBetweenModes to false if you want to keep user created tasks
@@ -118,12 +320,96 @@ void pre_auton()
 }
 task autonomous()
 {
-	// ..........................................................................
-	// Insert user code here.
-	// ..........................................................................
+	/*------------------------------------------------------------------------
 
-	// Remove this function call once you have "real" code.
-	AutonomousCodePlaceholderForTesting();
+	Autonomous Play #1 - Fence
+
+	Play-by-Play
+
+	Pre-Match
+	1. Place robot FORWARD FACING
+	2. Set dial to LFen or RFen to run playImmediateTone
+
+	(A) Left Field
+
+	1. Rotate four-bar 80 degrees up (positive speed value)
+	2. Move forward 40 inches (give or take) which knocks off two stars (+2 points)
+	3. Move backwards 3.25 inches (1 wheel rotation)
+	4. Rotate 90 degrees clockwise
+	5. Move forward 15 inches and knock off 1-2 more stars
+	6. Stop
+
+	(B) Right Field
+
+	1. Rotate four-bar 80 degrees up (positive speed value)
+	2. Move forward 40 inches (give or take) which knocks off two stars (+2 points)
+	3. Move backwards 3.25 inches (1 wheel rotation)
+	4. Rotate 90 degrees counterclockwise
+	5. Move forward 15 inches and knock off 1-2 more stars
+	6. Stop
+
+	Total Points: 2
+	------------------------------------------------------------------------*/
+
+
+	/*------------------------------------------------------------------------
+
+	Autonomous Play #2 - Scoring Stars in the Far Zone
+
+	Pre-Match
+	1. Place robot facing right (left field) or left (right field)
+	2. Set dial to LStar or RStar to run playImmediateTone
+
+	(A) Left Field
+
+	1. Move backwards 12 inches
+	2. Do the shimmy to lower platform
+	3. Move forward 36 inches
+	4. Lift platform 30 degree or until stars clear the fence (+6 pts)
+	5. Move backward 36" (to clear cube)
+	6. Rotate 90 degrees clockwise
+	7. Move backwards roughly 38 inches
+	9. Lower platform 30 degrees then rotate 90 deg up to score in far zone (+6 pts)
+
+	(B) Right Field
+
+	1. Move backwards 12 inches
+	2. Do the shimmy to lower platform
+	3. Move forward 36 inches
+	4. Lift platform 30 degree or until stars clear the fence (+6 pts)
+	5. Move backward 36" (to clear cube)
+	6. Rotate 90 degrees counterclockwise
+	7. Move backwards roughly 38 inches
+	9. Lower platform 30 degrees then rotate 90 deg up to score in far zone (+6 pts)
+
+	Total Points: 12
+	------------------------------------------------------------------------*/
+
+	//Auton Switching Wizard
+	switch (getPTVal()){
+	case 0:
+		leftFence();
+		break;
+
+	case 1:
+		rightFence();
+		break;
+
+	case 2:
+		leftStar();
+		break;
+
+	case 3:
+		rightStar();
+		break;
+
+	case 4:
+		autonSkills();
+		break;
+
+	default:
+		setDriveMotors(0,0,0,0);
+	}
 }
 
 task FBControl(){ //task for the Four-Bar control
@@ -132,7 +418,7 @@ task FBControl(){ //task for the Four-Bar control
 		if (vexRT[Btn6U] == 1 && vexRT[Btn6D] == 0){ //UP
 			setFBMotors(127);
 		}
-		else if (vexRT[Btn6U] == 0 && vexRT[Btn6D] == 1){ //DOWN
+		else if (vexRT[Btn6U] == 0 && vexRT[Btn6D] == 1 && SensorValue(plfmStop) == 0){ //DOWN
 			setFBMotors(-127);
 		}
 		else { //IDLE
@@ -140,13 +426,20 @@ task FBControl(){ //task for the Four-Bar control
 		}
 	}
 }
+
 task liftControl (){//task for the lift control
+	bool hasBeenPressed = false;
 	while(true){
 		if(vexRT[Btn5U] == 1 && vexRT[Btn5D] == 0){
 			setLiftMotors(127);
+			hasBeenPressed = true;
 		}
 		else if (vexRT[Btn5U] == 0 && vexRT[Btn5D] == 1){
 			setLiftMotors(-127);
+			hasBeenPressed = true;
+		}
+		else if (hasBeenPressed = false) {
+			setLiftMotors(0);
 		}
 		else {
 			setLiftMotors(10);
