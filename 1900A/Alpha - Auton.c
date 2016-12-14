@@ -408,7 +408,7 @@ Total Points: 18
 ------------------------------------------------------------------------*/
 
 task main()
-{
+{/*
 	//Auton Switching Wizard
 	switch (getPTVal()){
 	case 0:
@@ -434,4 +434,6 @@ task main()
 	default:
 		setDriveMotors(0,0,0,0);
 	}
+	*/
+	rightStar();
 }
