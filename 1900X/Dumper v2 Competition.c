@@ -6,6 +6,7 @@
 #pragma config(Sensor, dgtl5,  lDriveEnc,      sensorQuadEncoder)
 #pragma config(Sensor, dgtl7,  platformDown,   sensorTouch)
 #pragma config(Sensor, dgtl8,  platformLockPos, sensorTouch)
+#pragma config(Sensor, dgtl9,  platformRelease, sensorDigitalOut)
 #pragma config(Motor,  port2,           lDriveFront,   tmotorVex393TurboSpeed_MC29, openLoop)
 #pragma config(Motor,  port3,           lDriveBack,    tmotorVex393TurboSpeed_MC29, openLoop)
 #pragma config(Motor,  port4,           leftDump12,    tmotorVex393HighSpeed_MC29, openLoop)
