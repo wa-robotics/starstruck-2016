@@ -83,7 +83,7 @@ task platformLockController() {
 			setDumpMotors(127);
 
 		} else if (!platformDown) { //compensation power when lift is up
-			setDumpMotors(-20);
+			setDumpMotors(-45);
 		} else {
 			setDumpMotors(0);
 		}
@@ -103,15 +103,29 @@ task platformLockController() {
 #include "Dumper v2 Auton.c"
 
 task autonomous() {
-	const int AUTON_STARS_CUBE_RIGHT = 2000,
-						AUTON_STARS_RIGHT = 0;
+	const int AUTON_LEFT_STARS = 1206, //this is the upper limit (<=) to select
+						AUTON_LEFT_CUBE = 1952,
+						AUTON_RIGHT_STARS = 2952,
+						AUTON_RIGHT_CUBE = 3510,
+						AUTON_SKILLS = 4095;
 
 	int autonSelection = SensorValue[autonSelectPot];
 
-	if (autonSelection >= AUTON_STARS_CUBE_RIGHT) {
-		startTask(autonStarsCubeRight);
-	} else if (autonSelection >= AUTON_STARS_RIGHT) {
+	if (autonSelection <= AUTON_LEFT_STARS) {
+		startTask(autonKnockStarsLeft);
+
+	} else if (autonSelection <= AUTON_LEFT_CUBE) {
+		startTask(autonStarsCubeLeft);
+
+	} else if (autonSelection <= AUTON_RIGHT_STARS) {
 		startTask(autonKnockStarsRight);
+
+	} else if (autonSelection <= AUTON_RIGHT_CUBE) {
+		startTask(autonStarsCubeRight);
+
+	} else if (autonSelection <= AUTON_SKILLS) {
+		startTask(autonSkills);
+
 	}
 
 }
@@ -158,7 +172,8 @@ task drivetrainController() {
 
 task usercontrol()
 {
-	/*SensorValue[hangLock] = 0;
+	/*
+	SensorValue[hangLock] = 0;
 	//sensorValue[platformLock] = 1;
 	//setDumpMotors(40)
 	//wait10Msec(5);
@@ -233,7 +248,7 @@ task usercontrol()
 	setDumpMotors(100);
 	wait10Msec(50);
 	setDumpMotors(0);*/
-	SensorValue[rDriveEnc] = 0;
+	/*SensorValue[rDriveEnc] = 0;
 	wait10Msec(50);
 	while(SensorValue[rDriveEnc] > -900)
 	{
@@ -370,17 +385,19 @@ task usercontrol()
 	setRightDtMotors(0);
 	setDumpMotors(100);
 	wait10Msec(50);
-	setDumpMotors(0);
-	startTask(platformLockController);
-	startTask(drivetrainController);
+	setDumpMotors(0);*/
+	//startTask(autonomous);
+	//stopTask(usercontrol);
+	//startTask(platformLockController);
+	//startTask(drivetrainController);
 	while(1) {
 		if(vexRT[Btn6U])
 		{
-			SensorValue[hangLock] = 1;
+			SensorValue[hangLock] = 0;
 		}
 		else if(vexRT[Btn6D])
 		{
-			SensorValue[hangLock] = 0;
+			SensorValue[hangLock] = 1;
 		}
 	}
 }
