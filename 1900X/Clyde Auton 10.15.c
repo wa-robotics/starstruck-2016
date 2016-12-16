@@ -238,8 +238,21 @@ void strafeNoStraightening(int frontPower, int backPower, int encoderCounts, int
 	}
 }
 
+task dumpAutonSkills() {
+		setDrumMotors(127);
+		wait1Msec(700);
+		setDrumMotors(0);
+		wait1Msec(125);
+		setDrumMotors(-127);
+		while (!SensorValue[platformDown]) {
+			wait1Msec(25);
+		}
+		setDrumMotors(0);
+}
+
 task autonSkills()
 {
+	/*
 	driveDistance(-100,650,STRAIGHT);
 	driveDistance(-127,250,STRAIGHT); //500 drop the platform
 	driveDistance(127,190,STRAIGHT);
@@ -258,36 +271,105 @@ task autonSkills()
 	driveDistance(100,1000,STRAFE_LEFT);
 	driveDistance(127,300,STRAIGHT);
 	driveDistance(100,1375,STRAFE_LEFT);
+	*/
+
+	//drop the platform
+	driveDistance(-127,500,STRAIGHT);
+	driveDistance(127,260,STRAIGHT);
+
+	for (int i = 1; i <= 4; i++) {
+		wait1Msec(2000); //2 seconds to load
+
+		startTask(dumpAutonSkills); //start dumping
+		driveDistance(-127,1500,STRAIGHT); //start driving back
+
+		while (!SensorValue[platformDown]) { //don't continue until the platform is down
+			wait1Msec(25);
+		}
+
+		driveDistance(127,1500,STRAIGHT); //drive back to tile
+	}
+
 }
-task autonFence()
+task autonFenceLeft()
 {
 	//resetDrumPosition();
 	//wait10Msec(10000);
 	writeDebugStreamLine("ran");
-	SensorValue[tongue] = 1;
-	SensorValue[platformLock] = 1;
-	driveDistance(127,500,STRAIGHT); //500 drop the platform
-	driveDistance(-127,190,STRAIGHT);
-	wait10Msec(50);
-	setCatapultPosition(1);
-	wait10Msec(50);
-	driveDistance(100,1500,STRAIGHT);
-	driveDistance(-127,300,STRAIGHT);
-	driveDistance(100,1000,STRAFE_LEFT);
-	driveDistance(127,300,STRAIGHT);
-	driveDistance(100,1375,STRAFE_LEFT);
-	//actual autonomous
-	//driveDistance(100,340,STRAIGHT); //push the preload forward
-	//wait1Msec(500);
-	//driveDistance(-100,500,STRAIGHT); //500 drop the platform
+	//SensorValue[tongue] = 1;
+	//SensorValue[platformLock] = 1;
+	//driveDistance(-127,500,STRAIGHT); //500 drop the platform
 	//driveDistance(127,190,STRAIGHT);
-	//driveDistance(-127,190,STRAIGHT);
-	//wait1Msec(500);
-	//driveDistance(100,1500,STRAIGHT); //collect the 4 stars
-	//wait1Msec(500);
+	//wait10Msec(50);
+	//setCatapultPosition(1);
+	//wait10Msec(50);
+	//driveDistance(100,1500,STRAIGHT);
+	//driveDistance(-127,300,STRAIGHT);
+	//driveDistance(100,1000,STRAFE_LEFT);
+	//driveDistance(127,300,STRAIGHT);
+	//driveDistance(100,1375,STRAFE_LEFT);
+	//actual autonomous
+	driveDistance(100,340,STRAIGHT); //push the preload forward
+	wait1Msec(500);
+	driveDistance(-100,500,STRAIGHT); //500 drop the platform
+	driveDistance(127,190,STRAIGHT);
+	driveDistance(-127,190,STRAIGHT);
+	sensorValue[platformLock] = 1;
+	wait1Msec(500);
+	driveDistance(100,1500,STRAIGHT); //collect the 4 stars
+	wait1Msec(500);
+	setDrumMotors(127);
+	wait10Msec(30);
+	setDrumMotors(0);
+	wait10Msec(50);
+	driveDistance(-100,1100,STRAIGHT);
+	wait10Msec(50);
+	driveDistance(125,1150,STRAFE_LEFT);
+	wait10Msec(50);
+	setRightDtMotors(-45,-45);
+	setLeftDtMotors(45,45);
+	wait10Msec(75);
+	setRightDtMotors(0,0);
+	setLeftDtMotors(0,0);
+	setDrumMotors(127);
+	wait10Msec(85);
+	setDrumMotors(0);
+	/*driveDistance(100,175,STRAFE_RIGHT);
+	rotateDegrees(95,1);
+	while(!sensorValue[platformLock])
+	{
+		setDrumMotors(127);
+	}
+	setDrumMotors(0);
+	driveDistance(100,175,STRAFE_RIGHT);
+	driveDistance(100,1500,STRAIGHT);
+	rotateDegrees(95,37);
+	setDrumMotors(70);
+	wait10Msec(37);
+	setDrumMotors(0);
+	wait10Msec(50);
+	driveDistance(-100,500,STRAIGHT);
+	setDrumMotors(127);
+	wait10Msec(100);
+	setDrumMotors(0);
 	//strafeNoStraightening(55,127,550,STRAFE_LEFT);
 	//driveDistance(100,80,STRAIGHT);
 
-	wait10Msec(50);
-	fireCatapult();
+	//wait10Msec(50);
+	//fireCatapult();*/
+}
+
+task autonKnockStars() {
+	driveDistance(127,260,STRAIGHT);
+	driveDistance(-127,260,STRAIGHT);
+	sensorValue[platformLock] = 1;
+	wait1Msec(500);
+	setDrumMotors(127);
+	wait10Msec(70);
+	setDrumMotors(0);
+	driveDistance(127,1500,STRAIGHT);
+	wait1Msec(500);
+	driveDistance(125,500,STRAFE_RIGHT);
+	wait1Msec(500);
+	driveDistance(125,800,STRAFE_LEFT);
 }

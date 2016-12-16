@@ -12,7 +12,7 @@
 #pragma config(Sensor, I2C_2,  ,               sensorQuadEncoderOnI2CPort,    , AutoAssign )
 #pragma config(Motor,  port2,           lDriveFront,   tmotorVex393HighSpeed_MC29, openLoop, encoderPort, I2C_1)
 #pragma config(Motor,  port3,           lDriveBack,    tmotorVex393HighSpeed_MC29, openLoop)
-#pragma config(Motor,  port4,           rCatapult23,   tmotorVex393_MC29, openLoop)
+#pragma config(Motor,  port4,           rCatapult23,   tmotorVex393_MC29, openLoop, reversed)
 #pragma config(Motor,  port5,           rCatapult1,    tmotorVex393_MC29, openLoop, reversed)
 #pragma config(Motor,  port6,           lCatapult1,    tmotorVex393_MC29, openLoop, reversed)
 #pragma config(Motor,  port7,           lCatapult23,   tmotorVex393_MC29, openLoop, reversed)
@@ -155,7 +155,7 @@ void catapultInit() {
 	catapultPositions[0] = 0;
 	catapultPositions[1] = 1700;
 	catapultPositions[2] = 2200;
-	catapultPositions[3] = 2750; //2480
+	catapultPositions[3] = 2480;
 }
 
 void setCatapultPosition(int pos) {
@@ -367,15 +367,15 @@ task autonomous()
 {
 	catapultInit(); //make sure we can use the catapult	in any autonomous play
 
-	if (autonChoices.waitTime > 0) {
-		wait1Msec(autonChoices.waitTime*1000);
+	if (waitTime > 0) {
+		wait1Msec(waitTime*1000);
 	}
 
-	if (autonChoices.startingTile == "left") {
-			startTask(autonFence);
-	} else if (autonChoices.startingTile == "right") {
-		startTask(autonFence);
-	} else if (autonChoices.startingTile == "programmingSkills") {
+	if (startingTile == "stars") {
+		startTask(autonFenceLeft);
+	} else if (startingTile == "fence") {
+		startTask(autonKnockStars);
+	} else if (startingTile == "programmingSkills") {
 		startTask(autonSkills);
 	}
 
@@ -388,15 +388,61 @@ task autonomous()
 	//resetDrumPosition();
 
 }
+bool platformLocked;
+task driverDump()
+{
+	while(1)
+	{
+		if(SensorValue[platformLock])
+		{
+			platformLocked = false;
+		}
+		else
+		{
+			platformLocked = true;
+		}
+		if(vexRT[Btn5D])
+		{
+			setDrumMotors(-127);
+			if(platformLocked)
+			{
+				sensorValue[platformLock] = 1;
+			}
+		}
+		else if(vexRT[Btn5U])
+		{
+			if(platformLocked)
+			{
+				sensorValue[platformLock] = 1;
+			}
+			//wait1Msec(150); //give time for platform to release
+			setDrumMotors(127);
 
+		}
+		else
+		{
+			setDrumMotors(0);
+		}
+		if(sensorValue[platformDown] && !platformLocked && !vexRT[Btn5U])
+		{
+			SensorValue[platformLock] = 0;
+		}
+		if(vexRT[Btn6D])
+		{
+			sensorValue[platformLock] = 0;
+		}
+		else if(vexRT[Btn6U])
+		{
+			sensorValue[platformLock] = 1;
+		}
+	}
+}
 const bool DEBUG_AUTON = false;
 
 task usercontrol()
 {
 	catapultInit(); //make sure catapult can be controlled
-	wait1Msec(5000);
-	setCatapultPosition(3);
-	//prepareCatapult();
+	//setCatapultPosition(1);
 	//wait1Msec(1000);
 	//while(SensorValue[drumZero] == 0) {
 	//	setDrumMotors(-127);
@@ -404,14 +450,12 @@ task usercontrol()
 	//setDrumMotors(0);
 	if (DEBUG_AUTON) {
 		//to select the play
-		autonChoices.waitTime = 0; //time in seconds, so 0,1,3 are values supported by LCD selection wizard
-		autonChoices.startingTile = "left";
+		waitTime = 0; //time in seconds, so 0,1,3 are values supported by LCD selection wizard
+		startingTile = "stars";
 		startTask(autonomous);
 		stopTask(usercontrol);
 	}
-	startTask(driverCatapult);
-	startTask(button8UController);
-	//resetDrumPosition();
+	startTask(driverDump);
 	bLCDBacklight = true;
 	clearLCDLine(0);
 	int LY = 0;
@@ -420,9 +464,6 @@ task usercontrol()
 	int RX = 0;
 	int threshold = 15;
 	while (1) {
-		displayLCDNumber(0,1,SensorValue[drumPosEnc],1);
-		displayLCDNumber(1,0,SensorValue[drumZero],1);
-
 		//8L/8R circle strafe
 		if (vexRT[Btn8L]) {
 			setLeftDtMotors(-55,127);
@@ -440,24 +481,7 @@ task usercontrol()
 			motor[lDriveBack] = LY - LX;
 			motor[rDriveFront] = RY - RX;
 			motor[rDriveBack] = RY + RX;
-			wait1Msec(20);
-
-			if (vexRT[Btn6U]) {
-				while (vexRT[Btn6U]) {
-					if(vexRT[Btn6D] == 1)
-					{
-						SensorValue[drumPosEnc] = 0;
-					}
-					if(vexRT[Btn5D] == 1)
-					{
-						drumResetForward();
-					}
-					else if(vexRT[Btn5U] == 1)
-					{
-						drumResetBackward();
-					}
-				}
-			}
+			wait1Msec(10);
 		}
 	}
 }
