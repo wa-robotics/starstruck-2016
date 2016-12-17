@@ -391,7 +391,7 @@ task drivetrainController() {
 		}
 		rYLastSent = rY;
 		motor[DL] = (abs(lY) > threshold) ? lY : 0;
-		motor[DR] = (abs(lY) > threshold) ? lY : 0;
+		motor[DR] = (abs(rY) > threshold) ? rY : 0;
 		wait1Msec(15);
 	}
 	bool auton = false;
