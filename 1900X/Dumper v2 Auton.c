@@ -138,6 +138,14 @@ void driveDistance(int power, int encoderCounts, int direction) {
 
 }
 */
+
+void releasePlatform() {
+	SensorValue[platformRelease] = 1;
+	wait1Msec(750);
+	SensorValue[platformRelease] = 0;
+	wait1Msec(250);
+}
+
 task autonSkills()
 {
 	SensorValue[hangLock] = 1; //changed after flipping solenoid
@@ -148,7 +156,7 @@ task autonSkills()
 		setRightDtMotors(-75);
 		setLeftDtMotors(-75);
 	}
-	SensorValue[platformRelease] = 1;
+	releasePlatform();
 	setLeftDtMotors(0);
 	setRightDtMotors(0);
 	wait10Msec(300);
@@ -297,7 +305,7 @@ task autonKnockStarsLeft() //go to the fence and knock 3 stars off
 		setRightDtMotors(-75);
 		setLeftDtMotors(-75);
 	}
-	SensorValue[platformRelease] = 1;
+	releasePlatform();
 	//setDumpMotors(-50);
 	//wait10Msec(18);
 	//setDumpMotors(0);
@@ -325,7 +333,7 @@ task autonKnockStarsRight() //go to the fence and knock 3 stars off
 		setRightDtMotors(-75);
 		setLeftDtMotors(-75);
 	}
-	SensorValue[platformRelease] = 1;
+	releasePlatform();
 	//setDumpMotors(-50);
 	//wait10Msec(18);
 	//setDumpMotors(0);
@@ -352,7 +360,7 @@ task autonStarsCubeLeft() { //knock the stars off the fence (play 1 code same as
 		setRightDtMotors(-75);
 		setLeftDtMotors(-75);
 	}
-	SensorValue[platformRelease] = 1;
+	releasePlatform();
 	//setDumpMotors(-50);
 	//wait10Msec(18);
 	//setDumpMotors(0);
@@ -434,7 +442,7 @@ task autonStarsCubeRight() { //knock the stars off the fence (play 1 code same a
 	//setDumpMotors(-50);
 	//wait10Msec(18);
 	//setDumpMotors(0);
-	SensorValue[platformRelease] = 1;
+	releasePlatform();
 	while(SensorValue[rDriveEnc] > -2775)
 	{
 		setLeftDtMotors(-124.5);

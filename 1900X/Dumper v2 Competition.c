@@ -388,8 +388,8 @@ task usercontrol()
 	setDumpMotors(0);*/
 	//startTask(autonomous);
 	//stopTask(usercontrol);
-	//startTask(platformLockController);
-	//startTask(drivetrainController);
+	startTask(platformLockController);
+	startTask(drivetrainController);
 	while(1) {
 		if(vexRT[Btn6U])
 		{
@@ -399,5 +399,15 @@ task usercontrol()
 		{
 			SensorValue[hangLock] = 1;
 		}
+
+		if(vexRT[Btn7U])
+		{
+			SensorValue[platformRelease] = 0;
+		}
+		else if(vexRT[Btn7D])
+		{
+			SensorValue[platformRelease] = 1;
+		}
+
 	}
 }
