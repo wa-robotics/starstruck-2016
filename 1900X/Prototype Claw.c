@@ -40,8 +40,8 @@ task main()
 	int RX = 0;
 	int threshold = 15;
 	int armCompPower = 20; //compensation power for arm/lift
-	int armPotMaxLimit = 3000; //software limit for potentiometer to limit arm movement from going over the top
-	bool enableSoftwareArmPosLimit = false; //experimental software limit for arm, see above
+	int armPotMaxLimit = 1000; //software limit for potentiometer to limit arm movement from going over the top
+	bool enableSoftwareArmPosLimit = true; //experimental software limit for arm, see above
   while(1)
   {
   	//for deadzones; when the joystick value for an axis is below the threshold, the motors controlled by that joystick will not move in that direction
@@ -55,12 +55,16 @@ task main()
   	motor[rDriveBack] = RY + RX;
 
   	//untested
-	  if (vexRT[Btn5U] && (SensorValue[arm] < armPotMaxLimit || !enableSoftwareArmPosLimit)) {
-	  	setDumpMotors(127);
+	  if (vexRT[Btn5U] && (SensorValue[arm] > armPotMaxLimit || !enableSoftwareArmPosLimit)) {
+	  	setDumpMotors(85);
 		} else if (vexRT[Btn5D]) { //second part of condition is to prevent motors from jittering if 5U and 5D are pressed down
-			setDumpMotors(-127);
+			setDumpMotors(-85);
 		} else {
-			setDumpMotors(armCompPower);
+			if (SensorValue[arm] > 2300) { //arm is at bottom, no comp power
+				setDumpMotors(0);
+			} else {
+				setDumpMotors(armCompPower);
+			}
 		}
 
   	setClawMotors(vexRT[Btn6U]*127 - vexRT[Btn6D]*127);
