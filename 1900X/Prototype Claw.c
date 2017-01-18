@@ -61,7 +61,7 @@ task main()
 			setDumpMotors(-85);
 		} else {
 			if (SensorValue[arm] > 2300) {
-
+				setDumpMotors(0);
 			} else {
 				setDumpMotors(armCompPower);
 			}
