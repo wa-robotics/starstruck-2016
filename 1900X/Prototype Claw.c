@@ -39,9 +39,9 @@ task main()
 	int RY = 0;
 	int RX = 0;
 	int threshold = 15;
-	int armCompPower = 20; //compensation power for arm/lift
+	int armCompPower = 12; //compensation power for arm/lift
 	int armPotMaxLimit = 1000; //software limit for potentiometer to limit arm movement from going over the top
-	bool enableSoftwareArmPosLimit = true; //experimental software limit for arm, see above
+	bool enableSoftwareArmPosLimit = false; //experimental software limit for arm, see above
   while(1)
   {
   	//for deadzones; when the joystick value for an axis is below the threshold, the motors controlled by that joystick will not move in that direction
@@ -60,8 +60,8 @@ task main()
 		} else if (vexRT[Btn5D]) { //second part of condition is to prevent motors from jittering if 5U and 5D are pressed down
 			setDumpMotors(-85);
 		} else {
-			if (SensorValue[arm] > 2300) { //arm is at bottom, no comp power
-				setDumpMotors(0);
+			if (SensorValue[arm] > 2300) {
+
 			} else {
 				setDumpMotors(armCompPower);
 			}
