@@ -15,7 +15,7 @@ void setDumpMotors(int power) {
 	if (power > 127) {
 		power = 127;
 	} else if (power < -127) {
-		power = -127
+		power = -127;
 	}
 	motor[lDump12] = power;
 	motor[lDump3] = power;
@@ -40,7 +40,7 @@ task main()
 	int RX = 0;
 	int threshold = 15;
 	int armCompPower = 12; //compensation power for arm/lift
-	int armPotMaxLimit = 1000; //software limit for potentiometer to limit arm movement from going over the top
+	int armPotMaxLimit = 450; //software limit for potentiometer to limit arm movement from going over the top (protects potentiometer)
 	bool enableSoftwareArmPosLimit = false; //experimental software limit for arm, see above
   while(1)
   {
@@ -56,14 +56,16 @@ task main()
 
   	//untested
 	  if (vexRT[Btn5U] && (SensorValue[arm] > armPotMaxLimit || !enableSoftwareArmPosLimit)) {
-	  	setDumpMotors(85);
+	  	setDumpMotors(127);
 		} else if (vexRT[Btn5D]) { //second part of condition is to prevent motors from jittering if 5U and 5D are pressed down
-			setDumpMotors(-85);
+			setDumpMotors(-127);
 		} else {
-			if (SensorValue[arm] > 2300) {
+			if (SensorValue[arm] > 4080) { //arm is all the way down; no compensation power
 				setDumpMotors(0);
-			} else {
+			} else if (SensorValue[arm] > 1920) { //arm is up but has not gone past vertical (behind back of robot).  Positive compensation power
 				setDumpMotors(armCompPower);
+			} else { //arm is up and behind the back of the robot.  Negative compensation power (and increased compensation power to protect potentiometer from crossing its physical limit and counter momentum)
+				setDumpMotors(-armCompPower - 5);
 			}
 		}
 
