@@ -1,4 +1,5 @@
 #pragma config(Sensor, in1,    arm,            sensorPotentiometer)
+#pragma config(Sensor, in2,    ,               sensorPotentiometer)
 #pragma config(Motor,  port1,           leftClaw,      tmotorVex393_HBridge, openLoop)
 #pragma config(Motor,  port2,           lDriveFront,   tmotorVex393HighSpeed_MC29, openLoop)
 #pragma config(Motor,  port3,           lDriveBack,    tmotorVex393HighSpeed_MC29, openLoop)
