@@ -16,11 +16,16 @@
 #include "autonomousLib.c"
 //setDumpMotors and setClawMotors are in autonomousLib.c
 
-//potentiometer value for lift: 2200
+//potentiometer value for lift: 2150
 task autonomous() {
-	diagonalLeft(127,300);
-	wait1Msec(1000);
-	straight(127,700);
+	liftToPotTarget(2150,127);
+	wait1Msec(250);
+	diagonalLeft(127,160);
+	wait1Msec(750);
+	straight(127,600);
+	wait1Msec(125);
+	straight(-127,200);
+
 }
 
 task main()

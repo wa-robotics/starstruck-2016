@@ -63,3 +63,20 @@ void straight(int power, int dist) {
 	setLeftDtMotors(0);
 	setRightDtMotors(0);
 }
+
+//high pot value = bottom
+//low pot value = top
+void liftToPotTarget(int target, int maxPower) {
+	int potStart = SensorValue[arm];
+	if (potStart > target) { //potentiometer value is above target.  New target is UP
+		while (SensorValue[arm] > target + 500) {
+			setDumpMotors(maxPower);
+		}
+		while (SensorValue[arm] > target) {
+			setDumpMotors(.3*maxPower);
+		}
+		setDumpMotors(-20)
+		wait1Msec(125);
+		setDumpMotors(0);
+	}
+}
