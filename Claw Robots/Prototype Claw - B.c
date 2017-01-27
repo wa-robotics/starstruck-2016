@@ -30,8 +30,8 @@ task autonomous() {
 
 task main()
 {
-	startTask(autonomous);
-	stopTask(main);
+	//startTask(autonomous);
+	//stopTask(main);
 	//setClawMotors(127);
 	//wait1Msec(750);
 	//setClawMotors(-127);
