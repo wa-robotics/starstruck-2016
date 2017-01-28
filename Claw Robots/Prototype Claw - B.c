@@ -41,12 +41,12 @@ task clawControl()
      int PIDDrive;
      while(true)
      {
-          if(vexRT[Btn[6U]] == 1) //opens claw
+          if(vexRT[Btn6U]) //opens claw
           {
                setClawMotors(127);
                PIDTargetValue = SensorValue[claw];
           }
-          else if(vexRT[Btn[6D]] == 1) //closes claw
+          else if(vexRT[Btn6D]) //closes claw
           {
                setClawMotors(-127);
                PIDTargetValue = SensorValue[claw];
@@ -60,7 +60,7 @@ task clawControl()
                setClawMotors(PIDDrive);
                lastError = error;
           }
-          wait1msec(15); //prevents cpu hogging
+          wait1Msec(25); //prevents cpu hogging
      }
 }
 task main()
@@ -72,6 +72,7 @@ task main()
 	//setClawMotors(-127);
 	//wait1Msec(400);
 	startTask(clawControl); //simple control and PID for compensation on claw
+
 	int LY = 0;
 	int LX = 0;
 	int RY = 0;

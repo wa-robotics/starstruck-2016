@@ -1,33 +1,4 @@
-//this file assumes that
-//some constants for claw PID
-float kp = 0.5; //these constants might change down the road, but they are good for now
-float ki = 0.01;
-float kd = 0.00001;
-int error;
-int integral = 0;
-int derivative;
-int lastError;
-int PIDDrive;
-int target;
-bool compensate = false
-//function to control claw compensation
-task clawCompensate()
-{
-	while(1)
-	{
-		while(compensate == true) //allows us to control when to turn off compensation
-		{
-			error = target - SensorValue[claw];
-			integral += error;
-			derivative = error - lastError;
-			PIDDrive = kp*error + ki*integral + kd*derivative;
-			motor[clawRight] = PIDDrive;
-			motor[clawLeft] = PIDDrive;
-			lastError = error;
-		}
-	}
-}
-//functions for auto plays, and driver too I guess. (Evan's poor naming scheme not mine) -- Crawford
+//START: global movement functions for basic robot subsystem movements
 void setDumpMotors(int power) {
 	if (power > 127) {
 		power = 127;
@@ -53,6 +24,33 @@ void setLeftDtMotors(int power) {
 void setRightDtMotors(int power) {
 	motor[rDriveFront] = power;
 	motor[rDriveBack] = power;
+}
+//END: global functions
+
+//function to control claw compensation
+int target; //this variable needs global scope so PID can be controlled from outside this task.  Other variables are inside so they reset each time
+task clawCompensatePID()
+{
+	//some constants for claw PID
+	float kp = 0.5; //these constants might change down the road, but they are good for now
+	float ki = 0.01;
+	float kd = 0.00001;
+	int error;
+	int integral = 0;
+	int derivative;
+	int lastError;
+	int PIDDrive;
+
+	while(1)
+	{
+			error = target - SensorValue[claw];
+			integral += error;
+			derivative = error - lastError;
+			PIDDrive = kp*error + ki*integral + kd*derivative;
+			setClawMotors(PIDDrive);
+			lastError = error;
+			wait1Msec(25); //don't hog the CPU
+	}
 }
 
 //2-motor forward right diagonal or backward left diagonal
@@ -104,19 +102,25 @@ void liftToPotTarget(int target, int maxPower) {
 		while (SensorValue[arm] > target) {
 			setDumpMotors(.3*maxPower);
 		}
-		setDumpMotors(-20)
+		setDumpMotors(-20);
 		wait1Msec(125);
 		setDumpMotors(0);
 	}
 }
-void killCompensation() // lets us turn off all compensation
+void killClawCompensation() // lets us turn off all compensation
 {
-	compensate = false
+	stopTask(clawCompensatePID);
 	setClawMotors(0);
 }
+
+void startClawCompensation(int newTarget) {
+	target = newTarget;
+	startTask(clawCompensatePID);
+}
+
 void moveClaw(int power, int potValue)//allows us to move the claw in auto and compensate
 {
-	killCompensation(); //very important to do this before manually controlling the motors because PID is doing its thing
+	killClawCompensation(); //very important to do this before manually controlling the motors because PID is doing its thing
 	if(SensorValue[claw] < potValue)
 	{
 		while(SensorValue[claw] < potValue)
@@ -128,14 +132,15 @@ void moveClaw(int power, int potValue)//allows us to move the claw in auto and c
 	{
 		while(SensorValue[claw] > potValue)
 		{
-			setClawMotors(-1*abs(power)); //the exact opposite of the above codition for positive input (credit to Evan for remembering the number -1 exists)
+			setClawMotors(-abs(power)); //the exact opposite of the above codition for positive input (credit to Evan for remembering the number -1 exists)
 		}
 	}
-	target = potValue
-	compensate = true //turns on the compensation code for the claw
+	startClawCompensation(potValue); //turns on the compensation code for the claw
 }
-void manualCompensation(); //allows us to use the single power compensation
+
+//Not sure this will ever be used when killClawCompensation does virtually the same thing -Evan
+void manualCompensation() //allows us to use the single power compensation
 {
-	killCompensation(); //very important to do this before manually controlling the motors because PID is doing its thing
+	killClawCompensation(); //very important to do this before manually controlling the motors because PID is doing its thing
 	setClawMotors(15);
 }
