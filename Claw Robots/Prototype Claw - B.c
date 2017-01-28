@@ -1,4 +1,5 @@
 #pragma config(Sensor, in1,    arm,            sensorPotentiometer)
+#pragma config(Sensor, in2,    claw,           sensorPotentiometer)
 #pragma config(Sensor, dgtl1,  rDriveEnc,      sensorQuadEncoder)
 #pragma config(Sensor, dgtl3,  lDriveEnc,      sensorQuadEncoder)
 #pragma config(Motor,  port1,           leftClaw,      tmotorVex393_HBridge, openLoop)
@@ -27,7 +28,41 @@ task autonomous() {
 	straight(-127,200);
 
 }
-
+task clawControl()
+{
+     int PIDTargetValue;
+     float kp = 0.5; //these constants might change down the road, but they are good for now
+     float ki = 0.01;
+     float kd = 0.00001;
+     int error;
+     int integral = 0;
+     int derivative;
+     int lastError;
+     int PIDDrive;
+     while(true)
+     {
+          if(vexRT[Btn[6U]] == 1) //opens claw
+          {
+               setClawMotors(127);
+               PIDTargetValue = SensorValue[claw];
+          }
+          else if(vexRT[Btn[6D]] == 1) //closes claw
+          {
+               setClawMotors(-127);
+               PIDTargetValue = SensorValue[claw];
+          }
+          else //holds position with PID
+          {
+               error = PIDTargetValue - SensorValue[claw];
+               integral += error;
+               derivative = error - lastError;
+               PIDDrive = kp*error + ki*integral + kd*derivative;
+               setClawMotors(PIDDrive);
+               lastError = error;
+          }
+          wait1msec(15); //prevents cpu hogging
+     }
+}
 task main()
 {
 	//startTask(autonomous);
@@ -36,6 +71,7 @@ task main()
 	//wait1Msec(750);
 	//setClawMotors(-127);
 	//wait1Msec(400);
+	startTask(clawControl); //simple control and PID for compensation on claw
 	int LY = 0;
 	int LX = 0;
 	int RY = 0;
@@ -44,7 +80,7 @@ task main()
 	int armCompPower = 12; //compensation power for arm/lift
 	int armPotMaxLimit = 620; //software limit for potentiometer to limit arm movement from going over the top (protects potentiometer)
 	bool enableSoftwareArmPosLimit = true; //experimental software limit for arm, see above
-	int clawCompPower = 15
+	//int clawCompPower = 15
   while(1)
   {
   	//for deadzones; when the joystick value for an axis is below the threshold, the motors controlled by that joystick will not move in that direction
@@ -72,7 +108,7 @@ task main()
 			}
 		}
 
-  	if (vexRT[Btn6U]) {
+  	/*if (vexRT[Btn6U]) {
 			setClawMotors(127);
 			clawCompPower = 15;
 		} else if (vexRT[Btn6D]) {
@@ -80,7 +116,7 @@ task main()
 			clawCompPower = -20;
 		}	else {
 			setClawMotors(clawCompPower);
-		}
+		}*/
 
   	wait1Msec(25);
 	}

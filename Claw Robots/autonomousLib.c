@@ -1,8 +1,37 @@
 //this file assumes that
+//some constants for claw PID
+float kp = 0.5; //these constants might change down the road, but they are good for now
+float ki = 0.01;
+float kd = 0.00001;
+int error;
+int integral = 0;
+int derivative;
+int lastError;
+int PIDDrive;
+int target;
+bool compensate = false
+//function to control claw compensation
+task clawCompensate()
+{
+	while(1)
+	{
+		while(compensate == true) //allows us to control when to turn off compensation
+		{
+			error = target - SensorValue[claw];
+			integral += error;
+			derivative = error - lastError;
+			PIDDrive = kp*error + ki*integral + kd*derivative;
+			motor[clawRight] = PIDDrive;
+			motor[clawLeft] = PIDDrive;
+			lastError = error;
+		}
+	}
+}
+//functions for auto plays, and driver too I guess. (Evan's poor naming scheme not mine) -- Crawford
 void setDumpMotors(int power) {
 	if (power > 127) {
 		power = 127;
-	} else if (power < -127) {
+		} else if (power < -127) {
 		power = -127;
 	}
 	motor[lDump12] = power;
@@ -37,7 +66,7 @@ void diagonalLeft(int power, int dist) {
 	if (power > 0) {
 		motor[lDriveFront] = -10;
 		motor[rDriveBack] = -10;
-	} else if (power < 0) {
+		} else if (power < 0) {
 		motor[lDriveFront] = 10;
 		motor[rDriveBack] = 10;
 	}
@@ -55,7 +84,7 @@ void straight(int power, int dist) {
 	if (power > 0) {
 		setLeftDtMotors(-10);
 		setRightDtMotors(-10);
-	} else if (power < 0) {
+		} else if (power < 0) {
 		setLeftDtMotors(10);
 		setRightDtMotors(10);
 	}
@@ -79,4 +108,34 @@ void liftToPotTarget(int target, int maxPower) {
 		wait1Msec(125);
 		setDumpMotors(0);
 	}
+}
+void killCompensation() // lets us turn off all compensation
+{
+	compensate = false
+	setClawMotors(0);
+}
+void moveClaw(int power, int potValue)//allows us to move the claw in auto and compensate
+{
+	killCompensation(); //very important to do this before manually controlling the motors because PID is doing its thing
+	if(SensorValue[claw] < potValue)
+	{
+		while(SensorValue[claw] < potValue)
+		{
+			setClawMotors(abs(power)); //if the claw needs to be opened, this makes sure you are using a positive power so that it doesn't try to move forever
+		}
+	}
+	else if(SensorValue[claw] > potValue)
+	{
+		while(SensorValue[claw] > potValue)
+		{
+			setClawMotors(-1*abs(power)); //the exact opposite of the above codition for positive input (credit to Evan for remembering the number -1 exists)
+		}
+	}
+	target = potValue
+	compensate = true //turns on the compensation code for the claw
+}
+void manualCompensation(); //allows us to use the single power compensation
+{
+	killCompensation(); //very important to do this before manually controlling the motors because PID is doing its thing
+	setClawMotors(15);
 }
