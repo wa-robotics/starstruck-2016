@@ -1,5 +1,6 @@
 #pragma config(Sensor, in1,    arm,            sensorPotentiometer)
 #pragma config(Sensor, in2,    claw,           sensorPotentiometer)
+#pragma config(Sensor, in3,    gyro,           sensorGyro)
 #pragma config(Sensor, dgtl1,  rDriveEnc,      sensorQuadEncoder)
 #pragma config(Sensor, dgtl3,  lDriveEnc,      sensorQuadEncoder)
 #pragma config(Motor,  port1,           leftClaw,      tmotorVex393_HBridge, openLoop)
@@ -20,21 +21,21 @@
 //potentiometer value for lift: 2150
 int liftTarget;
 int clawTarget;
-task lift()
+task liftTask()
 {
 	liftToPotTarget(liftTarget,127);
 }
-task claw()
+task clawTask()
 {
 	moveClaw(127,clawTarget);
 }
 task autonomous() {
 	liftTarget = 2150;
 	clawTarget = 1000;//A
-	startTask(lift);
-	startTask(claw);
+	startTask(liftTask);
+	startTask(clawTask);
 	diagonalLeft(127,160);
-	waitForPot(2150,50);
+	waitForLift(2150,50);
 	waitForClaw(1000,50);//A
 	wait1Msec(250);
 	straight(127,600);

@@ -146,15 +146,46 @@ void manualCompensation() //allows us to use the single power compensation
 }
 void waitForLift(int target, int variance)
 {
-	while(SensorValue(arm) > target+variance || SensorValue(arm) < target-variance)
+	while(SensorValue[arm]> target+variance || SensorValue[arm]< target-variance)
 	{
 		wait1Msec(25);
 	}
 }
 void waitForClaw(int target, int variance)
 {
-	while(SensorValue(claw) > target+variance || SensorValue(claw) < target-variance)
+	while(SensorValue[claw]>target+variance || SensorValue[claw] < target-variance)
 	{
 		wait1Msec(25);
 	}
+}
+void rotateDegrees(int position, int direction) {//This function is for turning
+	SensorValue[gyro] = 0;
+	//Clear gyro
+	if(direction == 1){
+		//If direction == Left
+		while(abs(SensorValue[gyro]) < position){
+			//While the gyro is less than a set degrees, turn Left
+			setRightDtMotors(45);
+			setLeftDtMotors(-45);
+		}
+		setRightDtMotors(-30);
+		setLeftDtMotors(30);
+		wait1Msec(100); //brief brake
+	}
+	//end of LEFT turn
+	else{
+		//if direction == right
+		while(abs(SensorValue[gyro]) < position){
+			//While the gyro is less than a set degrees, turn right
+			setRightDtMotors(-45);
+			setLeftDtMotors(45);
+		}
+
+		setRightDtMotors(30);
+		setLeftDtMotors(-30);
+		wait1Msec(100); //brief brake
+	} //end of RIGHT turn
+	setRightDtMotors(0);
+	setLeftDtMotors(0);
+
 }
