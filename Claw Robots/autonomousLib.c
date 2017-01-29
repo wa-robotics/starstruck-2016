@@ -38,7 +38,7 @@ task clawCompensatePID()
 	int error;
 	int integral = 0;
 	int derivative;
-	int lastError;
+	int lastError = 0;
 	int PIDDrive;
 
 	while(1)
@@ -64,7 +64,7 @@ void diagonalLeft(int power, int dist) {
 	if (power > 0) {
 		motor[lDriveFront] = -10;
 		motor[rDriveBack] = -10;
-		} else if (power < 0) {
+	} else if (power < 0) {
 		motor[lDriveFront] = 10;
 		motor[rDriveBack] = 10;
 	}
@@ -82,7 +82,7 @@ void straight(int power, int dist) {
 	if (power > 0) {
 		setLeftDtMotors(-10);
 		setRightDtMotors(-10);
-		} else if (power < 0) {
+	} else if (power < 0) {
 		setLeftDtMotors(10);
 		setRightDtMotors(10);
 	}
@@ -106,6 +106,7 @@ void liftToPotTarget(int target, int maxPower) {
 		wait1Msec(125);
 		setDumpMotors(0);
 	}
+
 }
 void killClawCompensation() // lets us turn off all compensation
 {
@@ -138,12 +139,12 @@ void moveClaw(int power, int potValue)//allows us to move the claw in auto and c
 	startClawCompensation(potValue); //turns on the compensation code for the claw
 }
 
-//Not sure this will ever be used when killClawCompensation does virtually the same thing -Evan
 void manualCompensation() //allows us to use the single power compensation
 {
 	killClawCompensation(); //very important to do this before manually controlling the motors because PID is doing its thing
 	setClawMotors(15);
 }
+
 void waitForLift(int target, int variance)
 {
 	while(SensorValue[arm]> target+variance || SensorValue[arm]< target-variance)
@@ -151,6 +152,7 @@ void waitForLift(int target, int variance)
 		wait1Msec(25);
 	}
 }
+
 void waitForClaw(int target, int variance)
 {
 	while(SensorValue[claw]>target+variance || SensorValue[claw] < target-variance)
@@ -158,6 +160,8 @@ void waitForClaw(int target, int variance)
 		wait1Msec(25);
 	}
 }
+
+
 void rotateDegrees(int position, int direction) {//This function is for turning
 	SensorValue[gyro] = 0;
 	//Clear gyro
