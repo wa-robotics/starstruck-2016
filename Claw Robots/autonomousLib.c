@@ -144,3 +144,17 @@ void manualCompensation() //allows us to use the single power compensation
 	killClawCompensation(); //very important to do this before manually controlling the motors because PID is doing its thing
 	setClawMotors(15);
 }
+void waitForLift(int target, int variance)
+{
+	while(SensorValue(arm) > target+variance || SensorValue(arm) < target-variance)
+	{
+		wait1Msec(25);
+	}
+}
+void waitForClaw(int target, int variance)
+{
+	while(SensorValue(claw) > target+variance || SensorValue(claw) < target-variance)
+	{
+		wait1Msec(25);
+	}
+}

@@ -18,16 +18,53 @@
 //setDumpMotors and setClawMotors are in autonomousLib.c
 
 //potentiometer value for lift: 2150
+int liftTarget;
+int clawTarget;
+task lift()
+{
+	liftToPotTarget(liftTarget,127);
+}
+task claw()
+{
+	moveClaw(127,clawTarget);
+}
 task autonomous() {
-	liftToPotTarget(2150,127);
-	wait1Msec(250);
+	liftTarget = 2150;
+	clawTarget = 1000;//A
+	startTask(lift);
+	startTask(claw);
 	diagonalLeft(127,160);
-	wait1Msec(750);
+	waitForPot(2150,50);
+	waitForClaw(1000,50);//A
+	wait1Msec(250);
 	straight(127,600);
 	wait1Msec(125);
-	straight(-127,200);
-
+	straight(-127,100);
+	//point turn
+	//lift down
+	//wait
+	//strafe
+	//wait
+	//close
+	//wait
+	//raise arm
+	//wait a short amount of time
+	//open claw
+	//wait
+	//arm down
+	//wait
+	//drive forward
+	//wait
+	//close claw
+	//wait
+	//lift arm
+	//drive back
+	//wait
+	//raise arm
+	//open claw
+	//wait
 }
+
 task clawControl()
 {
      int PIDTargetValue;
