@@ -52,23 +52,123 @@ void pre_auton()
 	}
 }
 
+
 //potentiometer value for lift: 2150
+int liftTarget;
+int clawTarget;
+task liftTask()
+{
+	liftToPotTarget(liftTarget,127);
+}
+task clawTask()
+{
+	moveClaw(127,clawTarget);
+}
+
+
 task autonomous() {
-	liftToPotTarget(2150,127);
-	wait1Msec(250);
+	//Auton plays and their numbers, for reference.  These numbers are set as the value of the AUTON_PLAY variable to control which auton play runs
+	//#1 Big
+	//#2 Small
+	//#3 Cube (score middle cube and block)
+	//#4 Fence (3 stars, corner)
+	//#5 Nothing
+	//#6 Prog skills
+
+	//plays should differentiate between left and right using AUTON_SIDE and changing certain values accordingly (ex: running the right side version of a function)
+	if (AUTON_PLAY == 1) { //uncomment line inside this block when task exists
+		//startTask(autonBig);
+	} else if (AUTON_PLAY == 2) {
+		//startTask(autonSmall);
+	} else if (AUTON_PLAY == 3) {
+		//startTask(autonCube);
+	} else if (AUTON_PLAY == 4) {
+		//startTask(autonFence);
+	} else if (AUTON_PLAY == 5) {
+		//Do nothing
+	} else if (AUTON_PLAY == 6) {
+		//startTask(progSkills);
+	}
+
+	liftTarget = 2150;
+	clawTarget = 1000;//A
+	startTask(liftTask);
+	startTask(clawTask);
 	diagonalLeft(127,160);
-	wait1Msec(750);
+	waitForLift(2150,50);
+	waitForClaw(1000,50);//A
+	wait1Msec(250);
 	straight(127,600);
 	wait1Msec(125);
-	straight(-127,200);
+	straight(-127,100);
+	//point turn
+	//lift down
+	//wait
+	//strafe
+	//wait
+	//close
+	//wait
+	//raise arm
+	//wait a short amount of time
+	//open claw
+	//wait
+	//arm down
+	//wait
+	//drive forward
+	//wait
+	//close claw
+	//wait
+	//lift arm
+	//drive back
+	//wait
+	//raise arm
+	//open claw
+	//wait
+}
 
+task clawControl()
+{
+     int PIDTargetValue;
+     float kp = 0.5; //these constants might change down the road, but they are good for now
+     float ki = 0.01;
+     float kd = 0.00001;
+     int error;
+     int integral = 0;
+     int derivative;
+     int lastError = 0; //start this at 0 so the first time `derivative = error - lastError` runs there's no issue
+     int PIDDrive;
+     while(true)
+     {
+          if(vexRT[Btn6U]) //opens claw
+          {
+               setClawMotors(127);
+               //do we want to clear the integral and lastError terms here?
+               PIDTargetValue = SensorValue[claw];
+          }
+          else if(vexRT[Btn6D]) //closes claw
+          {
+               setClawMotors(-127);
+               //do we want to clear the integral and lastError terms here?
+               PIDTargetValue = SensorValue[claw];
+          }
+          else //holds position with PID
+          {
+               error = PIDTargetValue - SensorValue[claw];
+               integral += error;
+               derivative = error - lastError;
+               PIDDrive = kp*error + ki*integral + kd*derivative;
+               setClawMotors(PIDDrive);
+               lastError = error;
+          }
+          wait1Msec(25); //prevents cpu hogging
+     }
 }
 
 task usercontrol()
 {
 	//startTask(autonomous);
 	//stopTask(main);
-
+	//startTask(clawControl);
 	//setClawMotors(127);
 	//wait1Msec(750);
 	//setClawMotors(-127);
