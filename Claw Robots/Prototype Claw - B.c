@@ -26,6 +26,12 @@
 //Main competition background code...do not modify!
 #include "Vex_Competition_Includes.c"
 
+//global variables
+int LEFT = 1; //note that changing this value could affect gyro rotation function if LEFT is used for the value of the direction parameter in that function
+int RIGHT = 2;
+int AUTON_SIDE = 0; //either LEFT or RIGHT, as above
+int AUTON_PLAY = 0;
+
 //Our includes
 #include "autonomousLib.c"
 #include "LCD Wizard.c"
@@ -42,7 +48,8 @@ void pre_auton()
 	bDisplayCompetitionStatusOnLcd = false;
 
 	bLCDBacklight = true;
-	if (bIfiRobotDisabled) { //Only show auton play wizard when the robot is in competition mode & disabled on initial startup
+	bool testLcdWizard = false;
+	if (bIfiRobotDisabled || testLcdWizard) { //Only show auton play wizard when the robot is in competition mode & disabled on initial startup
 		startTask(LCDSelect);
 	}
 }
@@ -60,7 +67,7 @@ task clawTask()
 	moveClaw(127,clawTarget);
 }
 
-int AUTON_PLAY = 0;
+
 task autonomous() {
 	//Auton plays and their numbers, for reference.  These numbers are set as the value of the AUTON_PLAY variable to control which auton play runs
 	//#1 Big
@@ -69,6 +76,8 @@ task autonomous() {
 	//#4 Fence (3 stars, corner)
 	//#5 Nothing
 	//#6 Prog skills
+
+	//plays should differentiate between left and right using AUTON_SIDE and changing certain values accordingly (ex: running the right side version of a function)
 	if (AUTON_PLAY == 1) { //uncomment line inside this block when task exists
 		//startTask(autonBig);
 	} else if (AUTON_PLAY == 2) {
