@@ -75,7 +75,7 @@ task clawTask()
 	moveClaw(127,clawTarget);
 }
 
-
+task progSkills();
 task autonomous() {
 	//Auton plays and their numbers, for reference.  These numbers are set as the value of the AUTON_PLAY variable to control which auton play runs
 	//#1 Big
@@ -97,8 +97,9 @@ task autonomous() {
 	} else if (AUTON_PLAY == 5) {
 		//Do nothing
 	} else if (AUTON_PLAY == 6) {
-		//startTask(progSkills);
+		startTask(progSkills);
 	}
+
 	SensorValue[rDriveEnc] = 0;
 	SensorValue[lDriveEnc] = 0;
 	liftTarget = 2550;
@@ -135,6 +136,7 @@ task autonomous() {
 	wait1Msec(1500);
 	stopTask(clawTask);
 	startTask(clawTask);
+
 	//wait
 	//raise arm
 	//wait a short amount of time
@@ -152,6 +154,26 @@ task autonomous() {
 	//raise arm
 	//open claw
 	//wait
+}
+
+task progSkills() {
+		clawTarget = 2700;//A
+		//startTask(liftTask);
+		startTask(clawTask);
+		straight(-127,150);
+		waitForClaw(2700,100);
+		wait1Msec(1000);
+		startTask(clawTask);
+		clawTarget = 4000;
+		waitForClaw(4000,100);
+		wait1Msec(250);
+		liftTarget = 2100;
+		startTask(liftTask);
+		straight(-127,500);
+
+
+		//liftTarget = 1950;
+
 }
 
 task clawControl()
@@ -197,6 +219,7 @@ task usercontrol()
 	//AUTON_PLAY = {number};
 
 	 //stopTask(usercontrol);
+
 
 	//startTask(clawControl); //simple control and PID for compensation on claw
 

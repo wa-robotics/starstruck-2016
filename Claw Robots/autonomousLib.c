@@ -126,15 +126,19 @@ void moveClaw(int power, int potValue)//allows us to move the claw in auto and c
 	{
 		while(SensorValue[claw] < potValue)
 		{
-			setClawMotors(-abs(power)); //if the claw needs to be opened, this makes sure you are using a positive power so that it doesn't try to move forever
+			//orig +
+			setClawMotors(abs(power)); //if the claw needs to be opened, this makes sure you are using a positive power so that it doesn't try to move forever
 		}
+		setClawMotors(-20); //hold closed or restart compensation
 	}
 	else if(SensorValue[claw] > potValue)
 	{
 		while(SensorValue[claw] > potValue)
 		{
-			setClawMotors(abs(power)); //the exact opposite of the above codition for positive input (credit to Evan for remembering the number -1 exists)
+			//orig -
+			setClawMotors(-abs(power)); //the exact opposite of the above codition for positive input (credit to Evan for remembering the number -1 exists)
 		}
+		setClawMotors(15); //hold open or restart compensation
 	}
 	//startClawCompensation(potValue); //turns on the compensation code for the claw
 }
