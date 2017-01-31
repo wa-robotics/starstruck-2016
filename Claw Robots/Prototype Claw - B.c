@@ -254,9 +254,9 @@ task usercontrol()
 		} else if (vexRT[Btn5D] && !SensorValue[liftDown]) { //second part of condition is to prevent motors from jittering if 5U and 5D are pressed down
 			setDumpMotors(-127);
 		} else {
-			if (SensorValue[arm] > 3680) { //arm is all the way down; no compensation power
+			if (/*SensorValue[arm] > 4070 && */SensorValue[liftDown]) { //arm is all the way down; no compensation power
 				setDumpMotors(0);
-			} else if (SensorValue[arm] > 1200) { //arm is up but has not gone past vertical (behind back of robot).  Positive compensation power
+			} else if (SensorValue[arm] > 1950) { //arm is up but has not gone past vertical (behind back of robot).  Positive compensation power
 				setDumpMotors(armCompPower);
 			} else { //arm is up and behind the back of the robot.  Negative compensation power (and increased compensation power to protect potentiometer from crossing its physical limit and counter momentum)
 				setDumpMotors(-armCompPower);
