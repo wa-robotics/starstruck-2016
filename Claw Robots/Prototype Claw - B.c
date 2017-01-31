@@ -3,6 +3,7 @@
 #pragma config(Sensor, in3,    gyro,           sensorGyro)
 #pragma config(Sensor, dgtl1,  rDriveEnc,      sensorQuadEncoder)
 #pragma config(Sensor, dgtl3,  lDriveEnc,      sensorQuadEncoder)
+#pragma config(Sensor, dgtl5,  liftDown,       sensorTouch)
 #pragma config(Motor,  port1,           leftClaw,      tmotorVex393_HBridge, openLoop)
 #pragma config(Motor,  port2,           lDriveFront,   tmotorVex393HighSpeed_MC29, openLoop)
 #pragma config(Motor,  port3,           lDriveBack,    tmotorVex393HighSpeed_MC29, openLoop)
@@ -32,7 +33,7 @@ int AUTON_SIDE = 0; //either LEFT or RIGHT, as above
 int AUTON_PLAY = 0;
 
 //Our includes
-#include "autonomousLib.c"
+#include "autonomousLib B.c"
 #include "LCD Wizard.c"
 //setDumpMotors and setClawMotors are in autonomousLib.c
 
@@ -57,9 +58,17 @@ void pre_auton()
 //potentiometer value for lift: 2150
 int liftTarget;
 int clawTarget;
+int liftgo = 0;
 task liftTask()
 {
+while(1)
+{
+	if(liftgo == 1)
+	{
 	liftToPotTarget(liftTarget,127);
+	liftgo = 0;
+	}
+}
 }
 task clawTask()
 {
@@ -90,24 +99,42 @@ task autonomous() {
 	} else if (AUTON_PLAY == 6) {
 		//startTask(progSkills);
 	}
-
-	liftTarget = 1950;
-	clawTarget = 1000;//A
+	SensorValue[rDriveEnc] = 0;
+	SensorValue[lDriveEnc] = 0;
+	liftTarget = 2550;
+	clawTarget = 2600;//A
 	startTask(liftTask);
+	liftgo = 1;
 	startTask(clawTask);
-	diagonalLeft(127,160);
-	waitForLift(1950,50);
-	waitForClaw(1000,50);//A
+	diagonalLeft(127,50);
+	waitForLift(2550,50);
+	waitForClaw(2600,50);//A
+	setClawMotors(15);
 	wait1Msec(250);
-	straight(127,600);
+	straight(127,1500);
 	wait1Msec(125);
-	straight(-127,100);
-	//point turn
-	//lift down
-	//wait
-	//strafe
-	//wait
-	//close
+	straight(-127,310);
+	SensorValue[rDriveEnc] = 0;
+	while(SensorValue[rDriveEnc] < 650)
+	{
+		setRightDtMotors(85);
+		setLeftDtMotors(-85);
+	}
+	setRightDtMotors(0);
+	setLeftDtMotors(0);
+	liftToPotTarget(3650, -127)
+	strafeRight(1200, 127);
+	straight(127, 75);
+	moveClaw(127, 4050);
+	setClawMotors(-70);
+	wait1Msec(500);
+	stopTask(liftTask);
+	liftTarget = 1950
+	liftgo = 1;
+	startTask(liftTask);
+	wait1Msec(1500);
+	stopTask(clawTask);
+	startTask(clawTask);
 	//wait
 	//raise arm
 	//wait a short amount of time
@@ -168,8 +195,8 @@ task usercontrol()
 {
 	//Override auton play selection for testing: (next 3 lines)
 	//AUTON_PLAY = {number};
-	//startTask(autonomous);
-	//stopTask(usercontrol);
+
+	 //stopTask(usercontrol);
 
 	//startTask(clawControl); //simple control and PID for compensation on claw
 
@@ -193,11 +220,15 @@ task usercontrol()
   	motor[lDriveBack] = LY - LX;
   	motor[rDriveFront] = RY - RX;
   	motor[rDriveBack] = RY + RX;
-
+	if(vexRT[Btn8U])
+	{
+	 startTask(autonomous);
+	 stopTask(usercontrol);
+	}
 
 	  if (vexRT[Btn5U] && (SensorValue[arm] > armPotMaxLimit || !enableSoftwareArmPosLimit)) {
 	  	setDumpMotors(127);
-		} else if (vexRT[Btn5D]) { //second part of condition is to prevent motors from jittering if 5U and 5D are pressed down
+		} else if (vexRT[Btn5D] && !SensorValue[liftDown]) { //second part of condition is to prevent motors from jittering if 5U and 5D are pressed down
 			setDumpMotors(-127);
 		} else {
 			if (SensorValue[arm] > 3680) { //arm is all the way down; no compensation power
