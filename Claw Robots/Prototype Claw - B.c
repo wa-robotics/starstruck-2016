@@ -270,7 +270,7 @@ task usercontrol()
 		if(vexRT[Btn7U])
 		{
 			liftgo = 1;
-			clawTarget = 1330;
+			clawTarget = 1355;
 			liftTarget = 2100;
 			startTask(clawTask);
 			startTask(liftTask);
@@ -278,7 +278,7 @@ task usercontrol()
 		if(vexRT[Btn7L])
 		{
 			liftgo = 1;
-			clawTarget = 1330;
+			clawTarget = 1355;
 			liftTarget = 2390;
 			startTask(clawTask);
 			startTask(liftTask);
