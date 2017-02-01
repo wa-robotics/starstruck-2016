@@ -267,7 +267,22 @@ task usercontrol()
 	 startTask(autonomous);
 	 stopTask(usercontrol);
 	}
-
+		if(vexRT[Btn7U])
+		{
+			liftgo = 1;
+			clawTarget = 1330;
+			liftTarget = 2100;
+			startTask(clawTask);
+			startTask(liftTask);
+		}
+		if(vexRT[Btn7L])
+		{
+			liftgo = 1;
+			clawTarget = 1330;
+			liftTarget = 2390;
+			startTask(clawTask);
+			startTask(liftTask);
+		}
 	  if (vexRT[Btn5U] && (SensorValue[arm] > armPotMaxLimit || !enableSoftwareArmPosLimit)) {
 	  	setDumpMotors(127);
 		} else if (vexRT[Btn5D] && !SensorValue[liftDown]) { //second part of condition is to prevent motors from jittering if 5U and 5D are pressed down
