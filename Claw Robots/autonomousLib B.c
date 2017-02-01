@@ -76,7 +76,7 @@ void diagonalLeft(int power, int dist) {
 void straight(int power, int dist) {
 	SensorValue[rDriveEnc] = 0;
 	while(abs(SensorValue[rDriveEnc]) < dist) {
-		setLeftDtMotors(power-53);
+		setLeftDtMotors(power-38);
 		setRightDtMotors(power);
 	}
 	if (power > 0) {
@@ -129,6 +129,7 @@ void liftToPotTarget(int target, int maxPower) {
 		}
 		setDumpMotors(0);
 	}
+	setDumpMotors(12);
 
 }
 void killClawCompensation() // lets us turn off all compensation
@@ -141,7 +142,11 @@ void startClawCompensation(int newTarget) {
 	target = newTarget;
 	startTask(clawCompensatePID);
 }
-
+void manualCompensation() //allows us to use the single power compensation
+{
+	killClawCompensation(); //very important to do this before manually controlling the motors because PID is doing its thing
+	setClawMotors(15);
+}
 void moveClaw(int power, int potValue)//allows us to move the claw in auto and compensate
 {
 	killClawCompensation(); //very important to do this before manually controlling the motors because PID is doing its thing
@@ -159,14 +164,10 @@ void moveClaw(int power, int potValue)//allows us to move the claw in auto and c
 			setClawMotors(abs(power)); //the exact opposite of the above codition for positive input (credit to Evan for remembering the number -1 exists)
 		}
 	}
+	manualCompensation();
 	//startClawCompensation(potValue); //turns on the compensation code for the claw
 }
 
-void manualCompensation() //allows us to use the single power compensation
-{
-	killClawCompensation(); //very important to do this before manually controlling the motors because PID is doing its thing
-	setClawMotors(15);
-}
 
 void waitForLift(int target, int variance)
 {
