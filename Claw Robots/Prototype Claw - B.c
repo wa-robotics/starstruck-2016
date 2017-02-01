@@ -31,9 +31,15 @@ int LEFT = 1; //note that changing this value could affect gyro rotation functio
 int RIGHT = 2;
 int AUTON_SIDE = 0; //either LEFT or RIGHT, as above
 int AUTON_PLAY = 0;
+float straighteningKpLeft = 0.00125,//.43,//.195, //proportional constant for straightening response for the left side
+		straighteningKpRight = 0.00125;
+static int STRAIGHT = 2; //the 2 here shouldn't matter as long as no variables are multiplied by 'direction' in driveDistancePID
+static int STRAFE_LEFT = 3; //don't multiply values by this variable!
+static int STRAFE_RIGHT = 4;
 
 //Our includes
 #include "autonomousLib B.c"
+#include "driveStraight B.c"
 #include "LCD Wizard.c"
 //setDumpMotors and setClawMotors are in autonomousLib.c
 
@@ -98,6 +104,7 @@ task autonomous() {
 		//Do nothing
 	} else if (AUTON_PLAY == 6) {
 		startTask(progSkills);
+		stopTask(autonomous);
 	}
 
 	SensorValue[rDriveEnc] = 0;
@@ -164,19 +171,24 @@ task autonomous() {
 }
 
 task progSkills() {
+		straight(-127,250);
 		clawTarget = 2700;//A
-		//startTask(liftTask);
 		startTask(clawTask);
-		straight(-127,150);
 		waitForClaw(2700,100);
+		setClawMotors(15);
 		wait1Msec(1000);
-		startTask(clawTask);
-		clawTarget = 4000;
-		waitForClaw(4000,100);
-		wait1Msec(250);
-		liftTarget = 2100;
-		startTask(liftTask);
-		straight(-127,500);
+		//clawTarget = 4095;
+		//startTask(clawTask);
+		//waitForClaw(4075,25);
+		//setClawMotors(-20);
+		//wait1Msec(1000);
+		//liftTarget = 3670;
+		//startTask(liftTask);
+		//straight(-127,700);
+		//wait1Msec(250);
+		//liftTarget = 2100;
+		//startTask(liftTask);
+		//straight(-127,500);
 
 
 		//liftTarget = 1950;
@@ -223,9 +235,9 @@ task clawControl()
 task usercontrol()
 {
 	//Override auton play selection for testing: (next 3 lines)
-	//AUTON_PLAY = {number};
-
-	 //stopTask(usercontrol);
+	//AUTON_PLAY = 6;
+	//startTask(autonomous);
+	//stopTask(usercontrol);
 
 
 	//startTask(clawControl); //simple control and PID for compensation on claw

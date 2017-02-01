@@ -51,7 +51,7 @@ void driveDistance(int power, int encoderCounts, int direction) {
 						} else { //otherwise, just set the right side to the power
 							rPower = power;
 						}
-						writeDebugStreamLine("lPower = %d, rPower = %d",lPower,rPower);
+						writeDebugStreamLine("lPower = %d, rPower = %d,lDriveEnc = %d, rDriveEnc = %d",lPower,rPower,SensorValue[lDriveEnc],SensorValue[rDriveEnc]);
 
 					setLeftDtMotorsSeparate(lPower,lPower);
 					setRightDtMotorsSeparate(rPower,rPower);
