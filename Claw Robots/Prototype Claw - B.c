@@ -109,19 +109,19 @@ task autonomous() {
 
 	SensorValue[rDriveEnc] = 0;
 	SensorValue[lDriveEnc] = 0;
-	liftTarget = 2000;
-	clawTarget = 2000;//A
-	startTask(liftTask);
-	liftgo = 1;
+	liftTarget = 800;
+	clawTarget = 1900;//A
+	//startTask(liftTask);
+	//liftgo = 1;
 	startTask(clawTask);
-	diagonalLeft(127,50);
-	waitForLift(2000,50);
-	waitForClaw(2000,50);//A
+	diagonalLeft(-127,50);
+	//waitForLift(2000,50);
+	waitForClaw(1900,50);//A
 	wait1Msec(250);
-	straight(127,1420);
-	wait1Msec(125);
-	straight(-127,240);
-	SensorValue[rDriveEnc] = 0;
+	straight(-127,1306);
+	//wait1Msec(125);
+	//straight(127,150);
+	/*SensorValue[rDriveEnc] = 0;
 	while(SensorValue[rDriveEnc] < 735)
 	{
 		setRightDtMotors(85);
@@ -129,39 +129,32 @@ task autonomous() {
 	}
 	setRightDtMotors(0);
 	setLeftDtMotors(0);
-	liftToPotTarget(3950, -127)
-	strafeRight(1000, 127);
+	liftToPotTarget(3900, -127)
+	moveClaw(127, 1900);*/
+	strafeRight(1020, 127);
 	straight(127, 75);
 	moveClaw(127, 3200);
 	setClawMotors(-127);
-	wait1Msec(1000);
+	wait1Msec(500);
 	setClawMotors(-25);
-	liftTarget = 900;
+	straight(-127, 350);
 	liftgo = 1;
 	startTask(liftTask);
-	waitForLift(900,50);
-	setDumpMotors(100);
-	wait1Msec(200);
-	startTask(liftTask);
-	wait1Msec(400);
-	stopTask(clawTask);
+	wait1Msec(1000);
 	startTask(clawTask);
-	wait10Msec(175);
-	liftToPotTarget(3950, -127)
+	wait10Msec(80)
+	liftToPotTarget(3900, -127)
+	//straight(127, 200)
 	straight(127,1075);
-	moveClaw(127, 3550);
+	moveClaw(127, 3200);
 	setClawMotors(-50);
+	wait10Msec(100);
 	straight(-127,1075);
 	stopTask(liftTask);
-	liftTarget = 900;
+	liftTarget = 800;
 	liftgo = 1;
 	startTask(liftTask);
-	waitForLift(900,50);
-	setDumpMotors(100);
-	wait1Msec(200);
-	startTask(liftTask);
-	wait1Msec(400);
-	stopTask(clawTask);
+	wait1Msec(1000);
 	startTask(clawTask);
 	//arm down
 	//wait
