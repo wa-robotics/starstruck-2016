@@ -110,50 +110,57 @@ task autonomous() {
 	SensorValue[rDriveEnc] = 0;
 	SensorValue[lDriveEnc] = 0;
 	liftTarget = 2000;
-	clawTarget = 2600;//A
+	clawTarget = 2000;//A
 	startTask(liftTask);
 	liftgo = 1;
 	startTask(clawTask);
 	diagonalLeft(127,50);
 	waitForLift(2000,50);
-	waitForClaw(2600,50);//A
+	waitForClaw(2000,50);//A
 	wait1Msec(250);
-	straight(127,1500);
+	straight(127,1420);
 	wait1Msec(125);
-	straight(-127,310);
+	straight(-127,240);
 	SensorValue[rDriveEnc] = 0;
-	while(SensorValue[rDriveEnc] < 675)
+	while(SensorValue[rDriveEnc] < 735)
 	{
 		setRightDtMotors(85);
 		setLeftDtMotors(-85);
 	}
 	setRightDtMotors(0);
 	setLeftDtMotors(0);
-	liftToPotTarget(3900, -127)
+	liftToPotTarget(3950, -127)
 	strafeRight(1000, 127);
 	straight(127, 75);
-	moveClaw(127, 4050);
+	moveClaw(127, 3200);
 	setClawMotors(-127);
-	wait1Msec(500);
+	wait1Msec(1000);
 	setClawMotors(-25);
-	stopTask(liftTask);
-	liftTarget = 1150;
+	liftTarget = 900;
 	liftgo = 1;
 	startTask(liftTask);
-	wait1Msec(1000);
+	waitForLift(900,50);
+	setDumpMotors(100);
+	wait1Msec(200);
+	startTask(liftTask);
+	wait1Msec(400);
 	stopTask(clawTask);
 	startTask(clawTask);
 	wait10Msec(175);
-	liftToPotTarget(3900, -127)
+	liftToPotTarget(3950, -127)
 	straight(127,1075);
-	moveClaw(127, 4090);
+	moveClaw(127, 3550);
 	setClawMotors(-50);
 	straight(-127,1075);
 	stopTask(liftTask);
-	liftTarget = 1150;
+	liftTarget = 900;
 	liftgo = 1;
 	startTask(liftTask);
-	wait1Msec(1000);
+	waitForLift(900,50);
+	setDumpMotors(100);
+	wait1Msec(200);
+	startTask(liftTask);
+	wait1Msec(400);
 	stopTask(clawTask);
 	startTask(clawTask);
 	//arm down
@@ -270,16 +277,16 @@ task usercontrol()
 		if(vexRT[Btn7U])
 		{
 			liftgo = 1;
-			clawTarget = 1355;
-			liftTarget = 2100;
+			clawTarget = 2000;
+			liftTarget = 2000;
 			startTask(clawTask);
 			startTask(liftTask);
 		}
 		if(vexRT[Btn7L])
 		{
 			liftgo = 1;
-			clawTarget = 1355;
-			liftTarget = 2390;
+			clawTarget = 2000;
+			liftTarget = 2300;
 			startTask(clawTask);
 			startTask(liftTask);
 		}

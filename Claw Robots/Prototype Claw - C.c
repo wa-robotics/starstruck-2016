@@ -37,8 +37,7 @@ static int STRAFE_LEFT = 3; //don't multiply values by this variable!
 static int STRAFE_RIGHT = 4;
 
 //Our includes
-#include "autonomousLib.c"
-#include "driveStraight.c"
+#include "autonomousLib C.c"
 #include "LCD Wizard.c"
 //setDumpMotors and setClawMotors are in autonomousLib.c
 
@@ -62,6 +61,7 @@ void pre_auton()
 //potentiometer value for lift: 2150
 int liftTarget;
 int clawTarget;
+int liftgo = 0;
 task liftTask()
 {
 	liftToPotTarget(liftTarget,127);
@@ -98,47 +98,61 @@ task autonomous() {
 		startTask(progSkills);
 	}
 
-	//liftTarget = 2150;
-	//clawTarget = 1000;//A
+	SensorValue[rDriveEnc] = 0;
+	SensorValue[lDriveEnc] = 0;
+	liftTarget = 2190;
+	clawTarget = 2985;
+	startTask(liftTask);
+	startTask(clawTask);
+	//diagonalLeft(127,50);
+	waitForLift(2000,50);
+	waitForClaw(1111,50);//A
+	wait1Msec(250);
+	straight(127,1400);
+	wait1Msec(125);
+	straight(-127,310);
+	SensorValue[rDriveEnc] = 0;
+	while(abs(SensorValue[rDriveEnc]) < 845)
+	{
+		setRightDtMotors(85);
+		setLeftDtMotors(-85);
+	}
+	setRightDtMotors(0);
+	setLeftDtMotors(0);
+	SensorValue[rDriveEnc] = 0;
+	liftToPotTarget(3740, -127);
+	strafeRight(1020,127);
+	//straight(127, 75);
+	moveClaw(127, 1160);
+	//setClawMotors(-127);
+	//wait1Msec(500);
+	setClawMotors(-25);
+	//stopTask(liftTask);
+	//liftTarget = 1650;
 	//startTask(liftTask);
+	//wait1Msec(1450);
+	//setClawMotors(127);
+	//wait10Msec(100);
+	//setClawMotors(15);
+	//wait10Msec(300);
+	//liftToPotTarget(3800, -127)
+	//straight(127,1075);
+	//moveClaw(127, 0);
+	//setClawMotors(-50);
+	//straight(-127,1075);
+	//stopTask(liftTask);
+	//liftTarget = 1150;
+	//startTask(liftTask);
+	//wait1Msec(1000);
+	//stopTask(clawTask);
 	//startTask(clawTask);
-	//diagonalLeft(127,160);
-	//waitForLift(2150,50);
-	//waitForClaw(1000,50);//A
-	//wait1Msec(250);
-	//straight(127,600);
-	//wait1Msec(125);
-	//straight(-127,100);
-	//point turn
-	//lift down
-	//wait
-	//strafe
-	//wait
-	//close
-	//wait
-	//raise arm
-	//wait a short amount of time
-	//open claw
-	//wait
-	//arm down
-	//wait
-	//drive forward
-	//wait
-	//close claw
-	//wait
-	//lift arm
-	//drive back
-	//wait
-	//raise arm
-	//open claw
-	//wait
 }
 
 task progSkills() {
 		//clawTarget = 2700;//A
 		////startTask(liftTask);
 		//startTask(clawTask);
-		driveDistance(-127,150,STRAIGHT);
+		//driveDistance(-127,150,STRAIGHT);
 		//waitForClaw(2700,100);
 		//wait1Msec(1000);
 		//startTask(clawTask);
@@ -195,8 +209,8 @@ task clawControl()
 task usercontrol()
 {
 	//	AUTON_PLAY = 6;
-	//startTask(autonomous);
-	//stopTask(usercontrol);
+	startTask(autonomous);
+	stopTask(usercontrol);
 
 	int LY = 0;
 	int LX = 0;
