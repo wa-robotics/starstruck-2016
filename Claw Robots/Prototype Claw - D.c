@@ -114,8 +114,8 @@ task autonomous() {
 
 task usercontrol()
 {
-	startTask(autonomous);
-	stopTask(usercontrol);
+	//startTask(autonomous);
+	//stopTask(usercontrol);
 	//stopTask(main);
 
 	//setClawMotors(127);
