@@ -73,6 +73,25 @@ void diagonalLeft(int power, int dist) {
 	motor[rDriveBack] = 0;
 }
 
+void diagonalRight(int power, int dist) {
+	SensorValue[rDriveEnc] = 0;
+	while(abs(SensorValue[rDriveEnc]) < dist) {
+		writeDebugStreamLine("%d",SensorValue[lDriveEnc]);
+		motor[rDriveFront] = power;
+		motor[lDriveBack] = power;
+	}
+	if (power > 0) {
+		motor[rDriveFront] = -10;
+		motor[lDriveBack] = -10;
+	} else if (power < 0) {
+		motor[rDriveFront] = 10;
+		motor[lDriveBack] = 10;
+	}
+	wait1Msec(75);
+	motor[rDriveFront] = 0;
+	motor[lDriveBack] = 0;
+}
+
 void straight(int power, int dist) {
 	SensorValue[rDriveEnc] = 0;
 	while(abs(SensorValue[rDriveEnc]) < dist) {
@@ -99,6 +118,22 @@ void strafeRight(int target, int speed)
 		motor[lDriveBack] = -speed;
 		motor[rDriveFront] = -speed;
 		motor[rDriveBack] = speed;
+	}
+	motor[lDriveFront] = 0;
+	motor[lDriveBack] = 0;
+	motor[rDriveFront] = 0;
+	motor[rDriveBack] = 0;
+}
+
+void strafeLeft(int target, int speed)
+{
+	SensorValue[rDriveEnc] = 0;
+	while(abs(sensorValue[rDriveEnc]) < target)
+	{
+		motor[lDriveFront] = -speed;
+		motor[lDriveBack] = speed;
+		motor[rDriveFront] = speed;
+		motor[rDriveBack] = -speed;
 	}
 	motor[lDriveFront] = 0;
 	motor[lDriveBack] = 0;
@@ -157,9 +192,9 @@ void moveClaw(int power, int potValue)//allows us to move the claw in auto and c
 			setClawMotors(-abs(power)); //if the claw needs to be opened, this makes sure you are using a positive power so that it doesn't try to move forever
 		}
 	}
-	else if(SensorValue[claw] > potValue)
+	else if(SensorValue[claw] < potValue)
 	{
-		while(SensorValue[claw] > potValue)
+		while(SensorValue[claw] < potValue)
 		{
 			setClawMotors(abs(power)); //the exact opposite of the above codition for positive input (credit to Evan for remembering the number -1 exists)
 		}

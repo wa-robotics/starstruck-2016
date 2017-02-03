@@ -1,8 +1,8 @@
 #pragma config(Sensor, in1,    arm,            sensorPotentiometer)
 #pragma config(Sensor, in2,    claw,           sensorPotentiometer)
 #pragma config(Sensor, in3,    gyro,           sensorGyro)
-#pragma config(Sensor, dgtl1,  rDriveEnc,      sensorQuadEncoder)
-#pragma config(Sensor, dgtl3,  lDriveEnc,      sensorQuadEncoder)
+#pragma config(Sensor, dgtl1,  lDriveEnc,      sensorQuadEncoder)
+#pragma config(Sensor, dgtl3,  rDriveEnc,      sensorQuadEncoder)
 #pragma config(Motor,  port1,           leftClaw,      tmotorVex393_HBridge, openLoop)
 #pragma config(Motor,  port2,           lDriveFront,   tmotorVex393HighSpeed_MC29, openLoop)
 #pragma config(Motor,  port3,           lDriveBack,    tmotorVex393HighSpeed_MC29, openLoop)
@@ -100,42 +100,44 @@ task autonomous() {
 
 	SensorValue[rDriveEnc] = 0;
 	SensorValue[lDriveEnc] = 0;
-	liftTarget = 2190;
-	clawTarget = 2985;
+	liftTarget = 2060;
+	clawTarget = 2535;
 	startTask(liftTask);
 	startTask(clawTask);
-	//diagonalLeft(127,50);
-	waitForLift(2000,50);
-	waitForClaw(1111,50);//A
+	diagonalRight(127,400);
+	//waitForLift(2060,100);
+	//waitForClaw(2535,100);//A
 	wait1Msec(250);
-	straight(127,1400);
+	straight(127,1300);
 	wait1Msec(125);
-	straight(-127,310);
+	straight(-127,350);
 	SensorValue[rDriveEnc] = 0;
 	while(abs(SensorValue[rDriveEnc]) < 845)
 	{
-		setRightDtMotors(85);
-		setLeftDtMotors(-85);
+		setRightDtMotors(-85);
+		setLeftDtMotors(85);
 	}
 	setRightDtMotors(0);
 	setLeftDtMotors(0);
-	SensorValue[rDriveEnc] = 0;
+	moveClaw(127,3000);
 	liftToPotTarget(3740, -127);
-	strafeRight(1020,127);
-	//straight(127, 75);
-	moveClaw(127, 1160);
-	//setClawMotors(-127);
-	//wait1Msec(500);
-	setClawMotors(-25);
-	//stopTask(liftTask);
-	//liftTarget = 1650;
-	//startTask(liftTask);
-	//wait1Msec(1450);
-	//setClawMotors(127);
-	//wait10Msec(100);
-	//setClawMotors(15);
-	//wait10Msec(300);
-	//liftToPotTarget(3800, -127)
+	strafeLeft(1020,127);
+	straight(127,100);
+	moveClaw(-127,1111);
+	setClawMotors(-20);
+	stopTask(liftTask);
+	liftTarget = 1650;
+	startTask(liftTask);
+	straight(-127,200);
+	waitForLift(1650, 50);
+	wait1Msec(1450);
+	setClawMotors(127);
+	wait10Msec(100);
+	setClawMotors(15);
+	liftToPotTarget(3710, -127);
+
+
+
 	//straight(127,1075);
 	//moveClaw(127, 0);
 	//setClawMotors(-50);
@@ -239,7 +241,7 @@ task usercontrol()
 		} else if (vexRT[Btn5D]) { //second part of condition is to prevent motors from jittering if 5U and 5D are pressed down
 			setDumpMotors(-127);
 		} else {
-			if (SensorValue[arm] > 3880) { //arm is all the way down; no compensation power
+			if (SensorValue[arm] > 3760) { //arm is all the way down; no compensation power
 				setDumpMotors(0);
 			} else if (SensorValue[arm] > 1480) { //arm is up but has not gone past vertical (behind back of robot).  Positive compensation power
 				setDumpMotors(armCompPower);
