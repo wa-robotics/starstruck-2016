@@ -96,15 +96,15 @@ task autonomous() {
 	clawTarget = 1111;//A
 	startTask(liftTask);
 	startTask(clawTask);
-	//diagonalLeft(127,50);
+	diagonalLeft(127,50);
 	waitForLift(2000,50);
-	waitForClaw(1111,50);//A
+	waitForClaw(1111,150);//A
 	wait1Msec(250);
 	straight(127,1700);
 	wait1Msec(125);
 	straight(-127,310);
 	SensorValue[rDriveEnc] = 0;
-	while(abs(SensorValue[rDriveEnc]) < 845)
+	while(abs(SensorValue[rDriveEnc]) < 795)
 	{
 		setRightDtMotors(85);
 		setLeftDtMotors(-85);
@@ -118,15 +118,15 @@ task autonomous() {
 	moveClaw(127, 0);
 	setClawMotors(-127);
 	wait1Msec(500);
-	setClawMotors(-25);
+	setClawMotors(-20);
 	stopTask(liftTask);
 	liftTarget = 1650;
 	startTask(liftTask);
 	wait1Msec(1450);
 	setClawMotors(127);
-	wait10Msec(100);
+	wait1Msec(1000);
 	setClawMotors(15);
-	wait10Msec(300);
+	wait1Msec(500);
 	liftToPotTarget(3800, -127)
 	//straight(127,1075);
 	//moveClaw(127, 0);
@@ -201,11 +201,11 @@ task usercontrol()
 	int clawCompPower = 15;
   while(1)
   {
-  	if(vexRT[Btn8U])
-	{
-	 startTask(autonomous);
-	 stopTask(usercontrol);
-	}
+ // 	if(vexRT[Btn8U])
+	//{
+	// startTask(autonomous);
+	// stopTask(usercontrol);
+	//}
   	//for deadzones; when the joystick value for an axis is below the threshold, the motors controlled by that joystick will not move in that direction
   	LY = (abs(vexRT[Ch3]) > threshold) ? vexRT[Ch3] : 0;
   	LX = (abs(vexRT[Ch4]) > threshold) ? vexRT[Ch4] : 0;
@@ -222,9 +222,9 @@ task usercontrol()
 		} else if (vexRT[Btn5D]) { //second part of condition is to prevent motors from jittering if 5U and 5D are pressed down
 			setDumpMotors(-127);
 		} else {
-			if (SensorValue[arm] > 3850) { //arm is all the way down; no compensation power
+			if (SensorValue[arm] > 3890) { //arm is all the way down; no compensation power
 				setDumpMotors(0);
-			} else if (SensorValue[arm] > 1320) { //arm is up but has not gone past vertical (behind back of robot).  Positive compensation power
+			} else if (SensorValue[arm] > 1350) { //arm is up but has not gone past vertical (behind back of robot).  Positive compensation power
 				setDumpMotors(armCompPower);
 			} else { //arm is up and behind the back of the robot.  Negative compensation power (and increased compensation power to protect potentiometer from crossing its physical limit and counter momentum)
 				setDumpMotors(-armCompPower - 5);

@@ -76,7 +76,7 @@ void diagonalLeft(int power, int dist) {
 void straight(int power, int dist) {
 	SensorValue[rDriveEnc] = 0;
 	while(abs(SensorValue[rDriveEnc]) < dist) {
-		setLeftDtMotors(power-45);
+		setLeftDtMotors(power);
 		setRightDtMotors(power);
 	}
 	if (power > 0) {
@@ -110,10 +110,10 @@ void strafeRight(int target, int speed)
 void liftToPotTarget(int target, int maxPower) {
 	int potStart = SensorValue[arm];
 	if (potStart > target) { //potentiometer value is above target.  New target is UP
-		while (SensorValue[arm] > target + 500) {
+		while (SensorValue[arm] > target + 500 || SensorValue[arm] < target) {
 			setDumpMotors(abs(maxPower));
 		}
-		while (SensorValue[arm] > target) {
+		while (SensorValue[arm] > target || SensorValue[arm] < target - 50) {
 			setDumpMotors(abs(.3*maxPower));
 		}
 		setDumpMotors(-20);
