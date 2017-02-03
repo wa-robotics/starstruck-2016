@@ -143,12 +143,17 @@ task autonomous() {
 	waitForLift(800,50);
 	stopTask(liftTask);
 	setDumpMotors(127);
-	wait1Msec(1350);
+	wait1Msec(1100);
 	startTask(clawTask);
 	waitForClaw(1750,50);
 	setDumpMotors(0);
 	wait10Msec(80);
-	liftToPotTarget(4000, -127)
+	setDumpMotors(-127);
+	while(SensorValue[liftDown] == 0)
+	{
+		wait1Msec(25);
+	}
+	setDumpMotors(0);
 	//straight(127, 200)
 	straight(127,1075);
 	moveClaw(127, 3200);
