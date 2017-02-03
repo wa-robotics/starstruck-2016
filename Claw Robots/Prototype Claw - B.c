@@ -110,17 +110,17 @@ task autonomous() {
 	SensorValue[rDriveEnc] = 0;
 	SensorValue[lDriveEnc] = 0;
 	liftTarget = 800;
-	clawTarget = 1900;//A
+	clawTarget = 1750;//A
 	//startTask(liftTask);
 	//liftgo = 1;
 	startTask(clawTask);
 	diagonalLeft(-127,50);
 	//waitForLift(2000,50);
-	waitForClaw(1900,50);//A
+	waitForClaw(1750,50);//A
 	wait1Msec(250);
-	straight(-127,1306);
+	straight(-127,1200);
 	//wait1Msec(125);
-	//straight(127,150);
+	straight(127,150);
 	/*SensorValue[rDriveEnc] = 0;
 	while(SensorValue[rDriveEnc] < 735)
 	{
@@ -140,9 +140,14 @@ task autonomous() {
 	straight(-127, 350);
 	liftgo = 1;
 	startTask(liftTask);
-	wait1Msec(1000);
+	waitForLift(800,50);
+	stopTask(liftTask);
+	setDumpMotors(127);
+	wait1Msec(1350);
 	startTask(clawTask);
-	wait10Msec(80)
+	waitForClaw(1750,50);
+	setDumpMotors(0);
+	wait10Msec(80);
 	liftToPotTarget(3900, -127)
 	//straight(127, 200)
 	straight(127,1075);
@@ -152,10 +157,16 @@ task autonomous() {
 	straight(-127,1075);
 	stopTask(liftTask);
 	liftTarget = 800;
-	liftgo = 1;
+		liftgo = 1;
 	startTask(liftTask);
-	wait1Msec(1000);
+	waitForLift(800,50);
+	stopTask(liftTask);
+	setDumpMotors(127);
+	wait1Msec(1350);
 	startTask(clawTask);
+	waitForClaw(1750,50);
+	setDumpMotors(0);
+	wait10Msec(80);
 	//arm down
 	//wait
 	//drive forward

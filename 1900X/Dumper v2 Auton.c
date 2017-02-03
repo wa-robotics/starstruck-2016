@@ -139,7 +139,7 @@ void driveDistance(int power, int encoderCounts, int direction) {
 }
 */
 
-void releasePlatform() {
+task releasePlatform() {
 	SensorValue[platformRelease] = 1;
 	wait1Msec(750);
 	SensorValue[platformRelease] = 0;
@@ -156,9 +156,16 @@ task autonSkills()
 		setRightDtMotors(-75);
 		setLeftDtMotors(-75);
 	}
-	releasePlatform();
+	SensorValue[rDriveEnc] = 0;
+	while(SensorValue[rDriveEnc] < 900)
+	{
+		setRightDtMotors(75);
+		setLeftDtMotors(75);
+	}
+
 	setLeftDtMotors(0);
 	setRightDtMotors(0);
+	startTask(releasePlatform);
 	wait10Msec(300);
 	SensorValue[platformLock] = 1;
 	setDumpMotors(95);
@@ -300,19 +307,19 @@ task autonKnockStarsLeft() //go to the fence and knock 3 stars off
 	//setDumpMotors(0);
 	SensorValue[rDriveEnc] = 0;
 	wait10Msec(50);
-	while(SensorValue[rDriveEnc] > -2100)
+	while(SensorValue[rDriveEnc] > -1200) //prev -2100
 	{
 		setRightDtMotors(-75);
 		setLeftDtMotors(-75);
 	}
-	releasePlatform();
+	startTask(releasePlatform);
 	//setDumpMotors(-50);
 	//wait10Msec(18);
 	//setDumpMotors(0);
-	while(SensorValue[rDriveEnc] > -2775)
+	while(SensorValue[rDriveEnc] > -2775) //prev 2775
 	{
-		setLeftDtMotors(-26.5);
-		setRightDtMotors(-124.5);
+		setLeftDtMotors(-50.5); //prev -26.5
+		setRightDtMotors(-127); //prev -124,5
 	}
 	setLeftDtMotors(0);
 	setRightDtMotors(0);
@@ -333,7 +340,7 @@ task autonKnockStarsRight() //go to the fence and knock 3 stars off
 		setRightDtMotors(-75);
 		setLeftDtMotors(-75);
 	}
-	releasePlatform();
+	startTask(releasePlatform);
 	//setDumpMotors(-50);
 	//wait10Msec(18);
 	//setDumpMotors(0);
@@ -360,7 +367,7 @@ task autonStarsCubeLeft() { //knock the stars off the fence (play 1 code same as
 		setRightDtMotors(-75);
 		setLeftDtMotors(-75);
 	}
-	releasePlatform();
+	startTask(releasePlatform);
 	//setDumpMotors(-50);
 	//wait10Msec(18);
 	//setDumpMotors(0);
@@ -442,7 +449,7 @@ task autonStarsCubeRight() { //knock the stars off the fence (play 1 code same a
 	//setDumpMotors(-50);
 	//wait10Msec(18);
 	//setDumpMotors(0);
-	releasePlatform();
+	startTask(releasePlatform);
 	while(SensorValue[rDriveEnc] > -2775)
 	{
 		setLeftDtMotors(-124.5);

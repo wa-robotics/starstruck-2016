@@ -130,10 +130,10 @@ void turnRight(int power) {
 	motor[DR] = power;
 }
 void moveHang (int power){
-//while time1[T1] is less than time
-//set motor to power
-motor[Hang] = power;
-motor[Hang] = power;
+	//while time1[T1] is less than time
+	//set motor to power
+	motor[Hang] = power;
+	motor[Hang] = power;
 }
 
 task autonomousLeft()
@@ -245,65 +245,66 @@ task skillsauton()
 			wait10Msec(70);
 			moveLift(0);
 			drive(125,125);
-			wait10Msec(70);
-			moveLift(0);
-			drive(0,0);
-			wait10Msec(200);
-			moveLift(60);
-			wait10Msec(70);
-			moveLift(0);
-			drive(-125,-125);
-			wait10Msec(70);
-			drive(0,0);
-			moveLift(127);
-			wait10Msec(110);
-			moveLift(0);
-			wait10Msec(40);
-			moveLift(-127);
-			wait10Msec(70);
-			moveLift(0);
-			drive(125,125);
-			wait10Msec(70);
-			moveLift(0);
-			drive(0,0);
-			wait10Msec(200);
-			moveLift(60);
-			wait10Msec(70);
-			moveLift(0);
-			drive(-125,-125);
-			wait10Msec(70);
-			drive(0,0);
-			moveLift(127);
-			wait10Msec(110);
-			moveLift(0);
-			wait10Msec(40);
-			moveLift(-127);
-			wait10Msec(70);
-			moveLift(0);
-			drive(125,125);
-			wait10Msec(70);
-			moveLift(0);
-			drive(0,0);
-			wait10Msec(200);
-			moveLift(60);
-			wait10Msec(70);
-			moveLift(0);
-			drive(-125,-125);
-			wait10Msec(70);
-			drive(0,0);
-			moveLift(127);
-			wait10Msec(110);
-			moveLift(0);
-			wait10Msec(40);
-			moveLift(-127);
-			wait10Msec(70);
-			moveLift(0);
-			drive(125,125);
-			wait10Msec(70);
-			moveLift(0);
-			drive(0,0);
-			wait10Msec(200);
+			wait10Msec(60);
 		}
+		//moveLift(0);
+		//drive(0,0);
+		//wait10Msec(200);
+		//moveLift(60);
+		//wait10Msec(70);
+		//moveLift(0);
+		//drive(-125,-125);
+		//wait10Msec(70);
+		//drive(0,0);
+		//moveLift(127);
+		//wait10Msec(110);
+		//moveLift(0);
+		//wait10Msec(40);
+		//moveLift(-127);
+		//wait10Msec(70);
+		//moveLift(0);
+		//drive(125,125);
+		//wait10Msec(60);
+		//moveLift(0);
+		//drive(0,0);
+		//wait10Msec(200);
+		//moveLift(60);
+		//wait10Msec(70);
+		//moveLift(0);
+		//drive(-125,-125);
+		//wait10Msec(70);
+		//drive(0,0);
+		//moveLift(127);
+		//wait10Msec(110);
+		//moveLift(0);
+		//wait10Msec(40);
+		//moveLift(-127);
+		//wait10Msec(70);
+		//moveLift(0);
+		//drive(125,125);
+		//wait10Msec(60);
+		//moveLift(0);
+		//drive(0,0);
+		//wait10Msec(200);
+		//moveLift(60);
+		//wait10Msec(70);
+		//moveLift(0);
+		//drive(-125,-125);
+		//wait10Msec(70);
+		//drive(0,0);
+		//moveLift(127);
+		//wait10Msec(110);
+		//moveLift(0);
+		//wait10Msec(40);
+		//moveLift(-127);
+		//wait10Msec(70);
+		//moveLift(0);
+		//drive(125,125);
+		//wait10Msec(60);
+		//moveLift(0);
+		//drive(0,0);
+		//wait10Msec(200);
+
 	}
 
 	/*
@@ -368,8 +369,8 @@ task drivetrainController() {
 	slewRateLimit = 15,
 	threshold = 15;
 	while(true) {
-		lYRequested = vexRT[Ch3];
-		rYRequested = vexRT[Ch2];
+		lYRequested = vexRT[Ch3]*.7;
+		rYRequested = vexRT[Ch2]*.7;
 		if (abs(lYRequested - lYLastSent) > slewRateLimit) { //if the new power requested is greater than the slew rate limit
 			if (lYRequested > lYLastSent) {
 				lY += slewRateLimit; //only increase the power by the max allowed by the slew rate
@@ -409,13 +410,13 @@ task usercontrol()
 			} else {
 			setLiftMotors(9);
 		}
-			if (vexRT[Btn6U]) {
+		if (vexRT[Btn6U]) {
 			moveHang(127);
 			} else if (vexRT[Btn6D]) {
 			moveHang(-127);
-		} else {
+			} else {
 			moveHang(0);
-	}
+		}
 		wait1Msec(25);
 	}
 }

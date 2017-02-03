@@ -107,7 +107,8 @@ task autonomous() {
 						AUTON_LEFT_CUBE = 1952,
 						AUTON_RIGHT_STARS = 2952,
 						AUTON_RIGHT_CUBE = 3510,
-						AUTON_SKILLS = 4095;
+						AUTON_SKILLS = 4094,
+						NO_PLAY = 4095;
 
 	int autonSelection = SensorValue[autonSelectPot];
 
@@ -126,6 +127,8 @@ task autonomous() {
 	} else if (autonSelection <= AUTON_SKILLS) {
 		startTask(autonSkills);
 
+	} else if (autonSelection <= NO_PLAY) {
+
 	}
 
 }
@@ -137,11 +140,11 @@ task drivetrainController() {
 			rYLastSent = 0,
 			lY,
 			rY,
-			slewRateLimit = 15,
+			slewRateLimit = 10,
 			threshold = 15;
 	while(true) {
-		lYRequested = vexRT[Ch3];
-		rYRequested = vexRT[Ch2];
+		lYRequested = vexRT[Ch3]*.7;
+		rYRequested = vexRT[Ch2]*.7;
 		if (abs(lYRequested - lYLastSent) > slewRateLimit) { //if the new power requested is greater than the slew rate limit
 			if (lYRequested > lYLastSent) {
 				lY += slewRateLimit; //only increase the power by the max allowed by the slew rate
@@ -162,6 +165,8 @@ task drivetrainController() {
 			rY = (rYRequested == 0) ? 0 : rY;
 		}
 		rYLastSent = rY;
+
+
 		motor[lDriveFront] = (abs(lY) > threshold) ? lY : 0;
 		motor[lDriveBack] = (abs(lY) > threshold) ? lY : 0;
 		motor[rDriveFront] = (abs(rY) > threshold) ? rY : 0;
