@@ -46,63 +46,70 @@ void pre_auton()
 
 //potentiometer value for lift: 2150
 task autonomous() {
-	strafeLeft(450,127);
-	setClawMotors(-127)
+	//strafeLeft(450,127);
+	setClawMotors(-127);
 	wait10Msec(135);
 	setClawMotors(20);
 	SensorValue[rDriveEnc] = 0;
 	//wait10Msec(100);
-	while(abs(sensorValue[rDriveEnc]) < 370)
-	{
-		writeDebugStreamLine("%d",SensorValue[rDriveEnc]);
-		motor[lDriveFront] = -127;
-		motor[lDriveBack] = 127;
-		motor[rDriveFront] = 127;
-		motor[rDriveBack] = -127;
-		wait1Msec(25);
-	}
-	motor[lDriveFront] = 0;
-	motor[lDriveBack] = 0;
-	motor[rDriveFront] = 0;
-	motor[rDriveBack] = 0;
+	//while(abs(sensorValue[rDriveEnc]) < 370)
+	//{
+	//	writeDebugStreamLine("%d",SensorValue[rDriveEnc]);
+	//	motor[lDriveFront] = -127;
+	//	motor[lDriveBack] = 127;
+	//	motor[rDriveFront] = 127;
+	//	motor[rDriveBack] = -127;
+	//	wait1Msec(25);
+	//}
+	//motor[lDriveFront] = 0;
+	//while(abs(SensorValue[rDriveEnc]) < 300) {
+		setLeftDtMotors(127);
+		setRightDtMotors(-127);
+	//}
+	wait1Msec(500);
+	setLeftDtMotors(-10);
+	setRightDtMotors(10);
+	wait1Msec(75);
+	setLeftDtMotors(0);
+	setRightDtMotors(0);
 
 
-	SensorValue[rDriveEnc] = 0;
-	straight(127,1000);
-	setClawMotors(-40);
-	wait10Msec(100);
-	liftToPotTarget(3000,127);
-	SensorValue[rDriveEnc] = 0;
-	wait10Msec(100);
-	while(abs(SensorValue[rDriveEnc]) < 870)
-	{
-		writeDebugStreamLine("%d",SensorValue[rDriveEnc]);
-		setRightDtMotors(-127);
-		setLeftDtMotors(-127);
-		wait1Msec(25);
-	}
-	SensorValue[rDriveEnc] = 0;
-	wait10Msec(100);
-	while(abs(SensorValue[rDriveEnc]) < 415)
-	{
-		writeDebugStreamLine("%d",SensorValue[rDriveEnc]);
-		setRightDtMotors(-85);
-		setLeftDtMotors(85);
-		wait1Msec(25);
-	}
-	SensorValue[rDriveEnc] = 0;
-	wait10Msec(100);
-	while(abs(SensorValue[rDriveEnc]) < 870)
-	{
-		writeDebugStreamLine("%d",SensorValue[rDriveEnc]);
-		setRightDtMotors(-127);
-		setLeftDtMotors(-127);
-		wait1Msec(25);
-	}
-	liftToPotTarget(1100,127);
-	setClawMotors(127);
-	wait10Msec(200);
-	setClawMotors(0);
+	//SensorValue[rDriveEnc] = 0;
+	//straight(127,1000);
+	//setClawMotors(-40);
+	//wait10Msec(100);
+	//liftToPotTarget(3000,127);
+	//SensorValue[rDriveEnc] = 0;
+	//wait10Msec(100);
+	//while(abs(SensorValue[rDriveEnc]) < 870)
+	//{
+	//	writeDebugStreamLine("%d",SensorValue[rDriveEnc]);
+	//	setRightDtMotors(-127);
+	//	setLeftDtMotors(-127);
+	//	wait1Msec(25);
+	//}
+	//SensorValue[rDriveEnc] = 0;
+	//wait10Msec(100);
+	//while(abs(SensorValue[rDriveEnc]) < 415)
+	//{
+	//	writeDebugStreamLine("%d",SensorValue[rDriveEnc]);
+	//	setRightDtMotors(-85);
+	//	setLeftDtMotors(85);
+	//	wait1Msec(25);
+	//}
+	//SensorValue[rDriveEnc] = 0;
+	//wait10Msec(100);
+	//while(abs(SensorValue[rDriveEnc]) < 870)
+	//{
+	//	writeDebugStreamLine("%d",SensorValue[rDriveEnc]);
+	//	setRightDtMotors(-127);
+	//	setLeftDtMotors(-127);
+	//	wait1Msec(25);
+	//}
+	//liftToPotTarget(1100,127);
+	//setClawMotors(127);
+	//wait10Msec(200);
+	//setClawMotors(0);
 }
 
 task usercontrol()
