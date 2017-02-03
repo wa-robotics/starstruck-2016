@@ -236,7 +236,7 @@ task usercontrol()
   	//untested
 	  if (vexRT[Btn5U] && (SensorValue[arm] > armPotMaxLimit || !enableSoftwareArmPosLimit)) {
 	  	setDumpMotors(127);
-		} else if (vexRT[Btn5D]) { //second part of condition is to prevent motors from jittering if 5U and 5D are pressed down
+		} else if (vexRT[Btn5D] && SensorValue[arm] < 3760) { //second part of condition is to prevent motors from jittering if 5U and 5D are pressed down
 			setDumpMotors(-127);
 		} else {
 			if (SensorValue[arm] > 3760) { //arm is all the way down; no compensation power

@@ -93,12 +93,12 @@ void straight(int power, int dist) {
 void strafeRight(int target, int speed)
 {
 	SensorValue[rDriveEnc] = 0;
-	while(abs(sensorValue[rDriveEnc]) < target)
+	while(abs(SensorValue[rDriveEnc]) < target)
 	{
 		motor[lDriveFront] = speed;
 		motor[lDriveBack] = -speed;
-		motor[rDriveFront] = speed;
-		motor[rDriveBack] = -speed;
+		motor[rDriveFront] = -speed;
+		motor[rDriveBack] = speed;
 	}
 	motor[lDriveFront] = 0;
 	motor[lDriveBack] = 0;
@@ -108,10 +108,10 @@ void strafeRight(int target, int speed)
 void strafeLeft(int target, int speed)
 {
 	SensorValue[rDriveEnc] = 0;
-	while(abs(sensorValue[rDriveEnc]) < target)
+	while(abs(SensorValue[rDriveEnc]) < target)
 	{
-		motor[lDriveFront] = -speed;
-		motor[lDriveBack] = speed;
+		motor[lDriveFront] = speed; //this is actually the back wheel on the left side
+		motor[lDriveBack] = -speed;
 		motor[rDriveFront] = -speed;
 		motor[rDriveBack] = speed;
 	}

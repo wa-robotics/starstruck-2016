@@ -148,7 +148,7 @@ task autonomous() {
 	waitForClaw(1750,50);
 	setDumpMotors(0);
 	wait10Msec(80);
-	liftToPotTarget(3900, -127)
+	liftToPotTarget(4000, -127)
 	//straight(127, 200)
 	straight(127,1075);
 	moveClaw(127, 3200);
@@ -167,6 +167,7 @@ task autonomous() {
 	waitForClaw(1750,50);
 	setDumpMotors(0);
 	wait10Msec(80);
+	liftToPotTarget(4000,-127);
 	//arm down
 	//wait
 	//drive forward
