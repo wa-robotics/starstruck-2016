@@ -211,8 +211,6 @@ task clawControl()
 task usercontrol()
 {
 	//	AUTON_PLAY = 6;
-	startTask(autonomous);
-	stopTask(usercontrol);
 
 	int LY = 0;
 	int LX = 0;
