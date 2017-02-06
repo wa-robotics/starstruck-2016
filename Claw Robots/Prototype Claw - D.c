@@ -72,13 +72,21 @@ task autonomous() {
 	wait1Msec(75);
 	setLeftDtMotors(0);
 	setRightDtMotors(0);
-
-
+	wait10Msec(25);
+	setRightDtMotors(127);
+	setLeftDtMotors(127);
+	wait10Msec(120);
+	setLeftDtMotors(0);
+	setRightDtMotors(0);
+	setClawMotors(-50);
+	wait10Msec(75);
 	//SensorValue[rDriveEnc] = 0;
 	//straight(127,1000);
 	//setClawMotors(-40);
 	//wait10Msec(100);
-	//liftToPotTarget(3000,127);
+	setDumpMotors(127);
+	wait10Msec(80);
+	setDumpMotors(15);
 	//SensorValue[rDriveEnc] = 0;
 	//wait10Msec(100);
 	//while(abs(SensorValue[rDriveEnc]) < 870)
@@ -110,10 +118,38 @@ task autonomous() {
 	//setClawMotors(127);
 	//wait10Msec(200);
 	//setClawMotors(0);
+	wait10Msec(25);
+	setRightDtMotors(-127);
+	setLeftDtMotors(-127);
+	wait10Msec(120);
+	setLeftDtMotors(0);
+	setRightDtMotors(0);
+	setLeftDtMotors(127);
+		setRightDtMotors(-127);
+	//}
+	wait1Msec(347);
+	setLeftDtMotors(-10);
+	setRightDtMotors(10);
+	wait1Msec(75);
+	setLeftDtMotors(0);
+	setRightDtMotors(0);
+	wait10Msec(25);
+	setRightDtMotors(-127);
+	setLeftDtMotors(-127);
+	wait10Msec(155);
+	setLeftDtMotors(0);
+	setRightDtMotors(0);
+	setDumpMotors(127);
+	wait10Msec(80);
+	setDumpMotors(0);
+	setClawMotors(127);
+	wait10Msec(75);
+	setClawMotors(15);
 }
 
 task usercontrol()
 {
+	//wait10Msec(100);
 	//startTask(autonomous);
 	//stopTask(usercontrol);
 	//stopTask(main);
@@ -133,6 +169,10 @@ task usercontrol()
 	int clawCompPower = 15;
   while(1)
   {
+  	/*if (vexRT[Btn8u]){
+  		startTask(autonomous);
+  		stopTask(usercontrol);
+  	}*/
   	//for deadzones; when the joystick value for an axis is below the threshold, the motors controlled by that joystick will not move in that direction
   	LY = (abs(vexRT[Ch3]) > threshold) ? vexRT[Ch3] : 0;
   	LX = (abs(vexRT[Ch4]) > threshold) ? vexRT[Ch4] : 0;

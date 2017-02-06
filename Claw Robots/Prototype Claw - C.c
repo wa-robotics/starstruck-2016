@@ -111,32 +111,33 @@ task autonomous() {
 	straight(127,1300);
 	wait1Msec(125);
 	straight(-127,350);
-	SensorValue[rDriveEnc] = 0;
-	while(abs(SensorValue[rDriveEnc]) < 845)
-	{
-		setRightDtMotors(-85);
-		setLeftDtMotors(85);
-	}
-	setRightDtMotors(0);
-	setLeftDtMotors(0);
-	moveClaw(127,3000);
-	liftToPotTarget(3740, -127);
-	strafeLeft(1020,127);
-	straight(127,100);
-	moveClaw(-127,1111);
-	setClawMotors(-20);
-	stopTask(liftTask);
-	liftTarget = 1650;
-	startTask(liftTask);
-	straight(-127,200);
-	waitForLift(1650, 50);
-	wait1Msec(1450);
-	setClawMotors(127);
-	wait10Msec(100);
-	setClawMotors(15);
-	liftToPotTarget(3710, -127);
+	//SensorValue[rDriveEnc] = 0;
+	//while(abs(SensorValue[rDriveEnc]) < 745)
+	//{
+	//	setRightDtMotors(-85);
+	//	setLeftDtMotors(85);
+	//}
+	//setRightDtMotors(0);
+	//setLeftDtMotors(0);
+	////commented out to not get cube
+	//moveClaw(127,3000);
+	//liftToPotTarget(3615, -127);
+	//strafeLeft(1020,127);
+	//straight(127,100);
+	//moveClaw(-127,1111);
+	//setClawMotors(-20);
+	//stopTask(liftTask);
+	//liftTarget = 1650;
+	//startTask(liftTask);
+	//straight(-127,200);
+	//waitForLift(1650, 50);
+	//wait1Msec(1450);
+	//setClawMotors(127);
+	//wait10Msec(100);
+	//setClawMotors(15);
+	//liftToPotTarget(3710, -127);
 
-
+//end auton
 
 	//straight(127,1075);
 	//moveClaw(127, 0);
@@ -211,7 +212,8 @@ task clawControl()
 task usercontrol()
 {
 	//	AUTON_PLAY = 6;
-
+	//startTask(autonomous);
+	//stopTask(usercontrol);
 	int LY = 0;
 	int LX = 0;
 	int RY = 0;
@@ -236,10 +238,10 @@ task usercontrol()
   	//untested
 	  if (vexRT[Btn5U] && (SensorValue[arm] > armPotMaxLimit || !enableSoftwareArmPosLimit)) {
 	  	setDumpMotors(127);
-		} else if (vexRT[Btn5D] && SensorValue[arm] < 3760) { //second part of condition is to prevent motors from jittering if 5U and 5D are pressed down
+		} else if (vexRT[Btn5D] && SensorValue[arm] < 3675) { //second part of condition is to prevent motors from jittering if 5U and 5D are pressed down
 			setDumpMotors(-127);
 		} else {
-			if (SensorValue[arm] > 3760) { //arm is all the way down; no compensation power
+			if (SensorValue[arm] > 3675) { //arm is all the way down; no compensation power
 				setDumpMotors(0);
 			} else if (SensorValue[arm] > 1480) { //arm is up but has not gone past vertical (behind back of robot).  Positive compensation power
 				setDumpMotors(armCompPower);
