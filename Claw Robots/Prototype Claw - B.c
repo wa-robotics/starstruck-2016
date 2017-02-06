@@ -105,6 +105,7 @@ task progSkills() {
 	startTask(clawTask);
 	waitForClaw(1750,50);
 	setDumpMotors(0);
+	wait10Msec(100);
 	moveClaw(127, 3600);
 	wait10Msec(80);
 	straight(127,150)
@@ -132,6 +133,7 @@ task progSkills() {
 	startTask(clawTask);
 	waitForClaw(1750,50);
 	setDumpMotors(0);
+	wait10Msec(100);
 	moveClaw(127, 3600);
 	wait10Msec(80);
 	straight(127,150);
@@ -198,7 +200,8 @@ task progSkills() {
 }
 
 task autonomous() {
-	//startTask(progSkills);
+	wait10Msec(250);
+	startTask(progSkills);
 	//Auton plays and their numbers, for reference.  These numbers are set as the value of the AUTON_PLAY variable to control which auton play runs
 	//#1 Big
 	//#2 Small
@@ -222,7 +225,7 @@ task autonomous() {
 		startTask(progSkills);
 		stopTask(autonomous);
 	}
-	//stoptask(autonomous)
+	stoptask(autonomous)
 	SensorValue[rDriveEnc] = 0;
 	SensorValue[lDriveEnc] = 0;
 	liftTarget = 800;
@@ -369,8 +372,8 @@ task usercontrol()
 {
 	//Override auton play selection for testing: (next 3 lines)
 	//AUTON_PLAY = 6;
-
-
+	startTask(autonomous);
+	stopTask(usercontrol);
 	//startTask(clawControl); //simple control and PID for compensation on claw
 
 	int LY = 0;
