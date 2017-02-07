@@ -110,6 +110,7 @@ task autonomous() {
 		setLeftDtMotors(-85);
 	}
 	setRightDtMotors(0);
+
 	setLeftDtMotors(0);
 	SensorValue[rDriveEnc] = 0;
 	liftToPotTarget(3800, -127);

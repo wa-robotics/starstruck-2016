@@ -32,7 +32,7 @@ int RIGHT = 2;
 int AUTON_SIDE = 0; //either LEFT or RIGHT, as above
 int AUTON_PLAY = 0;
 float straighteningKpLeft = 0.00125,//.43,//.195, //proportional constant for straightening response for the left side
-		straighteningKpRight = 0.00125;
+straighteningKpRight = 0.00125;
 static int STRAIGHT = 2; //the 2 here shouldn't matter as long as no variables are multiplied by 'direction' in driveDistancePID
 static int STRAFE_LEFT = 3; //don't multiply values by this variable!
 static int STRAFE_RIGHT = 4;
@@ -46,7 +46,7 @@ static int STRAFE_RIGHT = 4;
 
 void pre_auton()
 {
-  bStopTasksBetweenModes = true;
+	bStopTasksBetweenModes = true;
 
 	// Set bDisplayCompetitionStatusOnLcd to false if you don't want the LCD
 	// used by the competition include file, for example, you might want
@@ -67,65 +67,87 @@ int clawTarget;
 int liftgo = 0;
 task liftTask()
 {
-while(1)
-{
-	if(liftgo == 1)
+	while(1)
 	{
-	liftToPotTarget(liftTarget,127);
-	liftgo = 0;
+		if(liftgo == 1)
+		{
+			liftToPotTarget(liftTarget,127);
+			liftgo = 0;
+		}
 	}
-}
 }
 task clawTask()
 {
 	moveClaw(127,clawTarget);
 }
 
-task progSkills();
-task autonomous() {
-	//Auton plays and their numbers, for reference.  These numbers are set as the value of the AUTON_PLAY variable to control which auton play runs
-	//#1 Big
-	//#2 Small
-	//#3 Cube (score middle cube and block)
-	//#4 Fence (3 stars, corner)
-	//#5 Nothing
-	//#6 Prog skills
-
-	//plays should differentiate between left and right using AUTON_SIDE and changing certain values accordingly (ex: running the right side version of a function)
-	if (AUTON_PLAY == 1) { //uncomment line inside this block when task exists
-		//startTask(autonBig);
-	} else if (AUTON_PLAY == 2) {
-		//startTask(autonSmall);
-	} else if (AUTON_PLAY == 3) {
-		//startTask(autonCube);
-	} else if (AUTON_PLAY == 4) {
-		//startTask(autonFence);
-	} else if (AUTON_PLAY == 5) {
-		//Do nothing
-	} else if (AUTON_PLAY == 6) {
-		startTask(progSkills);
-		stopTask(autonomous);
-	}
-
+task progSkills() {
 	SensorValue[rDriveEnc] = 0;
 	SensorValue[lDriveEnc] = 0;
 	liftTarget = 800;
-	clawTarget = 1750;//A
-	//startTask(liftTask);
-	//liftgo = 1;
+	clawTarget = 1750;
 	startTask(clawTask);
-	diagonalLeft(-127,50);
-	//waitForLift(2000,50);
-	waitForClaw(1750,50);//A
-	wait1Msec(250);
-	straight(-127,1200);
-	//wait1Msec(125);
+	straight(-127, 200);
+	waitForClaw(1750,50);
+	wait10Msec(250);
+	moveClaw(127, 3200);
 	straight(127,150);
+	setClawMotors(-127);
+	wait1Msec(500);
+	setClawMotors(-25);
+	straight(-127,1150);
+	liftgo = 1;
+	startTask(liftTask);
+	waitForLift(800,50);
+	stopTask(liftTask);
+	setDumpMotors(127);
+	wait1Msec(1250);
+	startTask(clawTask);
+	waitForClaw(1750,50);
+	setDumpMotors(0);
+	moveClaw(127, 3600);
+	wait10Msec(80);
+	straight(127,150)
+	setDumpMotors(-127);
+	while(SensorValue[liftDown] == 0)
+	{
+		wait1Msec(25);
+	}
+	setDumpMotors(0);
+	startTask(clawTask);
+	straight(127,1075);
+	wait10Msec(100);
+	moveClaw(127, 3200);
+	straight(127,150);
+	setClawMotors(-127);
+	wait1Msec(500);
+	setClawMotors(-25);
+	straight(-127,1150);
+	liftgo = 1;
+	startTask(liftTask);
+	waitForLift(800,50);
+	stopTask(liftTask);
+	setDumpMotors(127);
+	wait1Msec(1250);
+	startTask(clawTask);
+	waitForClaw(1750,50);
+	setDumpMotors(0);
+	moveClaw(127, 3600);
+	wait10Msec(80);
+	straight(127,150);
+	setDumpMotors(-127);
+	while(SensorValue[liftDown] == 0)
+	{
+		wait1Msec(25);
+	}
+	setDumpMotors(0);
+	straight(127,150);
+	startTask(clawTask);
 	/*SensorValue[rDriveEnc] = 0;
 	while(SensorValue[rDriveEnc] < 735)
 	{
-		setRightDtMotors(85);
-		setLeftDtMotors(-85);
+	setRightDtMotors(85);
+	setLeftDtMotors(-85);
 	}
 	setRightDtMotors(0);
 	setLeftDtMotors(0);
@@ -143,12 +165,17 @@ task autonomous() {
 	waitForLift(800,50);
 	stopTask(liftTask);
 	setDumpMotors(127);
-	wait1Msec(1350);
+	wait1Msec(1100);
 	startTask(clawTask);
 	waitForClaw(1750,50);
 	setDumpMotors(0);
 	wait10Msec(80);
-	liftToPotTarget(4000, -127)
+	setDumpMotors(-127);
+	while(SensorValue[liftDown] == 0)
+	{
+		wait1Msec(25);
+	}
+	setDumpMotors(0);
 	//straight(127, 200)
 	straight(127,1075);
 	moveClaw(127, 3200);
@@ -157,12 +184,106 @@ task autonomous() {
 	straight(-127,1075);
 	stopTask(liftTask);
 	liftTarget = 800;
-		liftgo = 1;
+	liftgo = 1;
 	startTask(liftTask);
 	waitForLift(800,50);
 	stopTask(liftTask);
 	setDumpMotors(127);
 	wait1Msec(1350);
+	startTask(clawTask);
+	waitForClaw(1750,50);
+	setDumpMotors(0);
+	wait10Msec(80);
+	liftToPotTarget(4000,-127);
+}
+
+task autonomous() {
+	//startTask(progSkills);
+	//Auton plays and their numbers, for reference.  These numbers are set as the value of the AUTON_PLAY variable to control which auton play runs
+	//#1 Big
+	//#2 Small
+	//#3 Cube (score middle cube and block)
+	//#4 Fence (3 stars, corner)
+	//#5 Nothing
+	//#6 Prog skills
+
+	//plays should differentiate between left and right using AUTON_SIDE and changing certain values accordingly (ex: running the right side version of a function)
+	if (AUTON_PLAY == 1) { //uncomment line inside this block when task exists
+		//startTask(autonBig);
+		} else if (AUTON_PLAY == 2) {
+		//startTask(autonSmall);
+		} else if (AUTON_PLAY == 3) {
+		//startTask(autonCube);
+		} else if (AUTON_PLAY == 4) {
+		//startTask(autonFence);
+		} else if (AUTON_PLAY == 5) {
+		//Do nothing
+		} else if (AUTON_PLAY == 6) {
+		startTask(progSkills);
+		stopTask(autonomous);
+	}
+	//stoptask(autonomous)
+	SensorValue[rDriveEnc] = 0;
+	SensorValue[lDriveEnc] = 0;
+	liftTarget = 800;
+	clawTarget = 1750;//A
+	//startTask(liftTask);
+	//liftgo = 1;
+	startTask(clawTask);
+	diagonalLeft(-127,50);
+	//waitForLift(2000,50);
+	waitForClaw(1750,50);//A
+	wait1Msec(250);
+	straight(-127,1200);
+	//wait1Msec(125);
+	straight(127,150);
+	/*SensorValue[rDriveEnc] = 0;
+	while(SensorValue[rDriveEnc] < 735)
+	{
+	setRightDtMotors(85);
+	setLeftDtMotors(-85);
+	}
+	setRightDtMotors(0);
+	setLeftDtMotors(0);
+	liftToPotTarget(3900, -127)
+	moveClaw(127, 1900);*/
+	strafeRight(1020, 127);
+	straight(127, 75);
+	moveClaw(127, 3200);
+	setClawMotors(-127);
+	wait1Msec(500);
+	setClawMotors(-25);
+	straight(-127, 350);
+	liftgo = 1;
+	startTask(liftTask);
+	waitForLift(800,50);
+	stopTask(liftTask);
+	setDumpMotors(127);
+	wait1Msec(1100);
+	startTask(clawTask);
+	waitForClaw(1750,50);
+	setDumpMotors(0);
+	wait10Msec(80);
+	setDumpMotors(-127);
+	while(SensorValue[liftDown] == 0)
+	{
+		wait1Msec(25);
+	}
+	setDumpMotors(0);
+	//straight(127, 200)
+	straight(127,1075);
+	moveClaw(127, 3200);
+	setClawMotors(-50);
+	wait10Msec(100);
+	straight(-127,1075);
+	stopTask(liftTask);
+	liftTarget = 800;
+	liftgo = 1;
+	startTask(liftTask);
+	waitForLift(800,50);
+	stopTask(liftTask);
+	setDumpMotors(127);
+	wait1Msec(1250);
 	startTask(clawTask);
 	waitForClaw(1750,50);
 	setDumpMotors(0);
@@ -182,74 +303,72 @@ task autonomous() {
 	//wait
 }
 
-task progSkills() {
-		straight(-127,250);
-		clawTarget = 2700;//A
-		startTask(clawTask);
-		waitForClaw(2700,100);
-		setClawMotors(15);
-		wait1Msec(1000);
-		//clawTarget = 4095;
-		//startTask(clawTask);
-		//waitForClaw(4075,25);
-		//setClawMotors(-20);
-		//wait1Msec(1000);
-		//liftTarget = 3670;
-		//startTask(liftTask);
-		//straight(-127,700);
-		//wait1Msec(250);
-		//liftTarget = 2100;
-		//startTask(liftTask);
-		//straight(-127,500);
+/*task progSkills() {
+	straight(-127,250);
+	clawTarget = 2700;//A
+	startTask(clawTask);
+	waitForClaw(2700,100);
+	setClawMotors(15);
+	wait1Msec(1000);
+	//clawTarget = 4095;
+	//startTask(clawTask);
+	//waitForClaw(4075,25);
+	//setClawMotors(-20);
+	//wait1Msec(1000);
+	//liftTarget = 3670;
+	//startTask(liftTask);
+	//straight(-127,700);
+	//wait1Msec(250);
+	//liftTarget = 2100;
+	//startTask(liftTask);
+	//straight(-127,500);
 
 
-		//liftTarget = 1950;
+	//liftTarget = 1950;
 
-}
+}*/
 
 task clawControl()
 {
-     int PIDTargetValue;
-     float kp = 0.5; //these constants might change down the road, but they are good for now
-     float ki = 0.01;
-     float kd = 0.00001;
-     int error;
-     int integral = 0;
-     int derivative;
-     int lastError = 0; //start this at 0 so the first time `derivative = error - lastError` runs there's no issue
-     int PIDDrive;
-     while(true)
-     {
-          if(vexRT[Btn6U]) //opens claw
-          {
-               setClawMotors(127);
-               //do we want to clear the integral and lastError terms here?
-               PIDTargetValue = SensorValue[claw];
-          }
-          else if(vexRT[Btn6D]) //closes claw
-          {
-               setClawMotors(-127);
-               //do we want to clear the integral and lastError terms here?
-               PIDTargetValue = SensorValue[claw];
-          }
-          else //holds position with PID
-          {
-               error = PIDTargetValue - SensorValue[claw];
-               integral += error;
-               derivative = error - lastError;
-               PIDDrive = kp*error + ki*integral + kd*derivative;
-               setClawMotors(PIDDrive);
-               lastError = error;
-          }
-          wait1Msec(25); //prevents cpu hogging
-     }
+	int PIDTargetValue;
+	float kp = 0.5; //these constants might change down the road, but they are good for now
+	float ki = 0.01;
+	float kd = 0.00001;
+	int error;
+	int integral = 0;
+	int derivative;
+	int lastError = 0; //start this at 0 so the first time `derivative = error - lastError` runs there's no issue
+	int PIDDrive;
+	while(true)
+	{
+		if(vexRT[Btn6U]) //opens claw
+		{
+			setClawMotors(127);
+			//do we want to clear the integral and lastError terms here?
+			PIDTargetValue = SensorValue[claw];
+		}
+		else if(vexRT[Btn6D]) //closes claw
+		{
+			setClawMotors(-127);
+			//do we want to clear the integral and lastError terms here?
+			PIDTargetValue = SensorValue[claw];
+		}
+		else //holds position with PID
+		{
+			error = PIDTargetValue - SensorValue[claw];
+			integral += error;
+			derivative = error - lastError;
+			PIDDrive = kp*error + ki*integral + kd*derivative;
+			setClawMotors(PIDDrive);
+			lastError = error;
+		}
+		wait1Msec(25); //prevents cpu hogging
+	}
 }
 task usercontrol()
 {
 	//Override auton play selection for testing: (next 3 lines)
 	//AUTON_PLAY = 6;
-	//startTask(autonomous);
-	//stopTask(usercontrol);
 
 
 	//startTask(clawControl); //simple control and PID for compensation on claw
@@ -263,22 +382,22 @@ task usercontrol()
 	int armPotMaxLimit = 620; //software limit for potentiometer to limit arm movement from going over the top (protects potentiometer)
 	bool enableSoftwareArmPosLimit = true; //experimental software limit for arm, see above
 	int clawCompPower = 15
-  while(1)
-  {
-  	//for deadzones; when the joystick value for an axis is below the threshold, the motors controlled by that joystick will not move in that direction
-  	LY = (abs(vexRT[Ch3]) > threshold) ? vexRT[Ch3] : 0;
-  	LX = (abs(vexRT[Ch4]) > threshold) ? vexRT[Ch4] : 0;
-  	RY = (abs(vexRT[Ch2]) > threshold) ? vexRT[Ch2] : 0;
-  	RX = (abs(vexRT[Ch1]) > threshold) ? vexRT[Ch1] : 0;
-    motor[lDriveFront] = LY + LX;
-  	motor[lDriveBack] = LY - LX;
-  	motor[rDriveFront] = RY - RX;
-  	motor[rDriveBack] = RY + RX;
-	if(vexRT[Btn8U])
+	while(1)
 	{
-	 startTask(autonomous);
-	 stopTask(usercontrol);
-	}
+		//for deadzones; when the joystick value for an axis is below the threshold, the motors controlled by that joystick will not move in that direction
+		LY = (abs(vexRT[Ch3]) > threshold) ? vexRT[Ch3] : 0;
+		LX = (abs(vexRT[Ch4]) > threshold) ? vexRT[Ch4] : 0;
+		RY = (abs(vexRT[Ch2]) > threshold) ? vexRT[Ch2] : 0;
+		RX = (abs(vexRT[Ch1]) > threshold) ? vexRT[Ch1] : 0;
+		motor[lDriveFront] = LY + LX;
+		motor[lDriveBack] = LY - LX;
+		motor[rDriveFront] = RY - RX;
+		motor[rDriveBack] = RY + RX;
+		/*if(vexRT[Btn8U])
+		{
+		startTask(autonomous);
+		stopTask(usercontrol);
+		}*/
 		if(vexRT[Btn7U])
 		{
 			liftgo = 1;
@@ -295,30 +414,30 @@ task usercontrol()
 			startTask(clawTask);
 			startTask(liftTask);
 		}
-	  if (vexRT[Btn5U] && (SensorValue[arm] > armPotMaxLimit || !enableSoftwareArmPosLimit)) {
-	  	setDumpMotors(127);
-		} else if (vexRT[Btn5D] && !SensorValue[liftDown]) { //second part of condition is to prevent motors from jittering if 5U and 5D are pressed down
+		if (vexRT[Btn5U] && (SensorValue[arm] > armPotMaxLimit || !enableSoftwareArmPosLimit)) {
+			setDumpMotors(127);
+			} else if (vexRT[Btn5D] && !SensorValue[liftDown]) { //second part of condition is to prevent motors from jittering if 5U and 5D are pressed down
 			setDumpMotors(-127);
-		} else {
+			} else {
 			if (/*SensorValue[arm] > 4070 && */SensorValue[liftDown]) { //arm is all the way down; no compensation power
 				setDumpMotors(0);
-			} else if (SensorValue[arm] > 1950) { //arm is up but has not gone past vertical (behind back of robot).  Positive compensation power
+				} else if (SensorValue[arm] > 1950) { //arm is up but has not gone past vertical (behind back of robot).  Positive compensation power
 				setDumpMotors(armCompPower);
-			} else { //arm is up and behind the back of the robot.  Negative compensation power (and increased compensation power to protect potentiometer from crossing its physical limit and counter momentum)
+				} else { //arm is up and behind the back of the robot.  Negative compensation power (and increased compensation power to protect potentiometer from crossing its physical limit and counter momentum)
 				setDumpMotors(-armCompPower);
 			}
 		}
 
-  	if (vexRT[Btn6U]) {
+		if (vexRT[Btn6U]) {
 			setClawMotors(127);
 			clawCompPower = 15;
-		} else if (vexRT[Btn6D]) {
+			} else if (vexRT[Btn6D]) {
 			setClawMotors(-127);
 			clawCompPower = -20;
-		}	else {
+			}	else {
 			setClawMotors(clawCompPower);
 		}
 
-  	wait1Msec(25);
+		wait1Msec(25);
 	}
 }
