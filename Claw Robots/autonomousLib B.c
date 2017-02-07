@@ -105,6 +105,21 @@ void strafeRight(int target, int speed)
 	motor[rDriveFront] = 0;
 	motor[rDriveBack] = 0;
 }
+void strafeLeft(int target, int speed)
+{
+	SensorValue[rDriveEnc] = 0;
+	while(abs(sensorValue[rDriveEnc]) < target)
+	{
+		motor[lDriveFront] = -speed;
+		motor[lDriveBack] = speed;
+		motor[rDriveFront] = speed;
+		motor[rDriveBack] = -speed;
+	}
+	motor[lDriveFront] = 0;
+	motor[lDriveBack] = 0;
+	motor[rDriveFront] = 0;
+	motor[rDriveBack] = 0;
+}
 //high pot value = bottom
 //low pot value = top
 void liftToPotTarget(int target, int maxPower) {
