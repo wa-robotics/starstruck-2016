@@ -24,7 +24,7 @@
 
 //Main competition background code...do not modify!
 #include "Vex_Competition_Includes.c"
-
+#include "W Auton.c"
 #include "Position PID - 4 Motor Struct.c"
 //setDumpMotors and setClawMotors are in autonomousLib.c
 
@@ -44,9 +44,35 @@ void pre_auton()
 	//}
 }
 
+//potentiometer value for lift: 2150
+int liftTarget;
+int clawTarget;
+int liftgo = 0;
+task liftTask()
+{
+	while(1)
+	{
+		if(liftgo == 1)
+		{
+			liftToPotTarget(liftTarget,127);
+			liftgo = 0;
+		}
+	}
+}
+task clawTask()
+{
+	moveClaw(127,clawTarget);
+}
+
 
 task autonomous() {
-	driveDistancePID(720,STRAIGHT,10000);
+	liftToTargetPID(1700,10000,.455,0.00035,2); //upward constants
+	//liftToTargetPID(400,10000,.255,0.00035,1,10); //downward constants
+	//driveDistancePID(720,STRAIGHT,10000);
+	//liftTarget = 800;
+	//clawTarget = 1750;
+	//startTask(clawTask);
+	//straight(-127, 200);
 }
 
 //potentiometer value for lift: 2150

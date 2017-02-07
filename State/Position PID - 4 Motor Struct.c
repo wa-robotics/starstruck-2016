@@ -7,6 +7,9 @@ float positionKp = .8, //proportional constant for positional PID
 			positionKi = 0.000350, //integral constant
 			positionKd = 4.25; //derivative constant
 
+float liftKp,
+			liftKi,
+
 
 void setLeftDtMotors(float power) {
 	motor[lDriveFront] = power;
@@ -92,6 +95,26 @@ float posPidNextPower (posPID *pos,int encoderVal) {
 	pos->motor_drive = newMotorDrive;
 	//writeDebugStreamLine("%d,%f,%f,%f,%f,%f,%f,%f,%f",nPgmTime,pos->target,pos->error,SensorValue[lDriveEnc], SensorValue[rDriveEnc],pos->p,pos->i,pos->d,pos->motor_drive);
 	return newMotorDrive;
+}
+
+int getReversedPot() {
+	return 4095 - SensorValue[arm];
+}
+
+void liftToTargetPID(int target, int time, float kP, float kI, float kD) {
+	posPID liftPID;
+	posPidInit(liftPID,target,kP,kI,kD,15);
+	time1[T1] = 0;
+	writeDebugStreamLine("getReversedPot(), target, liftPID.p,liftPID.i,liftPID.d,power");
+	float lastPower;
+	while (time1[T1] < time) {
+		float power = posPidNextPower(liftPID,getReversedPot());
+		setDumpMotors(power);
+		lastPower = power;
+		writeDebugStreamLine("%d,%d,%d,%d,%d,%d",getReversedPot(), liftPID.error, liftPID.p,liftPID.i,liftPID.d,power);
+		wait1Msec(25);
+	}
+	setDumpMotors(lastPower);
 }
 
 //@param time The maximum time in milliseconds to complete the operation
