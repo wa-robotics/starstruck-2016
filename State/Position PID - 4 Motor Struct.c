@@ -105,16 +105,49 @@ void liftToTargetPID(int target, int time, float kP, float kI, float kD) {
 	posPID liftPID;
 	posPidInit(liftPID,target,kP,kI,kD,15);
 	time1[T1] = 0;
-	writeDebugStreamLine("getReversedPot(), target, liftPID.p,liftPID.i,liftPID.d,power");
+	writeDebugStreamLine("getReversedPot(), error, liftPID.p,liftPID.i,liftPID.d,power");
 	float lastPower;
 	while (time1[T1] < time) {
 		float power = posPidNextPower(liftPID,getReversedPot());
-		setDumpMotors(power);
+		if (SensorValue[arm] > 3850 && target < (4095 - 3850)) {
+			setDumpMotors(0);
+		} else {
+			setDumpMotors(power);
+		}
 		lastPower = power;
 		writeDebugStreamLine("%d,%d,%d,%d,%d,%d",getReversedPot(), liftPID.error, liftPID.p,liftPID.i,liftPID.d,power);
 		wait1Msec(25);
 	}
-	setDumpMotors(lastPower);
+	if (SensorValue[arm] > 3850) {
+		setDumpMotors(0);
+	} else {
+		setDumpMotors(lastPower);
+	}
+}
+
+void liftToTargetPIDEnc(int target, int time, float kP, float kI, float kD) {
+	posPID liftPID;
+	posPidInit(liftPID,target,kP,kI,kD,15);
+	time1[T1] = 0;
+	writeDebugStreamLine("encoder, error, liftPID.p,liftPID.i,liftPID.d,power");
+	float lastPower;
+	while (time1[T1] < time) {
+		float power = posPidNextPower(liftPID,SensorValue[liftEnc]);
+		if (SensorValue[liftEnc] && target <= 0) { //reject negative targets, stop going down when the lift is all the way down
+			writeDebugStreamLine("Lift is at bottom, not sending power");
+			setDumpMotors(0);
+		} else {
+			setDumpMotors(power);
+		}
+		lastPower = power;
+		writeDebugStreamLine("%d,%d,%d,%d,%d,%d", SensorValue[liftEnc], liftPID.error, liftPID.p,liftPID.i,liftPID.d,power);
+		wait1Msec(25);
+	}
+	if (SensorValue[liftEnc]) {
+		setDumpMotors(0);
+	} else {
+		setDumpMotors(lastPower);
+	}
 }
 
 //@param time The maximum time in milliseconds to complete the operation
@@ -142,14 +175,14 @@ void driveDistancePID(int encoderCounts, int direction, int time) {
 
 			writeDebugStreamLine("%f",straighteningError;
 			if (straighteningError > 0) { //left side is ahead, so speed up the right side
-				rPower = power + straighteningError*straighteningKpLeft;
-			} else { //otherwise, just set the right side to the power
-				rPower = power;
-			}
-			if (straighteningError < 0) { //right side is ahead, so speed up the left side
-				lPower = power - straighteningError*straighteningKpRight;
+				lPower = power + straighteningError*straighteningKpLeft;
 			} else { //otherwise, just set the right side to the power
 				lPower = power;
+			}
+			if (straighteningError < 0) { //right side is ahead, so speed up the left side
+				rPower = power - straighteningError*straighteningKpRight;
+			} else { //otherwise, just set the right side to the power
+				rPower = power;
 			}
 
 			writeDebugStreamLine("%d,%f,%f,%f,%f,%f,%f,%f,%f,%f",nPgmTime,drivePID.target,drivePID.error,SensorValue[lDriveEnc], SensorValue[rDriveEnc],drivePID.p,drivePID.i,drivePID.d,lPower,rPower);

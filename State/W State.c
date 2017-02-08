@@ -3,6 +3,7 @@
 #pragma config(Sensor, in3,    gyro,           sensorGyro)
 #pragma config(Sensor, dgtl1,  rDriveEnc,      sensorQuadEncoder)
 #pragma config(Sensor, dgtl3,  lDriveEnc,      sensorQuadEncoder)
+#pragma config(Sensor, dgtl5,  liftEnc,        sensorQuadEncoder)
 #pragma config(Motor,  port1,           leftClaw,      tmotorVex393_HBridge, openLoop)
 #pragma config(Motor,  port2,           lDriveFront,   tmotorVex393HighSpeed_MC29, openLoop)
 #pragma config(Motor,  port3,           lDriveBack,    tmotorVex393HighSpeed_MC29, openLoop)
@@ -64,10 +65,41 @@ task clawTask()
 	moveClaw(127,clawTarget);
 }
 
+void moveClawTime(int power, int ms,int compPower) {
+	setClawMotors(power);
+	wait1Msec(ms);
+	setClawMotors(compPower);
+}
+
+task progSkills() {
+	moveClawTime(-127,750,15);
+	driveDistancePID(-200,STRAIGHT,1000);
+	wait1Msec(2000); //wait for 1st preload
+
+
+	moveClawTime(-127,750,-20);
+	wait1Msec(250);
+	driveDistancePID(-3200,STRAIGHT,1000); //move back so the lift can go up a little
+	liftToTargetPID(4095 - 788, 2750,.435,.00020,1.9);
+	setDumpMotors(-12);
+	//driveDistancePID(-2600,STRAIGHT,3000);
+}
+
 
 task autonomous() {
-	liftToTargetPID(1700,10000,.455,0.00035,2); //upward constants
-	//liftToTargetPID(400,10000,.255,0.00035,1,10); //downward constants
+	setClawMotors(-127); //close claw
+	wait1Msec(1250);
+	setClawMotors(0);
+	wait1Msec(1000);
+	//raise lift
+	liftToTargetPID(4095 - 788,3000,.435,0.00020,1.9); //upward constants
+	setDumpMotors(-12);
+	wait1Msec(1000);
+	setClawMotors(127);
+	wait1Msec(1250);
+	setClawMotors(15);
+	wait1Msec(1000);
+	liftToTargetPID(4095 - 3930,10000,.125,0,.4); //downward constants
 	//driveDistancePID(720,STRAIGHT,10000);
 	//liftTarget = 800;
 	//clawTarget = 1750;
@@ -96,8 +128,8 @@ task autonomous() {
 task usercontrol()
 {
 
-	startTask(autonomous);
-	stopTask(usercontrol);
+	//startTask(progSkills);
+	//stopTask(usercontrol);
 	//stopTask(main);
 
 	//setClawMotors(127);
