@@ -447,8 +447,8 @@ task usercontrol()
 {
 	//Override auton play selection for testing: (next 3 lines)
 	//AUTON_PLAY = 6;
-	startTask(autonomous);
-	stopTask(usercontrol);
+	//startTask(autonomous);
+	//stopTask(usercontrol);
 	//startTask(clawControl); //simple control and PID for compensation on claw
 
 	int LY = 0;
