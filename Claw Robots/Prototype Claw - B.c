@@ -4,6 +4,7 @@
 #pragma config(Sensor, dgtl1,  rDriveEnc,      sensorQuadEncoder)
 #pragma config(Sensor, dgtl3,  lDriveEnc,      sensorQuadEncoder)
 #pragma config(Sensor, dgtl5,  liftDown,       sensorTouch)
+#pragma config(Sensor, dgtl6,  liftEnc,        sensorQuadEncoder)
 #pragma config(Motor,  port1,           leftClaw,      tmotorVex393_HBridge, openLoop)
 #pragma config(Motor,  port2,           lDriveFront,   tmotorVex393HighSpeed_MC29, openLoop)
 #pragma config(Motor,  port3,           lDriveBack,    tmotorVex393HighSpeed_MC29, openLoop)
@@ -31,15 +32,10 @@ int LEFT = 1; //note that changing this value could affect gyro rotation functio
 int RIGHT = 2;
 int AUTON_SIDE = 0; //either LEFT or RIGHT, as above
 int AUTON_PLAY = 0;
-float straighteningKpLeft = 0.00125,//.43,//.195, //proportional constant for straightening response for the left side
-straighteningKpRight = 0.00125;
-static int STRAIGHT = 2; //the 2 here shouldn't matter as long as no variables are multiplied by 'direction' in driveDistancePID
-static int STRAFE_LEFT = 3; //don't multiply values by this variable!
-static int STRAFE_RIGHT = 4;
 
 //Our includes
 #include "autonomousLib B.c"
-#include "driveStraight B.c"
+#include "../State/Position PID - 4 Motor Struct.c"
 #include "LCD Wizard.c"
 //setDumpMotors and setClawMotors are in autonomousLib.c
 
@@ -447,6 +443,7 @@ task usercontrol()
 {
 	//Override auton play selection for testing: (next 3 lines)
 	//AUTON_PLAY = 6;
+
 	//startTask(autonomous);
 	//stopTask(usercontrol);
 	//startTask(clawControl); //simple control and PID for compensation on claw
