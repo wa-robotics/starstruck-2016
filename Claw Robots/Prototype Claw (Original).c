@@ -3,6 +3,7 @@
 #pragma config(Sensor, in3,    gyro,           sensorGyro)
 #pragma config(Sensor, dgtl1,  lDriveEnc,      sensorQuadEncoder)
 #pragma config(Sensor, dgtl3,  rDriveEnc,      sensorQuadEncoder)
+#pragma config(Sensor, dgtl5,  armDown,        sensorTouch)
 #pragma config(Motor,  port1,           leftClaw,      tmotorVex393_HBridge, openLoop)
 #pragma config(Motor,  port2,           lDriveFront,   tmotorVex393HighSpeed_MC29, openLoop)
 #pragma config(Motor,  port3,           lDriveBack,    tmotorVex393HighSpeed_MC29, openLoop)
@@ -198,7 +199,7 @@ task usercontrol()
 	int threshold = 15;
 	int armCompPower = 12; //compensation power for arm/lift
 	int armPotMaxLimit = 300; //software limit for potentiometer to limit arm movement from going over the top (protects potentiometer)
-	bool enableSoftwareArmPosLimit = true; //experimental software limit for arm, see above
+	bool enableSoftwareArmPosLimit = false; //experimental software limit for arm, see above
 	int clawCompPower = 15;
   while(1)
   {
@@ -220,15 +221,20 @@ task usercontrol()
   	//untested
 	  if (vexRT[Btn5U] && (SensorValue[arm] > armPotMaxLimit || !enableSoftwareArmPosLimit)) {
 	  	setDumpMotors(127);
-		} else if (vexRT[Btn5D]) { //second part of condition is to prevent motors from jittering if 5U and 5D are pressed down
+		} else if (vexRT[Btn5D] && !SensorValue[armDown]) { //second part of condition is to prevent motors from jittering if 5U and 5D are pressed down
 			setDumpMotors(-127);
 		} else {
-			if (SensorValue[arm] > 3890) { //arm is all the way down; no compensation power
+			/*if (SensorValue[arm] > 3890) { //arm is all the way down; no compensation power
 				setDumpMotors(0);
-			} else if (SensorValue[arm] > 1350) { //arm is up but has not gone past vertical (behind back of robot).  Positive compensation power
+			} else if (SensorValue[arm] > 1350) { *///arm is up but has not gone past vertical (behind back of robot).  Positive compensation power
 				setDumpMotors(armCompPower);
-			} else { //arm is up and behind the back of the robot.  Negative compensation power (and increased compensation power to protect potentiometer from crossing its physical limit and counter momentum)
+			/*} else { //arm is up and behind the back of the robot.  Negative compensation power (and increased compensation power to protect potentiometer from crossing its physical limit and counter momentum)
 				setDumpMotors(-armCompPower - 5);
+			}*/
+			if (SensorValue[armDown]) {
+				setDumpMotors(-17);
+			} else {
+				setDumpMotors(armCompPower);
 			}
 		}
 
