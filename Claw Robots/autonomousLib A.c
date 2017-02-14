@@ -93,7 +93,7 @@ void straight(int power, int dist) {
 void strafeRight(int target, int speed)
 {
 	SensorValue[rDriveEnc] = 0;
-	while(abs(sensorValue[rDriveEnc]) < target)
+	while(abs(SensorValue[rDriveEnc]) < target)
 	{
 		motor[lDriveFront] = speed;
 		motor[lDriveBack] = -speed;

@@ -4,7 +4,7 @@
 #pragma config(Sensor, dgtl1,  lDriveEnc,      sensorQuadEncoder)
 #pragma config(Sensor, dgtl3,  rDriveEnc,      sensorQuadEncoder)
 #pragma config(Sensor, dgtl5,  armDown,        sensorTouch)
-#pragma config(Sensor, dgtl6,  armEnc,         sensorQuadEncoder)
+#pragma config(Sensor, dgtl6,  liftEnc,         sensorQuadEncoder)
 #pragma config(Motor,  port1,           leftClaw,      tmotorVex393_HBridge, openLoop)
 #pragma config(Motor,  port2,           lDriveFront,   tmotorVex393HighSpeed_MC29, openLoop)
 #pragma config(Motor,  port3,           lDriveBack,    tmotorVex393HighSpeed_MC29, openLoop)
@@ -35,6 +35,7 @@ int AUTON_PLAY = 0;
 
 //Our includes
 #include "autonomousLib A.c"
+#include "../State/Position PID - 4 Motor Struct.c"
 #include "LCD Wizard.c"
 //setDumpMotors and setClawMotors are in autonomousLib.c
 
@@ -130,7 +131,7 @@ task autonomous() {
 	wait1Msec(1000);
 	setClawMotors(15);
 	wait1Msec(500);
-	liftToPotTarget(3800, -127)
+	liftToPotTarget(3800, -127);
 	//straight(127,1075);
 	//moveClaw(127, 0);
 	//setClawMotors(-50);
@@ -181,6 +182,12 @@ task clawControl()
      }
 }
 bool holdDown = false;
+
+task liftComp() {
+	int target = SensorValue[liftEnc];
+	liftToTargetPIDEnc(SensorValue[liftEnc]+5,1000,2,0.00035,.2);
+}
+
 task usercontrol()
 {
 	//liftTarget = 2350;
@@ -221,28 +228,30 @@ task usercontrol()
   	motor[rDriveBack] = RY + RX;
 
   	if (SensorValue[armDown]) {
-  		SensorValue[armEnc] = 0;
+  		SensorValue[liftEnc] = 0;
   	}
 
-  	//untested
-	  if (vexRT[Btn5U] && (SensorValue[armEnc] < armEncMaxLimit || !enableSoftwareArmPosLimit)) {
+	  if (vexRT[Btn5U] && (SensorValue[liftEnc] < armEncMaxLimit || !enableSoftwareArmPosLimit)) {
+	  	stopTask(liftComp);
 	  	setDumpMotors(127);
 	  	holdDown = false;
 		} else if (vexRT[Btn5D] && !SensorValue[armDown]) { //second part of condition is to prevent motors from jittering if 5U and 5D are pressed down
+			stopTask(liftComp);
 			setDumpMotors(-127);
 		} else {
 
-		//vertical at 117
+			//vertical at 117
 			/*if (SensorValue[arm] > 3890) { //arm is all the way down; no compensation power
 				setDumpMotors(0);
 			} else if (SensorValue[arm] > 1350) { *///arm is up but has not gone past vertical (behind back of robot).  Positive compensation power
 				if (SensorValue[armDown]) {
 					holdDown = true;
 				}
-				if (holdDown || SensorValue[armEnc] >= 117) {
-						setDumpMotors(-17);
+				if (holdDown || SensorValue[liftEnc] >= 117) {
+					stopTask(liftComp);
+					setDumpMotors(-17);
 				} else {
-					setDumpMotors(0);
+					startTask(liftComp);
 				}
 			/*} else { //arm is up and behind the back of the robot.  Negative compensation power (and increased compensation power to protect potentiometer from crossing its physical limit and counter momentum)
 				setDumpMotors(-armCompPower - 5);

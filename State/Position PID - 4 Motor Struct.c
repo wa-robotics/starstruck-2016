@@ -8,7 +8,7 @@ float positionKp = .8, //proportional constant for positional PID
 			positionKd = 4.25; //derivative constant
 
 float liftKp,
-			liftKi,
+			liftKi;
 
 
 void setLeftDtMotors(float power) {
@@ -143,7 +143,7 @@ void liftToTargetPIDEnc(int target, int time, float kP, float kI, float kD) {
 		writeDebugStreamLine("%d,%d,%d,%d,%d,%d", SensorValue[liftEnc], liftPID.error, liftPID.p,liftPID.i,liftPID.d,power);
 		wait1Msec(25);
 	}
-	if (SensorValue[liftEnc]) {
+	if (SensorValue[liftEnc] < 2) {
 		setDumpMotors(0);
 	} else {
 		setDumpMotors(lastPower);
@@ -173,7 +173,7 @@ void driveDistancePID(int encoderCounts, int direction, int time) {
 			int straighteningError = SensorValue[lDriveEnc] - SensorValue[rDriveEnc];
 			float rPower, lPower;
 
-			writeDebugStreamLine("%f",straighteningError;
+			writeDebugStreamLine("%f",straighteningError);
 			if (straighteningError > 0) { //left side is ahead, so speed up the right side
 				lPower = power + straighteningError*straighteningKpLeft;
 			} else { //otherwise, just set the right side to the power
