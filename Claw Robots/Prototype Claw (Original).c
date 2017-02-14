@@ -231,7 +231,7 @@ task usercontrol()
   		SensorValue[liftEnc] = 0;
   	}
 
-	  if (vexRT[Btn5U] && (SensorValue[liftEnc] < armEncMaxLimit || !enableSoftwareArmPosLimit)) {
+	  if (vexRT[Btn5U] && (SensorValue[liftEnc] < armEncMaxLimit || !enableSoftwareArmPosLimit || vexRT[Btn8U])) {
 	  	stopTask(liftComp);
 	  	setDumpMotors(127);
 	  	holdDown = false;
