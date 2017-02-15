@@ -3,6 +3,8 @@
 #pragma config(Sensor, in3,    gyro,           sensorGyro)
 #pragma config(Sensor, dgtl1,  lDriveEnc,      sensorQuadEncoder)
 #pragma config(Sensor, dgtl3,  rDriveEnc,      sensorQuadEncoder)
+#pragma config(Sensor, dgtl5,  armDown,        sensorTouch)
+#pragma config(Sensor, dgtl6,  liftEnc,        sensorQuadEncoder)
 #pragma config(Motor,  port1,           leftClaw,      tmotorVex393_HBridge, openLoop)
 #pragma config(Motor,  port2,           lDriveFront,   tmotorVex393HighSpeed_MC29, openLoop)
 #pragma config(Motor,  port3,           lDriveBack,    tmotorVex393HighSpeed_MC29, openLoop)
@@ -30,14 +32,10 @@ int LEFT = 1; //note that changing this value could affect gyro rotation functio
 int RIGHT = 2;
 int AUTON_SIDE = 0; //either LEFT or RIGHT, as above
 int AUTON_PLAY = 0;
-float straighteningKpLeft = 0.4,//.43,//.195, //proportional constant for straightening response for the left side
-float	straighteningKpRight = 0.4,
-static int STRAIGHT = 2; //the 2 here shouldn't matter as long as no variables are multiplied by 'direction' in driveDistancePID
-static int STRAFE_LEFT = 3; //don't multiply values by this variable!
-static int STRAFE_RIGHT = 4;
 
 //Our includes
 #include "autonomousLib C.c"
+#include "../State/Position PID - 4 Motor Struct.c"
 #include "LCD Wizard.c"
 //setDumpMotors and setClawMotors are in autonomousLib.c
 
@@ -209,6 +207,13 @@ task clawControl()
      }
 }
 
+bool holdDown = false;
+bool liftCompStarted = false;
+task liftComp() {
+	int target = SensorValue[liftEnc];
+	liftToTargetPIDEnc(SensorValue[liftEnc]+5,1000,2,0.00035,.2);
+}
+
 task usercontrol()
 {
 	//	AUTON_PLAY = 6;
@@ -220,8 +225,8 @@ task usercontrol()
 	int RX = 0;
 	int threshold = 15;
 	int armCompPower = 12; //compensation power for arm/lift
-	int armPotMaxLimit = 620; //software limit for potentiometer to limit arm movement from going over the top (protects potentiometer)
-	bool enableSoftwareArmPosLimit = true; //experimental software limit for arm, see above
+	int armEncMaxLimit = 118; //software limit for potentiometer to limit arm movement from going over the top (protects potentiometer)
+	bool enableSoftwareArmPosLimit = false; //experimental software limit for arm, see above
 	int clawCompPower = 15
   while(1)
   {
@@ -235,19 +240,35 @@ task usercontrol()
   	motor[rDriveFront] = RY - RX;
   	motor[rDriveBack] = RY + RX;
 
-  	//untested
-	  if (vexRT[Btn5U] && (SensorValue[arm] > armPotMaxLimit || !enableSoftwareArmPosLimit)) {
+    if (vexRT[Btn5U] && (SensorValue[liftEnc] < armEncMaxLimit || !enableSoftwareArmPosLimit || vexRT[Btn8U])) {
+	  	stopTask(liftComp);
+	  	liftCompStarted = false;
 	  	setDumpMotors(127);
-		} else if (vexRT[Btn5D] && SensorValue[arm] < 3675) { //second part of condition is to prevent motors from jittering if 5U and 5D are pressed down
+	  	holdDown = false;
+		} else if (vexRT[Btn5D] && !SensorValue[armDown]) { //second part of condition is to prevent motors from jittering if 5U and 5D are pressed down
+			stopTask(liftComp);
+			liftCompStarted = false;
 			setDumpMotors(-127);
 		} else {
-			if (SensorValue[arm] > 3675) { //arm is all the way down; no compensation power
+
+			//vertical at 117
+			/*if (SensorValue[arm] > 3890) { //arm is all the way down; no compensation power
 				setDumpMotors(0);
-			} else if (SensorValue[arm] > 1480) { //arm is up but has not gone past vertical (behind back of robot).  Positive compensation power
-				setDumpMotors(armCompPower);
-			} else { //arm is up and behind the back of the robot.  Negative compensation power (and increased compensation power to protect potentiometer from crossing its physical limit and counter momentum)
-				setDumpMotors(-armCompPower);
-			}
+			} else if (SensorValue[arm] > 1350) { *///arm is up but has not gone past vertical (behind back of robot).  Positive compensation power
+				if (SensorValue[armDown]) {
+					holdDown = true;
+				}
+				if (holdDown || SensorValue[liftEnc] >= 117) {
+					stopTask(liftComp);
+					liftCompStarted = false;
+					setDumpMotors(-12);
+				} else if (!liftCompStarted) { //don't restart this task unless the lift has moved
+					startTask(liftComp);
+					liftCompStarted = true;
+				}
+			/*} else { //arm is up and behind the back of the robot.  Negative compensation power (and increased compensation power to protect potentiometer from crossing its physical limit and counter momentum)
+				setDumpMotors(-armCompPower - 5);
+			}*/
 		}
 
   	if (vexRT[Btn6U]) {

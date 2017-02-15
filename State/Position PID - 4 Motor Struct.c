@@ -7,9 +7,6 @@ float positionKp = .8, //proportional constant for positional PID
 			positionKi = 0.000350, //integral constant
 			positionKd = 4.25; //derivative constant
 
-float liftKp,
-			liftKi;
-
 
 void setLeftDtMotors(float power) {
 	motor[lDriveFront] = power;

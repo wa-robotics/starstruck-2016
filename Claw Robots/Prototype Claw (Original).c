@@ -182,7 +182,7 @@ task clawControl()
      }
 }
 bool holdDown = false;
-
+bool liftCompStarted = false;
 task liftComp() {
 	int target = SensorValue[liftEnc];
 	liftToTargetPIDEnc(SensorValue[liftEnc]+5,1000,2,0.00035,.2);
@@ -190,16 +190,6 @@ task liftComp() {
 
 task usercontrol()
 {
-	//liftTarget = 2350;
-	//clawTarget = 1111;//A
-	//liftToPotTarget(2350,127);
-	//strafeRight(1000, 127);
-	//startTask(autonomous);
-	//stopTask(usercontrol);
-	//setClawMotors(127);
-	//wait1Msec(750);
-	//setClawMotors(-127);
-	//wait1Msec(400);
 	int LY = 0;
 	int LX = 0;
 	int RY = 0;
@@ -207,7 +197,7 @@ task usercontrol()
 	int threshold = 15;
 	int armCompPower = 12; //compensation power for arm/lift
 	int armEncMaxLimit = 118; //software limit for potentiometer to limit arm movement from going over the top (protects potentiometer)
-	bool enableSoftwareArmPosLimit = true; //experimental software limit for arm, see above
+	bool enableSoftwareArmPosLimit = true; //software limit for arm, see above
 	int clawCompPower = 15;
 
   while(1)
@@ -233,10 +223,12 @@ task usercontrol()
 
 	  if (vexRT[Btn5U] && (SensorValue[liftEnc] < armEncMaxLimit || !enableSoftwareArmPosLimit || vexRT[Btn8U])) {
 	  	stopTask(liftComp);
+	  	liftCompStarted = false;
 	  	setDumpMotors(127);
 	  	holdDown = false;
 		} else if (vexRT[Btn5D] && !SensorValue[armDown]) { //second part of condition is to prevent motors from jittering if 5U and 5D are pressed down
 			stopTask(liftComp);
+			liftCompStarted = false;
 			setDumpMotors(-127);
 		} else {
 
@@ -249,9 +241,11 @@ task usercontrol()
 				}
 				if (holdDown || SensorValue[liftEnc] >= 117) {
 					stopTask(liftComp);
-					setDumpMotors(-17);
-				} else {
+					liftCompStarted = false;
+					setDumpMotors(-12);
+				} else if (!liftCompStarted) { //don't restart this task unless the lift has moved
 					startTask(liftComp);
+					liftCompStarted = true;
 				}
 			/*} else { //arm is up and behind the back of the robot.  Negative compensation power (and increased compensation power to protect potentiometer from crossing its physical limit and counter momentum)
 				setDumpMotors(-armCompPower - 5);
