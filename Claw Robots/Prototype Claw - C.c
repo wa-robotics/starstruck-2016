@@ -262,7 +262,7 @@ task usercontrol()
 					stopTask(liftComp);
 					liftCompStarted = false;
 					setDumpMotors(-12);
-				} else if (!liftCompStarted) { //don't restart this task unless the lift has moved
+				} else if (!liftCompStarted || true) { //don't restart this task unless the lift has moved
 					startTask(liftComp);
 					liftCompStarted = true;
 				}
