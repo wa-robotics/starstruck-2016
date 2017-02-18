@@ -32,6 +32,11 @@ int LEFT = 1; //note that changing this value could affect gyro rotation functio
 int RIGHT = 2;
 int AUTON_SIDE = 0; //either LEFT or RIGHT, as above
 int AUTON_PLAY = 0;
+int armPotOffset = 0; //The value of the claw potentiometer when the claw is fully closed and touching the physical limit
+
+int getArmPos() {
+	return SensorValue[claw] - armPotOffset;
+}
 
 //Our includes
 #include "autonomousLib C.c"
@@ -209,9 +214,13 @@ task clawControl()
 
 bool holdDown = false;
 bool liftCompStarted = false;
+
 task liftComp() {
 	int target = SensorValue[liftEnc];
-	liftToTargetPIDEnc(SensorValue[liftEnc]+5,1000,2,0.00035,.2);
+	liftToTargetPIDEnc(target+5,1000,2,0.00035,.2);
+	while(1) {
+		wait1Msec(500); //keep this task alive until it stops; the wait time here doesn't really matter, since the task will be stopped when it is no longer needed
+	}
 }
 
 task usercontrol()
@@ -224,10 +233,9 @@ task usercontrol()
 	int RY = 0;
 	int RX = 0;
 	int threshold = 15;
-	int armCompPower = 12; //compensation power for arm/lift
 	int armEncMaxLimit = 118; //software limit for potentiometer to limit arm movement from going over the top (protects potentiometer)
-	bool enableSoftwareArmPosLimit = false; //experimental software limit for arm, see above
-	int clawCompPower = 15
+	bool enableSoftwareArmPosLimit = true; //experimental software limit for arm, see above
+	int clawCompPower = 15;
   while(1)
   {
   	//for deadzones; when the joystick value for an axis is below the threshold, the motors controlled by that joystick will not move in that direction
@@ -262,7 +270,7 @@ task usercontrol()
 					stopTask(liftComp);
 					liftCompStarted = false;
 					setDumpMotors(-12);
-				} else if (!liftCompStarted || true) { //don't restart this task unless the lift has moved
+				} else if (!liftCompStarted) { //don't restart this task unless the lift has moved
 					startTask(liftComp);
 					liftCompStarted = true;
 				}
