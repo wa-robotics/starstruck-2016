@@ -34,6 +34,11 @@ int AUTON_SIDE = 0; //either LEFT or RIGHT, as above
 int AUTON_PLAY = 0;
 int armPotOffset = 0; //The value of the claw potentiometer when the claw is fully closed and touching the physical limit
 
+int getArmPos() {
+	return SensorValue[claw] - armPotOffset;
+}
+
+
 //Our includes
 #include "autonomousLib B.c"
 #include "../State/Position PID - 4 Motor Struct.c"
@@ -57,9 +62,6 @@ void pre_auton()
 	}
 }
 
-int getArmPos() {
-	return SensorValue[claw] - armPotOffset;
-}
 
 
 //potentiometer value for lift: 2150
