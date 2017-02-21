@@ -233,8 +233,8 @@ task usercontrol()
 	int RY = 0;
 	int RX = 0;
 	int threshold = 15;
-	int armEncMaxLimit = 118; //software limit for potentiometer to limit arm movement from going over the top (protects potentiometer)
-	bool enableSoftwareArmPosLimit = true; //experimental software limit for arm, see above
+	int armEncMaxLimit = 125; //software limit for potentiometer to limit arm movement from going over the top (protects potentiometer)
+	bool enableSoftwareArmPosLimit = false; //experimental software limit for arm, see above
 	int clawCompPower = 15;
   while(1)
   {
