@@ -453,7 +453,7 @@ bool liftCompStarted = false;
 
 task liftComp() {
 	int target = SensorValue[liftEnc];
-	liftToTargetPIDEnc(target+5,1000,3,0.00035,.2);
+	liftToTargetPIDEnc(target+8,1000,3,0.00035,.2);
 	while(1) {
 		wait1Msec(500); //keep this task alive until it stops; the wait time here doesn't really matter, since the task will be stopped when it is no longer needed
 	}
@@ -467,7 +467,7 @@ task usercontrol()
 	int RX = 0;
 	int threshold = 15;
 	int armEncMaxLimit = 118; //software limit for potentiometer to limit arm movement from going over the top (protects potentiometer)
-	bool enableSoftwareArmPosLimit = true; //experimental software limit for arm, see above
+	bool enableSoftwareArmPosLimit = false; //experimental software limit for arm, see above
 	int clawCompPower = 15;
   while(1)
   {
