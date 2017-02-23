@@ -34,14 +34,15 @@ int AUTON_SIDE = 0; //either LEFT or RIGHT, as above
 int AUTON_PLAY = 0;
 int armPotOffset = 260; //The value of the claw potentiometer when the claw is fully closed and touching the physical limit
 
-int getArmPos() {
-	return SensorValue[claw] - armPotOffset;
-}
+/*int getArmPos() {
+	return SenvsorValue[claw] - armPotOffset;
+}*/
 
 //Our includes
 #include "autonomousLib C.c"
 #include "../State/Position PID - 4 Motor - X Drive.c"
 #include "LCD Wizard.c"
+//#include "Position PID - 4 Motor - X Drive.c"
 //setDumpMotors and setClawMotors are in autonomousLib.c
 
 void pre_auton()
@@ -75,8 +76,13 @@ task clawTask()
 }
 
 
-task progSkills();
-
+task progSkills()
+{
+	driveDistancePID(-510,STRAIGHT,1500);
+	moveClaw(-127,850);
+	driveDistancePID(275,STRAIGHT,1000);
+	moveClaw(-127,270)
+}
 task autonomous() {
 	//Auton plays and their numbers, for reference.  These numbers are set as the value of the AUTON_PLAY variable to control which auton play runs
 	//#1 Big
@@ -154,7 +160,7 @@ task autonomous() {
 	//startTask(clawTask);
 }
 
-task progSkills() {
+/*task progSkills() {
 		//clawTarget = 2700;//A
 		////startTask(liftTask);
 		//startTask(clawTask);
@@ -172,7 +178,7 @@ task progSkills() {
 
 		//liftTarget = 1950;
 
-}
+}*/
 
 task clawControl()
 {
