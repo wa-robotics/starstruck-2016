@@ -110,53 +110,52 @@ float posPidNextPower (posPID *pos,int encoderVal) {
 int getReversedPot() {
 	return 4095 - SensorValue[arm];
 }
-
-void liftToTargetPID(int target, int time, float kP, float kI, float kD) {
-	posPID liftPID;
-	posPidInit(liftPID,target,kP,kI,kD,15);
-	time1[T1] = 0;
-	writeDebugStreamLine("getReversedPot(), error, liftPID.p,liftPID.i,liftPID.d,power");
-	float lastPower;
-	while (time1[T1] < time) {
-		float power = posPidNextPower(liftPID,getReversedPot());
-		if (SensorValue[arm] > 3850 && target < (4095 - 3850)) {
-			setDumpMotors(0);
-		} else {
-			setDumpMotors(power);
-		}
-		lastPower = power;
-		writeDebugStreamLine("%d,%d,%d,%d,%d,%d",getReversedPot(), liftPID.error, liftPID.p,liftPID.i,liftPID.d,power);
-		wait1Msec(25);
-	}
-	if (SensorValue[arm] > 3850) {
-		setDumpMotors(0);
-	} else {
-		setDumpMotors(lastPower);
-	}
-}
-
 void liftToTargetPIDEnc(int target, int time, float kP, float kI, float kD) {
-	posPID liftPID;
-	posPidInit(liftPID,target,kP,kI,kD,15);
+	int error = 0,
+	errorSum = 0,
+	lastError = 0,
+	slewRateLimit = 15;
+
+	float pTerm,
+	iTerm,
+	dTerm,
+	power,
+	lastPower = 0;
+
 	time1[T1] = 0;
-	writeDebugStreamLine("encoder, error, liftPID.p,liftPID.i,liftPID.d,power");
-	float lastPower;
+
 	while (time1[T1] < time) {
-		float power = posPidNextPower(liftPID,SensorValue[liftEnc]);
-		if (SensorValue[liftEnc] && target <= 0) { //reject negative targets, stop going down when the lift is all the way down
-			writeDebugStreamLine("Lift is at bottom, not sending power");
-			setDumpMotors(0);
-		} else {
-			setDumpMotors(power);
+		//update error terms
+		error = target - SensorValue[liftEnc];
+		errorSum += error;
+
+		pTerm = error * (float) kP;
+		iTerm = errorSum * (float) kI;
+		dTerm = (error - lastError) * (float) kD; //calculate motor power
+		power = pTerm + iTerm + dTerm;
+
+		//limit the values of the power term to only be those that can be taken by the motors
+		if (power > 127) {
+			power = 127;
+		} else if (power < -127) {
+			power = -127;
 		}
-		lastPower = power;
-		writeDebugStreamLine("%d,%d,%d,%d,%d,%d", SensorValue[liftEnc], liftPID.error, liftPID.p,liftPID.i,liftPID.d,power);
+
+		lastError = error; //update last error
+
+		//apply a slew rate to limit acceleration/deceleration
+		if(abs(power-lastPower) > slewRateLimit) {
+			if(power > lastPower) { //if the power is increasing (and the difference is greater than the slew rate allows)
+				power = lastPower + slewRateLimit; //increment the power to only add
+			} else { //if the power is decreasing (and the differene is greater than the slew rate allows)
+				power = lastPower - slewRateLimit;
+			}
+		}
+
+		lastPower = power; //update the last power
+		writeDebugStreamLine("%d,%f,%f,%f,%f,%f,%f,%f",nPgmTime,target,error,SensorValue[liftEnc],pTerm,iTerm,dTerm,power);
+		setDumpMotors(power);
 		wait1Msec(25);
-	}
-	if (SensorValue[liftEnc] < 2) {
-		setDumpMotors(0);
-	} else {
-		setDumpMotors(lastPower);
 	}
 }
 

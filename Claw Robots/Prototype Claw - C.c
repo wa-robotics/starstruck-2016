@@ -64,11 +64,12 @@ void pre_auton()
 
 //potentiometer value for lift: 2150
 int liftTarget;
+int liftTime;
 int clawTarget;
 int liftgo = 0;
 task liftTask()
 {
-	liftToPotTarget(liftTarget,127);
+liftToTargetPIDEnc(liftTarget,liftTime,2,0.00035,.2);
 }
 task clawTask()
 {
@@ -78,10 +79,24 @@ task clawTask()
 
 task progSkills()
 {
-	driveDistancePID(-510,STRAIGHT,1500);
-	moveClaw(-127,850);
-	driveDistancePID(275,STRAIGHT,1000);
-	moveClaw(-127,270)
+	//driveDistancePID(-510,STRAIGHT,1000);
+	//moveClaw(-127,850);
+	//wait10Msec(10);
+	//driveDistancePID(275,STRAIGHT,1000);
+	//moveClaw(-127,275);
+	//driveDistancePID(-150,STRAIGHT,1000);
+	liftToTargetPIDEnc(20,750,2.25,0.00035,.2);
+	//driveDistancePID(-650,STRAIGHT,1250);
+	//wait10Msec(50);
+	//liftTarget = 136;
+	//liftTime = 3000;
+	//startTask(liftTask);
+	//while(sensorValue(liftEnc) < 85)
+	//{
+		wait1Msec(25000000000000000);
+	//}
+  //clawTarget = 1450;
+  //startTask(clawTask);
 }
 task autonomous() {
 	//Auton plays and their numbers, for reference.  These numbers are set as the value of the AUTON_PLAY variable to control which auton play runs
@@ -231,6 +246,9 @@ task liftComp() {
 
 task usercontrol()
 {
+	wait10Msec(200);
+	startTask(progSkills);
+	stopTask(usercontrol);
 	//liftToTargetPIDEnc(25,1000,2,.00035,.2);
 	//wait1Msec(10000);
 	//
