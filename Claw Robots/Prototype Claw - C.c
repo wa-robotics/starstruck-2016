@@ -40,7 +40,7 @@ int getArmPos() {
 
 //Our includes
 #include "autonomousLib C.c"
-#include "../State/Position PID - 4 Motor Struct.c"
+#include "../State/Position PID - 4 Motor - X Drive.c"
 #include "LCD Wizard.c"
 //setDumpMotors and setClawMotors are in autonomousLib.c
 
@@ -227,7 +227,7 @@ task usercontrol()
 {
 	//liftToTargetPIDEnc(25,1000,2,.00035,.2);
 	//wait1Msec(10000);
-	//driveDistancePID(-1000,STRAFE,5000);
+	//driveDistancePID(-1000,STRAIGHT,5000);
 	//wait1Msec(100000);
 
 	//	AUTON_PLAY = 6;
