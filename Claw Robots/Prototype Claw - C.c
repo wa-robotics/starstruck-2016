@@ -79,24 +79,26 @@ task clawTask()
 
 task progSkills()
 {
-	//driveDistancePID(-510,STRAIGHT,1000);
-	//moveClaw(-127,850);
-	//wait10Msec(10);
-	//driveDistancePID(275,STRAIGHT,1000);
-	//moveClaw(-127,275);
-	//driveDistancePID(-150,STRAIGHT,1000);
-	liftToTargetPIDEnc(20,750,2.25,0.00035,.2);
-	//driveDistancePID(-650,STRAIGHT,1250);
-	//wait10Msec(50);
-	//liftTarget = 136;
-	//liftTime = 3000;
-	//startTask(liftTask);
-	//while(sensorValue(liftEnc) < 85)
-	//{
-		wait1Msec(25000000000000000);
-	//}
-  //clawTarget = 1450;
-  //startTask(clawTask);
+	driveDistancePID(-510,STRAIGHT,1000);
+	moveClaw(-127,850);
+	wait10Msec(10);
+	driveDistancePID(275,STRAIGHT,1000);
+	moveClaw(-127,390);
+	setClawMotors(-50);
+	wait10Msec(25);
+	driveDistancePID(-150,STRAIGHT,1000);
+	liftToTargetPIDEnc(35,750,2.25,0.00035,.2);
+	driveDistancePID(-1100,STRAIGHT,1250);
+	wait10Msec(50);
+	liftTarget = 136;
+	liftTime = 3000;
+	startTask(liftTask);
+	while(sensorValue(liftEnc) < 85)
+	{
+		wait1Msec(25);
+	}
+  clawTarget = 1450;
+  startTask(clawTask);
 }
 task autonomous() {
 	//Auton plays and their numbers, for reference.  These numbers are set as the value of the AUTON_PLAY variable to control which auton play runs
