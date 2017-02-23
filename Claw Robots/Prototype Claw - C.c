@@ -227,8 +227,8 @@ task usercontrol()
 {
 	//liftToTargetPIDEnc(25,1000,2,.00035,.2);
 	//wait1Msec(10000);
-	driveDistancePID(-1000,STRAFE,5000);
-	wait1Msec(100000);
+	//driveDistancePID(-1000,STRAFE,5000);
+	//wait1Msec(100000);
 
 	//	AUTON_PLAY = 6;
 	//startTask(autonomous);
