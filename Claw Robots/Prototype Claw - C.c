@@ -1,6 +1,6 @@
 #pragma config(Sensor, in1,    arm,            sensorPotentiometer)
 #pragma config(Sensor, in2,    claw,           sensorPotentiometer)
-#pragma config(Sensor, in3,    gyro,           sensorGyro)
+#pragma config(Sensor, in3,    gyro,           sensorNone)
 #pragma config(Sensor, dgtl1,  lDriveEnc,      sensorQuadEncoder)
 #pragma config(Sensor, dgtl3,  rDriveEnc,      sensorQuadEncoder)
 #pragma config(Sensor, dgtl5,  armDown,        sensorTouch)
@@ -32,7 +32,7 @@ int LEFT = 1; //note that changing this value could affect gyro rotation functio
 int RIGHT = 2;
 int AUTON_SIDE = 0; //either LEFT or RIGHT, as above
 int AUTON_PLAY = 0;
-int armPotOffset = 0; //The value of the claw potentiometer when the claw is fully closed and touching the physical limit
+int armPotOffset = 260; //The value of the claw potentiometer when the claw is fully closed and touching the physical limit
 
 int getArmPos() {
 	return SensorValue[claw] - armPotOffset;
@@ -225,6 +225,11 @@ task liftComp() {
 
 task usercontrol()
 {
+	//liftToTargetPIDEnc(25,1000,2,.00035,.2);
+	//wait1Msec(10000);
+	driveDistancePID(-1000,STRAFE,5000);
+	wait1Msec(100000);
+
 	//	AUTON_PLAY = 6;
 	//startTask(autonomous);
 	//stopTask(usercontrol);

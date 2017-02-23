@@ -4,7 +4,7 @@
 #pragma config(Sensor, dgtl1,  lDriveEnc,      sensorQuadEncoder)
 #pragma config(Sensor, dgtl3,  rDriveEnc,      sensorQuadEncoder)
 #pragma config(Sensor, dgtl5,  armDown,        sensorTouch)
-#pragma config(Sensor, dgtl6,  liftEnc,         sensorQuadEncoder)
+#pragma config(Sensor, dgtl6,  liftEnc,        sensorQuadEncoder)
 #pragma config(Motor,  port1,           leftClaw,      tmotorVex393_HBridge, openLoop)
 #pragma config(Motor,  port2,           lDriveFront,   tmotorVex393HighSpeed_MC29, openLoop)
 #pragma config(Motor,  port3,           lDriveBack,    tmotorVex393HighSpeed_MC29, openLoop)
@@ -32,6 +32,11 @@ int LEFT = 1; //note that changing this value could affect gyro rotation functio
 int RIGHT = 2;
 int AUTON_SIDE = 0; //either LEFT or RIGHT, as above
 int AUTON_PLAY = 0;
+int armPotOffset = 0; //The value of the claw potentiometer when the claw is fully closed and touching the physical limit
+
+int getArmPos() {
+	return SensorValue[claw] - armPotOffset;
+}
 
 //Our includes
 #include "autonomousLib A.c"

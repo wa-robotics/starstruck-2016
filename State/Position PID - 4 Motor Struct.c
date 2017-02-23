@@ -1,7 +1,7 @@
 
 float positionKp = .8, //proportional constant for positional PID
 			straighteningKpLeft = 0.29,//.43,//.195, //proportional constant for straightening response for the left side
-			straighteningKpRight = -0.29,//.22,//.16, //proportional constant for straightening response for the right side
+			straighteningKpRight = 0.29,//.22,//.16, //proportional constant for straightening response for the right side
 			straighteningKpLeftTurn = 0.4,//.43,//.195, //proportional constant for straightening response for the left side when turning
 			straighteningKpRightTurn = 0.4,//.22,//.16, //proportional constant for straightening response for the right side when turning
 			positionKi = 0.000350, //integral constant
@@ -17,14 +17,25 @@ void setRightDtMotors(float power) {
 	motor[rDriveFront] = power;
 	motor[rDriveBack] = power;
 }
+
+void setLeftDtMotorsStrafe(float power) {
+		motor[lDriveFront] = power;
+		motor[lDriveBack] = -power;
+}
+
+void setRightDtMotorsStrafe(float power) {
+		motor[rDriveFront] = -power;
+		motor[rDriveBack] = power;
+}
+
 //Structure to hold all position PID related data
 typedef struct _position_pid_controller {
     // Encoder
-    long            e_current;              ///< current encoder count
-    long            e_last;                 ///< last encoder count
+    int            e_current;              ///< current encoder count
+    int            e_last;                 ///< last encoder count
     // PID control algorithm variables
     int            target;
-    int						 slewRateLimit;
+    float						 slewRateLimit;
     float           error;                  ///
     float           last_error;             ///< error last time update called
     float						errorSum;
@@ -172,14 +183,14 @@ void driveDistancePID(int encoderCounts, int direction, int time) {
 
 			writeDebugStreamLine("%f",straighteningError);
 			if (straighteningError > 0) { //left side is ahead, so speed up the right side
-				lPower = power + straighteningError*straighteningKpLeft;
-			} else { //otherwise, just set the right side to the power
-				lPower = power;
-			}
-			if (straighteningError < 0) { //right side is ahead, so speed up the left side
-				rPower = power - straighteningError*straighteningKpRight;
+				rPower = power + straighteningError*straighteningKpLeft;
 			} else { //otherwise, just set the right side to the power
 				rPower = power;
+			}
+			if (straighteningError < 0) { //right side is ahead, so speed up the left side
+				lPower = power - straighteningError*straighteningKpRight;
+			} else { //otherwise, just set the right side to the power
+				lPower = power;
 			}
 
 			writeDebugStreamLine("%d,%f,%f,%f,%f,%f,%f,%f,%f,%f",nPgmTime,drivePID.target,drivePID.error,SensorValue[lDriveEnc], SensorValue[rDriveEnc],drivePID.p,drivePID.i,drivePID.d,lPower,rPower);
@@ -188,6 +199,32 @@ void driveDistancePID(int encoderCounts, int direction, int time) {
 			wait1Msec(25);
 
 		} //end if (direction == STRAIGHT)
+		else if (direction == STRAFE) { //Postive targets = right, negative targets = left
+			float encAverage = (abs(SensorValue[lDriveEnc]) + abs(SensorValue[rDriveEnc]))/2.0;
+			float power = posPidNextPower(drivePID,encAverage*sgn(encoderCounts));
+
+			//adjust the powers sent to each side if the encoder values don't match
+			int straighteningError = abs(SensorValue[lDriveEnc]) - abs(SensorValue[rDriveEnc];
+			float rPower, lPower;
+
+			writeDebugStreamLine("%f",straighteningError);
+			if (straighteningError > 0) { //left side is ahead, so speed up the right side
+				rPower = power + straighteningError*straighteningKpLeft;
+			} else { //otherwise, just set the right side to the power
+				rPower = power;
+			}
+			if (straighteningError < 0) { //right side is ahead, so speed up the left side
+				lPower = power - straighteningError*straighteningKpRight;
+			} else { //otherwise, just set the right side to the power
+				lPower = power;
+			}
+
+			writeDebugStreamLine("%d,%f,%f,%f,%f,%f,%f,%f,%f,%f",nPgmTime,drivePID.target,drivePID.error,SensorValue[lDriveEnc], SensorValue[rDriveEnc],drivePID.p,drivePID.i,drivePID.d,lPower,rPower);
+			setLeftDtMotorsStrafe(lPower);
+			setRightDtMotorsStrafe(rPower);
+			wait1Msec(25);
+
+		} //end if (direction == STRAFE)
 		wait1Msec(25);
 
 		setLeftDtMotors(0);
