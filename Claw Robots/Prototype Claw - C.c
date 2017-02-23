@@ -233,7 +233,9 @@ task usercontrol()
 {
 	//liftToTargetPIDEnc(25,1000,2,.00035,.2);
 	//wait1Msec(10000);
-	//driveDistancePID(-1000,STRAIGHT,5000);
+	//
+  //writeDebugStreamLine("%d",STRAFE);
+	//liftToTargetPIDEnc(30,1000,2,0.00035,.2);
 	//wait1Msec(100000);
 
 	//	AUTON_PLAY = 6;
@@ -244,7 +246,8 @@ task usercontrol()
 	int RY = 0;
 	int RX = 0;
 	int threshold = 15;
-	int armEncMaxLimit = 125; //software limit for potentiometer to limit arm movement from going over the top (protects potentiometer)
+	int
+	armEncMaxLimit = 125; //software limit for potentiometer to limit arm movement from going over the top (protects potentiometer)
 	bool enableSoftwareArmPosLimit = false; //experimental software limit for arm, see above
 	int clawCompPower = 15;
   while(1)
