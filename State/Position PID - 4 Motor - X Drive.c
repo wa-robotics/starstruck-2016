@@ -28,45 +28,12 @@ void setRightDtMotorsStrafe(float power) {
 		motor[rDriveBack] = power;
 }
 
-//Structure to hold all position PID related data
-typedef struct _position_pid_controller {
-    // Encoder
-    int            e_current;              ///< current encoder count
-    int            e_last;                 ///< last encoder count
-    // PID control algorithm variables
-    int            target;
-    float						 slewRateLimit;
-    float           error;                  ///
-    float           last_error;             ///< error last time update called
-    float						errorSum;
-    float						Kp;
-    float						Ki;
-    float						Kd;
-    float						p;
-    float						i;
-    float						d;
-
-    // final motor drive
-    long            motor_drive;            ///< final motor control value
-} posPID;
-
 static int STRAIGHT = 2; //the 2 here shouldn't matter as long as no variables are multiplied by 'direction' in driveDistancePID
 static int STRAFE_LEFT = 3;
 static int STRAFE_RIGHT = 4;
 static int STRAFE = 5;
 static int ROTATE_LEFT = -1;
 static int ROTATE_RIGHT = 1;
-
-void posPidInit(posPID *pos, int target, float kP, float kI, float kD, float slewRate) {
-	pos->Kp = kP;
-	pos->Ki = kI;
-	pos->Kd = kD;
-	pos->target = target;
-	pos->last_error = 0;
-	pos->errorSum = 0;
-	pos->e_last = 0;
-	pos->slewRateLimit = slewRate;
-}
 
 //Check if motor power is > 127 or < -127, and if so, fix it
 float clampPower(float power) {
@@ -76,35 +43,6 @@ float clampPower(float power) {
 		return -127;
 	}
 	return power;
-}
-
-float posPidNextPower (posPID *pos,int encoderVal) {
-	pos->e_current = encoderVal;
-	pos->error = pos->target - pos->e_current;
-	pos->errorSum += pos->error;
-
-	int oldMotorDrive = pos->motor_drive;
-
-	pos->p = pos->error * (float) pos->Kp;
-	pos->i = pos->errorSum * (float) pos->Ki;
-	pos->d = (pos->error - pos->last_error) * (float)pos->Kd;
-
-	pos->last_error = pos->error;
-	float newMotorDrive = pos->p + pos->i + pos->d;
-
-	newMotorDrive = clampPower(newMotorDrive);
-
-	//apply a slew rate to limit acceleration/deceleration
-	if(abs(newMotorDrive-oldMotorDrive) > pos->slewRateLimit) {
-		if(newMotorDrive > oldMotorDrive) { //if the power is increasing (and the difference is greater than the slew rate allows)
-			newMotorDrive = oldMotorDrive + pos->slewRateLimit; //increment the power to only add
-		} else { //if the power is decreasing (and the difference is greater than the slew rate allows)
-			newMotorDrive = oldMotorDrive - pos->slewRateLimit;
-		}
-	}
-	pos->motor_drive = newMotorDrive;
-	//writeDebugStreamLine("%d,%f,%f,%f,%f,%f,%f,%f,%f",nPgmTime,pos->target,pos->error,SensorValue[lDriveEnc], SensorValue[rDriveEnc],pos->p,pos->i,pos->d,pos->motor_drive);
-	return newMotorDrive;
 }
 
 int getReversedPot() {
@@ -238,7 +176,8 @@ void driveDistancePID(int encoderCounts, int direction, int time) {
 					setRightDtMotors(rPower);
 					wait1Msec(25);
 				}
-
+					setLeftDtMotors(0);
+					setRightDtMotors(0);
 			} else if (direction == STRAFE) {
 					while(time1[T1] < time) {
 						//update error terms

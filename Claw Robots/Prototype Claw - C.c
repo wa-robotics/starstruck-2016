@@ -67,9 +67,20 @@ int liftTarget;
 int liftTime;
 int clawTarget;
 int liftgo = 0;
-task liftTask()
+/*task liftTask()
 {
 liftToTargetPIDEnc(liftTarget,liftTime,2,0.00035,.2);
+}*/
+task liftTask()
+{
+	while(1)
+	{
+		if(liftgo == 1)
+		{
+			liftToPotTarget(liftTarget,127);
+			liftgo = 0;
+		}
+	}
 }
 task clawTask()
 {
@@ -88,8 +99,11 @@ task progSkills()
 	wait10Msec(25);
 	driveDistancePID(-150,STRAIGHT,1000);
 	liftToTargetPIDEnc(35,750,2.25,0.00035,.2);
+	wait10Msec(100);
 	driveDistancePID(-1100,STRAIGHT,1250);
 	wait10Msec(50);
+	setRightDtMotors(0);
+	setLeftDtMotors(0);
 	liftTarget = 136;
 	liftTime = 3000;
 	startTask(liftTask);
@@ -99,6 +113,195 @@ task progSkills()
 	}
   clawTarget = 1450;
   startTask(clawTask);
+  /*SensorValue[rDriveEnc] = 0;
+	SensorValue[lDriveEnc] = 0;
+	liftTarget = 800;
+	clawTarget = 1750;
+	startTask(clawTask);
+	straight(-127, 200);
+	waitForClaw(1750,50);
+	wait10Msec(250);
+	moveClaw(127, 3200);
+	straight(127,150);
+	setClawMotors(-127);
+	wait1Msec(500);
+	setClawMotors(-25);
+	straight(-127,1150);
+	liftgo = 1;
+	startTask(liftTask);
+	waitForLift(800,50);
+	stopTask(liftTask);
+	setDumpMotors(127);
+	wait1Msec(1250);
+	startTask(clawTask);
+	waitForClaw(1750,50);
+	setDumpMotors(0);
+	wait10Msec(80);
+	straight(127,150)
+	setDumpMotors(-127);
+	while(SensorValue[ArmDown] == 0)
+	{
+		wait1Msec(25);
+	}
+	setDumpMotors(0);
+	startTask(clawTask);
+	straight(127,1075);
+	wait10Msec(100);
+	moveClaw(127, 3200);
+	straight(127,150);
+	setClawMotors(-127);
+	wait1Msec(500);
+	setClawMotors(-25);
+	straight(-127,1220);
+	liftgo = 1;
+	startTask(liftTask);
+	waitForLift(800,50);
+	stopTask(liftTask);
+	setDumpMotors(127);
+	wait1Msec(1850);
+	startTask(clawTask);
+	waitForClaw(1750,50);
+	setDumpMotors(0);
+	wait10Msec(80);
+	straight(127,150);
+	setDumpMotors(-127);
+	while(SensorValue[ArmDown] == 0)
+	{
+		wait1Msec(25);
+	}
+	setDumpMotors(0);
+	straight(127,150);
+	strafeleft(100,127);
+	moveClaw(127,2550);
+	SensorValue[rDriveEnc] = 0;
+	while(abs(SensorValue[rDriveEnc]) < 340.5)
+	{
+	setRightDtMotors(-85);
+	setLeftDtMotors(85);
+	}
+	setRightDtMotors(0);
+	setLeftDtMotors(0);
+	straight(127,1050);
+	setClawMotors(-127);
+	wait10Msec(100);
+	setClawMotors(-30);
+	liftToPotTarget(800,127);
+	SensorValue[rDriveEnc] = 0;
+	while(abs(SensorValue[rDriveEnc]) < 340.5)
+	{
+	setRightDtMotors(85);
+	setLeftDtMotors(-85);
+	}
+	setRightDtMotors(0);
+	setLeftDtMotors(0);
+	stopTask(liftTask);
+	setDumpMotors(127);
+	wait1Msec(1250);
+	startTask(clawTask);
+	waitForClaw(1750,50);
+	setDumpMotors(0);
+	wait10Msec(80);
+	setDumpMotors(-127);
+	while(SensorValue[ArmDown] == 0)
+	{
+		wait1Msec(25);
+	}
+	setDumpMotors(0);
+	/*SensorValue[rDriveEnc] = 0;
+	while(SensorValue[rDriveEnc] < 735)
+	{
+	setRightDtMotors(85);
+	setLeftDtMotors(-85);
+	}
+	setRightDtMotors(0);
+	setLeftDtMotors(0);
+	liftToPotTarget(3900, -127)
+	moveClaw(127, 1900);
+	straight(127, 175);
+	moveClaw(127, 3200);
+	setClawMotors(-127);
+	wait1Msec(500);
+	setClawMotors(-25);
+	straight(-127, 350);
+	liftgo = 1;
+	startTask(liftTask);
+	waitForLift(800,50);
+	stopTask(liftTask);
+	setDumpMotors(127);
+	wait1Msec(1250);
+	startTask(clawTask);
+	waitForClaw(1750,50);
+	setDumpMotors(0);
+	wait10Msec(80);
+	setDumpMotors(-127);
+	while(SensorValue[ArmDown] == 0)
+	{
+		wait1Msec(25);
+	}
+	setDumpMotors(0);
+	//straight(127, 200)
+	straight(127,1075);
+	moveClaw(127, 3200);
+	setClawMotors(-50);
+	wait10Msec(100);
+	straight(-127,1075);
+	stopTask(liftTask);
+	liftTarget = 800;
+	liftgo = 1;
+	startTask(liftTask);
+	waitForLift(800,50);
+	stopTask(liftTask);
+	setDumpMotors(127);
+	wait1Msec(1250);
+	startTask(clawTask);
+	waitForClaw(1750,50);
+	setDumpMotors(0);
+	wait10Msec(80);
+	straight(127,150);
+	setDumpMotors(-127);
+	while(SensorValue[ArmDown] == 0)
+	{
+		wait1Msec(25);
+	}
+	setDumpMotors(0);
+	straight(127,150);
+	startTask(clawTask);
+	/*SensorValue[rDriveEnc] = 0;
+	while(SensorValue[rDriveEnc] < 735)
+	{
+	setRightDtMotors(85);
+	setLeftDtMotors(-85);
+	}
+	setRightDtMotors(0);
+	setLeftDtMotors(0);
+	liftToPotTarget(3900, -127)
+	moveClaw(127, 1900);
+	strafeRight(700, 127);
+	straight(127,750);
+	wait10Msec(100);
+	moveClaw(127, 3200);
+	straight(127,150);
+	setClawMotors(-127);
+	wait1Msec(500);
+	setClawMotors(-25);
+	straight(-127,1220);
+	liftgo = 1;
+	startTask(liftTask);
+	waitForLift(800,50);
+	stopTask(liftTask);
+	setDumpMotors(127);
+	wait1Msec(1850);
+	startTask(clawTask);
+	waitForClaw(1750,50);
+	setDumpMotors(0);
+	wait10Msec(80);
+	straight(127,150);
+	setDumpMotors(-127);
+	while(SensorValue[ArmDown] == 0)
+	{
+		wait1Msec(25);
+	}
+	setDumpMotors(0);*/
 }
 task autonomous() {
 	//Auton plays and their numbers, for reference.  These numbers are set as the value of the AUTON_PLAY variable to control which auton play runs
@@ -248,9 +451,9 @@ task liftComp() {
 
 task usercontrol()
 {
-	wait10Msec(200);
-	startTask(progSkills);
-	stopTask(usercontrol);
+	//wait10Msec(200);
+	//startTask(progSkills);
+	//stopTask(usercontrol);
 	//liftToTargetPIDEnc(25,1000,2,.00035,.2);
 	//wait1Msec(10000);
 	//
