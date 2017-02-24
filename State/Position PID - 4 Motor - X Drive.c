@@ -219,7 +219,7 @@ void driveDistancePID(int encoderCounts, int direction, int time) {
 					}
 
 					//adjust the powers sent to each side if the encoder values don't match
-					straighteningError = SensorValue[lDriveEnc] - SensorValue[rDriveEnc];
+					straighteningError = abs(SensorValue[lDriveEnc]) - abs(SensorValue[rDriveEnc]);
 
 					if (straighteningError < 0) { //right side is ahead, so speed up the right side
 						rPower = power + straighteningError*straighteningKpRight;
