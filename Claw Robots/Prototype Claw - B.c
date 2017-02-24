@@ -41,7 +41,7 @@ int getArmPos() {
 
 //Our includes
 #include "autonomousLib B.c"
-#include "../State/Position PID - 4 Motor Struct.c"
+#include "../State/Position PID - 4 Motor - X Drive.c"
 #include "LCD Wizard.c"
 //setDumpMotors and setClawMotors are in autonomousLib.c
 
@@ -277,6 +277,20 @@ task progSkills() {
 
 }
 
+task autonBig() {
+	driveDistancePID(600, STRAIGHT, 1000);
+	moveClaw(127,560);
+	setClawMotors(-20);
+	liftToTargetPIDEnc(74,1250,6,0.00035,.2);
+	wait1Msec(250);
+	driveDistancePID(500, STRAIGHT, 750);
+	driveDistancePID(330, ROTATE_RIGHT, 1000);
+	driveDistancePID(600,STRAIGHT,1000);
+	moveClaw(127,1600);
+	setClawMotors(15);
+}
+
+
 task autonomous() {
 	wait10Msec(250);
 	startTask(progSkills);
@@ -290,7 +304,7 @@ task autonomous() {
 
 	//plays should differentiate between left and right using AUTON_SIDE and changing certain values accordingly (ex: running the right side version of a function)
 	if (AUTON_PLAY == 1) { //uncomment line inside this block when task exists
-		//startTask(autonBig);
+			startTask(autonBig);
 		} else if (AUTON_PLAY == 2) {
 		//startTask(autonSmall);
 		} else if (AUTON_PLAY == 3) {
@@ -461,6 +475,9 @@ task liftComp() {
 
 task usercontrol()
 {
+
+	//startTask(autonBig);
+	//stopTask(usercontrol);
 	int LY = 0;
 	int LX = 0;
 	int RY = 0;
