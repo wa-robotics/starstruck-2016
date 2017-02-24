@@ -187,7 +187,7 @@ void driveDistancePID(int encoderCounts, int direction, int time) {
 	lastPower = 0;
 
 	time1[T1] = 0;
-	if (direction == STRAIGHT || direction == STRAFE || direction == STRAFE_LEFT || direction == STRAFE_RIGHT) { //validate direction
+	if (direction == STRAIGHT || direction == STRAFE || direction == ROTATE_LEFT || direction == ROTATE_RIGHT) { //validate direction
 
 			if (direction == STRAIGHT) {
 				while (time1[T1] < time) {
@@ -291,8 +291,57 @@ void driveDistancePID(int encoderCounts, int direction, int time) {
 					}
 					setLeftDtMotors(0);
 					setRightDtMotors(0);
-			} else {
+			} else if (direction == ROTATE_LEFT || direction == ROTATE_RIGHT) {
+					while (time1[T1] < time) {
+						//update error terms
+						error = target - (abs(SensorValue[lDriveEnc]) + abs(SensorValue[rDriveEnc]))/2; //need to use absolute values here because one of
+						errorSum += error;
 
+						pTerm = error * (float) positionKp;
+						iTerm = errorSum * (float) positionKi;
+						dTerm = (error - lastError) * (float) positionKd; //calculate motor power
+						power = pTerm + iTerm + dTerm;
+
+						//limit the values of the power term to only be those that can be taken by the motors
+						if (power > 127) {
+							power = 127;
+						} else if (power < -127) {
+							power = -127;
+						}
+
+						lastError = error; //update last error
+
+						//apply a slew rate to limit acceleration/deceleration
+						if(abs(power-lastPower) > slewRateLimit) {
+							if(power > lastPower) { //if the power is increasing (and the difference is greater than the slew rate allows)
+								power = lastPower + slewRateLimit; //increment the power to only add
+							} else { //if the power is decreasing (and the differene is greater than the slew rate allows)
+								power = lastPower - slewRateLimit;
+							}
+						}
+
+						//adjust the powers sent to each side if the encoder values don't match
+						straighteningError = abs(SensorValue[lDriveEnc]) - abs(SensorValue[rDriveEnc]);
+
+						if (straighteningError > 0) { //left side is ahead, so speed up the right side
+							rPower = power + straighteningError*straighteningKpLeftTurn;
+						} else { //otherwise, just set the right side to the power
+							rPower = power;
+						}
+						if (straighteningError < 0) { //right side is ahead, so speed up the left side
+							lPower = power - straighteningError*straighteningKpRightTurn;
+						} else { //otherwise, just set the right side to the power
+							lPower = power;
+						}
+
+						lastPower = power; //update the last power
+						writeDebugStreamLine("%d,%f,%f,%f,%f,%f,%f,%f,%f",nPgmTime,error,SensorValue[lDriveEnc],SensorValue[rDriveEnc],pTerm,iTerm,dTerm,lPower,rPower);
+						setLeftDtMotors(lPower * direction); //for a left turn, ROTATE_LEFT = -1 so this moves the left side backwards for a left turn. For a right turn will go forward since ROTATE_RIGHT = 1
+						setRightDtMotors(rPower * -1 * direction); //same idea as for a left turn, except this side needs to go the opposite way as the left side in order to turn, hence the * -1 in the calculation
+						wait1Msec(25);
+				}
+				setLeftDtMotors(0);
+				setRightDtMotors(0);
 			}
 		}
 	}
