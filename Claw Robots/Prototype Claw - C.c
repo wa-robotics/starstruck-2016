@@ -325,6 +325,19 @@ task autonBigClawDelay() {
 	startTask(clawTask);
 }
 
+void releaseClaw() {
+	moveClaw(127,3500);
+	liftToTargetPIDEnc(5,250,2,0.00035,.2);
+	while (!SensorValue[armDown]) {
+		setDumpMotors(-127);
+	}
+	setDumpMotors(0);
+	SensorValue[liftEnc] = 0;
+}
+
+//start left tile:
+//       right wheel at top of outdent #7 left side of tile
+//       left wheel at middle of outdent #6 bottom side of tile (closer to fence)
 task autonBig() {
 	clawTarget = 414;
 	autonClawWait = 750;
@@ -337,22 +350,22 @@ task autonBig() {
 	wait1Msec(750);
 	liftTarget = 40;
 	liftTime = 1000;
-	liftgo = 1;
+  liftgo = 1;
 	startTask(asyncLiftPID);
-	wait1Msec(250);
-	driveDistancePID(400, STRAIGHT, 750);
-	driveDistancePID(350, ROTATE_LEFT, 500);
-	liftTarget = 70;
-	liftTime = 750;
-	liftgo = 1;
-	startTask(asyncLiftPID);
-	//liftToTargetPIDEnc(35,1000,2.5,0.00035,.2);
-	//wait1Msec(250);
+//	wait1Msec(250);
+//	driveDistancePID(400, STRAIGHT, 750);
+//	driveDistancePID(350, ROTATE_LEFT, 500);
+//	liftTarget = 70;
+//	liftTime = 750;
+//	liftgo = 1;
+//	startTask(asyncLiftPID);
+//	//liftToTargetPIDEnc(35,1000,2.5,0.00035,.2);
+//	//wait1Msec(250);
 
-	//driveDistancePID(330, ROTATE_RIGHT, 1000);
-	driveDistancePID(200,STRAIGHT,1000);
-	moveClaw(127,1600);
-	setClawMotors(15);
+//	//driveDistancePID(330, ROTATE_RIGHT, 1000);
+//	driveDistancePID(200,STRAIGHT,1000);
+//	moveClaw(127,1600);
+//	setClawMotors(15);
 }
 
 task autonomous() {
@@ -506,10 +519,12 @@ task usercontrol()
 	//wait10Msec(200);
 	//startTask(progSkills);
 	//stopTask(usercontrol);
+  releaseClaw();
+  wait1Msec(100000);
 	//liftToTargetPIDEnc(25,1000,2,.00035,.2);
 	//wait1Msec(10000);
-	startTask(autonBig);
-	stopTask(usercontrol);
+	//startTask(autonBig);
+	//stopTask(usercontrol);
 	//driveDistancePID(-1000,STRAFE,5000);
   //writeDebugStreamLine("%d",STRAFE);
 	//liftToTargetPIDEnc(30,1000,2,0.00035,.2);
