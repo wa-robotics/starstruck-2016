@@ -87,12 +87,10 @@ task asyncLiftPID() {
 		if (!bIfiAutonomousMode) { //only do this in driver control
 			disableLiftComp = true;
 		}
-		disableLiftComp = true;
 		if (liftgo) {
 			liftToTargetPIDEnc(liftTarget,liftTime,2.5,0.00035,.2);
 			liftgo = 0;
 		}
-		disableLiftComp = false;
 		if (!bIfiAutonomousMode) { //only do this in driver control
 			disableLiftComp = false;
 		}

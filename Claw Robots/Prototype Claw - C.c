@@ -33,6 +33,7 @@ int RIGHT = 2;
 int AUTON_SIDE = 0; //either LEFT or RIGHT, as above
 int AUTON_PLAY = 0;
 int armPotOffset = 260; //The value of the claw potentiometer when the claw is fully closed and touching the physical limit
+bool disableLiftComp = false;
 
 /*int getArmPos() {
 	return SenvsorValue[claw] - armPotOffset;
@@ -303,6 +304,57 @@ task progSkills()
 	}
 	setDumpMotors(0);*/
 }
+
+task asyncLiftPID() {
+	while(1) {
+		if (!bIfiAutonomousMode) { //only do this in driver control
+			disableLiftComp = true;
+		}
+		if (liftgo) {
+			liftToTargetPIDEnc(liftTarget,liftTime,3.25,0.00050,.2);
+			liftgo = 0;
+		}
+		if (!bIfiAutonomousMode) { //only do this in driver control
+			disableLiftComp = false;
+		}
+	}
+}
+int autonClawWait = 0;
+task autonBigClawDelay() {
+	wait1Msec(autonClawWait);
+	startTask(clawTask);
+}
+
+task autonBig() {
+	clawTarget = 414;
+	autonClawWait = 750;
+	startTask(autonBigClawDelay);
+	//moveClaw(127,560);
+	driveDistancePID(700, STRAIGHT, 1000);
+	////moveClaw(127,560);
+	waitForClaw(470,20);
+	setClawMotors(-20);
+	wait1Msec(750);
+	liftTarget = 40;
+	liftTime = 1000;
+	liftgo = 1;
+	startTask(asyncLiftPID);
+	wait1Msec(250);
+	driveDistancePID(400, STRAIGHT, 750);
+	driveDistancePID(350, ROTATE_LEFT, 500);
+	liftTarget = 70;
+	liftTime = 750;
+	liftgo = 1;
+	startTask(asyncLiftPID);
+	//liftToTargetPIDEnc(35,1000,2.5,0.00035,.2);
+	//wait1Msec(250);
+
+	//driveDistancePID(330, ROTATE_RIGHT, 1000);
+	driveDistancePID(200,STRAIGHT,1000);
+	moveClaw(127,1600);
+	setClawMotors(15);
+}
+
 task autonomous() {
 	//Auton plays and their numbers, for reference.  These numbers are set as the value of the AUTON_PLAY variable to control which auton play runs
 	//#1 Big
@@ -456,7 +508,9 @@ task usercontrol()
 	//stopTask(usercontrol);
 	//liftToTargetPIDEnc(25,1000,2,.00035,.2);
 	//wait1Msec(10000);
-	//
+	startTask(autonBig);
+	stopTask(usercontrol);
+	//driveDistancePID(-1000,STRAFE,5000);
   //writeDebugStreamLine("%d",STRAFE);
 	//liftToTargetPIDEnc(30,1000,2,0.00035,.2);
 	//wait1Msec(100000);

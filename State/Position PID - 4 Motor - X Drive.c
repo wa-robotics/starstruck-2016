@@ -185,7 +185,7 @@ void driveDistancePID(int encoderCounts, int direction, int time) {
 							 error = target - (SensorValue[lDriveEnc] + SensorValue[rDriveEnc]*-1)/2.0;
 
 						}	else {
-							 error = target + (SensorValue[lDriveEnc] + SensorValue[rDriveEnc]*-1)/2.0;
+							 error = target + (SensorValue[lDriveEnc]*-1 + SensorValue[rDriveEnc])/2.0;
 
 					  }
 						errorSum += error;

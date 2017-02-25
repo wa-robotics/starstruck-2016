@@ -1,6 +1,6 @@
-#pragma config(Sensor, in1,    arm,            sensorPotentiometer)
-#pragma config(Sensor, in2,    claw,           sensorPotentiometer)
-#pragma config(Sensor, in3,    gyro,           sensorGyro)
+#pragma config(Sensor, in1,    claw,           sensorPotentiometer)
+#pragma config(Sensor, in2,    arm,            sensorNone)
+#pragma config(Sensor, in3,    gyro,           sensorNone)
 #pragma config(Sensor, dgtl1,  lDriveEnc,      sensorQuadEncoder)
 #pragma config(Sensor, dgtl3,  rDriveEnc,      sensorQuadEncoder)
 #pragma config(Sensor, dgtl5,  armDown,        sensorTouch)
@@ -32,7 +32,8 @@ int LEFT = 1; //note that changing this value could affect gyro rotation functio
 int RIGHT = 2;
 int AUTON_SIDE = 0; //either LEFT or RIGHT, as above
 int AUTON_PLAY = 0;
-int armPotOffset = 0; //The value of the claw potentiometer when the claw is fully closed and touching the physical limit
+int armPotOffset = 230; //The value of the claw potentiometer when the claw is fully closed and touching the physical limit
+bool disableLiftComp = false;
 
 int getArmPos() {
 	return SensorValue[claw] - armPotOffset;
@@ -40,7 +41,7 @@ int getArmPos() {
 
 //Our includes
 #include "autonomousLib A.c"
-#include "../State/Position PID - 4 Motor Struct.c"
+#include "../State/Position PID - 4 Motor - X Drive.c"
 #include "LCD Wizard.c"
 //setDumpMotors and setClawMotors are in autonomousLib.c
 
@@ -63,7 +64,9 @@ void pre_auton()
 
 //potentiometer value for lift: 2150
 int liftTarget;
+int liftTime;
 int clawTarget;
+int liftgo = 0;
 task liftTask()
 {
 	liftToPotTarget(liftTarget,127);
@@ -72,6 +75,53 @@ task clawTask()
 {
 	moveClaw(127,clawTarget);
 }
+task asyncLiftPID() {
+	while(1) {
+		if (!bIfiAutonomousMode) { //only do this in driver control
+			disableLiftComp = true;
+		}
+		if (liftgo) {
+			liftToTargetPIDEnc(liftTarget,liftTime,3.25,0.00050,.2);
+			liftgo = 0;
+		}
+		if (!bIfiAutonomousMode) { //only do this in driver control
+			disableLiftComp = false;
+		}
+	}
+}
+int autonClawWait = 0;
+task autonBigClawDelay() {
+	wait1Msec(autonClawWait);
+	startTask(clawTask)
+}
+
+task autonBig() {
+	clawTarget = 560;
+	autonClawWait = 400;
+	startTask(autonBigClawDelay);
+	//moveClaw(127,560);
+	driveDistancePID(600, STRAIGHT, 1000);
+	//moveClaw(127,560);
+	setClawMotors(-20);
+	waitForClaw(540,20);
+	wait1Msec(500);
+	liftTarget = 45;
+	liftTime = 1500;
+	liftgo = 1;
+	startTask(asyncLiftPID);
+	wait1Msec(250);
+	driveDistancePID(600, STRAIGHT, 750);
+	wait1Msec(250);
+	driveDistancePID(200, ROTATE_RIGHT, 1000);
+	//liftToTargetPIDEnc(35,1000,2.5,0.00035,.2);
+	//wait1Msec(250);
+
+	//driveDistancePID(330, ROTATE_RIGHT, 1000);
+	//driveDistancePID(600,STRAIGHT,1000);
+	//moveClaw(127,1600);
+	//setClawMotors(15);
+}
+
 
 
 task autonomous() {
@@ -195,6 +245,8 @@ task liftComp() {
 
 task usercontrol()
 {
+	//startTask(autonBig);
+	//stopTask(usercontrol);
 	int LY = 0;
 	int LX = 0;
 	int RY = 0;
