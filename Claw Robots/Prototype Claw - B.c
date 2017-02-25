@@ -54,7 +54,7 @@ void pre_auton()
 	// Set bDisplayCompetitionStatusOnLcd to false if you don't want the LCD
 	// used by the competition include file, for example, you might want
 	// to display your team name on the LCD in this function.
-	bDisplayCompetitionStatusOnLcd = false;
+	//bDisplayCompetitionStatusOnLcd = false;
 
 	bLCDBacklight = true;
 	bool testLcdWizard = false;
@@ -76,7 +76,7 @@ task liftTask()
 	{
 		if(liftgo == 1)
 		{
-			liftToPotTarget(liftTarget,127);
+			liftToTargetPIDEnc(liftTarget,liftTime,2,0.00035,.2);
 			liftgo = 0;
 		}
 	}
@@ -105,29 +105,29 @@ task clawTask()
 task progSkills() {
 	SensorValue[rDriveEnc] = 0;
 	SensorValue[lDriveEnc] = 0;
-	liftTarget = 800;
+	liftTarget = 135;
 	clawTarget = 1750;
 	startTask(clawTask);
-	straight(-127, 200);
+	driveDistancePID(-200,STRAIGHT,1000);
 	waitForClaw(1750,50);
 	wait10Msec(250);
-	moveClaw(127, 3200);
-	straight(127,150);
+	moveClaw(127, 550);
+	driveDistancePID(150,STRAIGHT,1000);
 	setClawMotors(-127);
 	wait1Msec(500);
 	setClawMotors(-25);
-	straight(-127,1150);
+	driveDistancePID(-1150,STRAIGHT,1500);
 	liftgo = 1;
 	startTask(liftTask);
-	waitForLift(800,50);
+	waitForLift(115,50);
 	stopTask(liftTask);
 	setDumpMotors(127);
-	wait1Msec(1250);
+	wait1Msec(1750);
 	startTask(clawTask);
 	waitForClaw(1750,50);
 	setDumpMotors(0);
 	wait10Msec(80);
-	straight(127,150)
+	driveDistancePID(150,STRAIGHT,1000);
 	setDumpMotors(-127);
 	while(SensorValue[liftDown] == 0)
 	{
@@ -135,17 +135,17 @@ task progSkills() {
 	}
 	setDumpMotors(0);
 	startTask(clawTask);
-	straight(127,1075);
+	driveDistancePID(1075,STRAIGHT,1500);
 	wait10Msec(100);
-	moveClaw(127, 3200);
-	straight(127,150);
+	moveClaw(127, 550);
+	driveDistancePID(150,STRAIGHT,1000);
 	setClawMotors(-127);
 	wait1Msec(500);
 	setClawMotors(-25);
-	straight(-127,1220);
+	driveDistancePID(-1220,STRAIGHT,1500);
 	liftgo = 1;
 	startTask(liftTask);
-	waitForLift(800,50);
+	waitForLift(115,50);
 	stopTask(liftTask);
 	setDumpMotors(127);
 	wait1Msec(1850);
@@ -153,31 +153,33 @@ task progSkills() {
 	waitForClaw(1750,50);
 	setDumpMotors(0);
 	wait10Msec(80);
-	straight(127,150);
+	driveDistancePID(150,STRAIGHT,1000);
 	setDumpMotors(-127);
 	while(SensorValue[liftDown] == 0)
 	{
 		wait1Msec(25);
 	}
 	setDumpMotors(0);
-	straight(127,150);
+	driveDistancePID(150,STRAIGHT,1000);
 	strafeleft(100,127);
-	moveClaw(127,2550);
+	moveClaw(127,1050);
 	SensorValue[rDriveEnc] = 0;
-	while(abs(SensorValue[rDriveEnc]) < 340.5)
+	while(abs(SensorValue[rDriveEnc]) < 390.5)
 	{
 	setRightDtMotors(-85);
 	setLeftDtMotors(85);
 	}
 	setRightDtMotors(0);
 	setLeftDtMotors(0);
-	straight(127,1050);
+	driveDistancePID(1050,STRAIGHT,1500);
 	setClawMotors(-127);
 	wait10Msec(100);
 	setClawMotors(-30);
-	liftToPotTarget(800,127);
+	liftgo = 1;
+	liftTarget = 70;
+	startTask(liftTask);
 	SensorValue[rDriveEnc] = 0;
-	while(abs(SensorValue[rDriveEnc]) < 340.5)
+	while(abs(SensorValue[rDriveEnc]) < 410)
 	{
 	setRightDtMotors(85);
 	setLeftDtMotors(-85);
@@ -207,15 +209,16 @@ task progSkills() {
 	setLeftDtMotors(0);
 	liftToPotTarget(3900, -127)
 	moveClaw(127, 1900);*/
-	straight(127, 175);
-	moveClaw(127, 3200);
+	driveDistancePID(175,STRAIGHT,1000);
+	moveClaw(127, 550);
 	setClawMotors(-127);
 	wait1Msec(500);
 	setClawMotors(-25);
-	straight(-127, 350);
+	driveDistancePID(-350,STRAIGHT,1000);
+	liftTarget = 135;
 	liftgo = 1;
 	startTask(liftTask);
-	waitForLift(800,50);
+	waitForLift(115,50);
 	stopTask(liftTask);
 	setDumpMotors(127);
 	wait1Msec(1250);
@@ -230,16 +233,16 @@ task progSkills() {
 	}
 	setDumpMotors(0);
 	//straight(127, 200)
-	straight(127,1075);
-	moveClaw(127, 3200);
+	driveDistancePID(1075,STRAIGHT,1500);
+	moveClaw(127, 550);
 	setClawMotors(-50);
 	wait10Msec(100);
-	straight(-127,1075);
+	driveDistancePID(-1075,STRAIGHT,1500);
 	stopTask(liftTask);
-	liftTarget = 800;
+	liftTarget = 135;
 	liftgo = 1;
 	startTask(liftTask);
-	waitForLift(800,50);
+	waitForLift(115,50);
 	stopTask(liftTask);
 	setDumpMotors(127);
 	wait1Msec(1250);
@@ -247,14 +250,14 @@ task progSkills() {
 	waitForClaw(1750,50);
 	setDumpMotors(0);
 	wait10Msec(80);
-	straight(127,150);
+	driveDistancePID(150,STRAIGHT,1000);
 	setDumpMotors(-127);
 	while(SensorValue[liftDown] == 0)
 	{
 		wait1Msec(25);
 	}
 	setDumpMotors(0);
-	straight(127,150);
+	driveDistancePID(150,STRAIGHT,1000);
 	startTask(clawTask);
 	/*SensorValue[rDriveEnc] = 0;
 	while(SensorValue[rDriveEnc] < 735)
@@ -267,17 +270,17 @@ task progSkills() {
 	liftToPotTarget(3900, -127)
 	moveClaw(127, 1900);*/
 	strafeRight(700, 127);
-	straight(127,750);
+	driveDistancePID(750,STRAIGHT,1500);
 	wait10Msec(100);
-	moveClaw(127, 3200);
-	straight(127,150);
+	moveClaw(127, 550);
+	driveDistancePID(150,STRAIGHT,1000);
 	setClawMotors(-127);
 	wait1Msec(500);
 	setClawMotors(-25);
-	straight(-127,1220);
+	driveDistancePID(-1220,STRAIGHT,1500);
 	liftgo = 1;
 	startTask(liftTask);
-	waitForLift(800,50);
+	waitForLift(115,50);
 	stopTask(liftTask);
 	setDumpMotors(127);
 	wait1Msec(1850);
@@ -285,7 +288,7 @@ task progSkills() {
 	waitForClaw(1750,50);
 	setDumpMotors(0);
 	wait10Msec(80);
-	straight(127,150);
+	driveDistancePID(150,STRAIGHT,1000);
 	setDumpMotors(-127);
 	while(SensorValue[liftDown] == 0)
 	{
@@ -369,7 +372,7 @@ task autonomous() {
 	straight(-127, 350);
 	liftgo = 1;
 	startTask(liftTask);
-	waitForLift(800,50);
+	waitForLift(100,50);
 	stopTask(liftTask);
 	setDumpMotors(127);
 	wait1Msec(1100);
@@ -393,7 +396,7 @@ task autonomous() {
 	liftTarget = 800;
 	liftgo = 1;
 	startTask(liftTask);
-	waitForLift(800,50);
+	waitForLift(100,50);
 	stopTask(liftTask);
 	setDumpMotors(127);
 	wait1Msec(1250);
@@ -512,6 +515,10 @@ task usercontrol()
 	bool btn8UPressed = false;
   while(1)
   {
+  	if(vexRT[Btn7D]){
+  		startTask(autonomous);
+  		stopTask(usercontrol);
+  	}
   	//for deadzones; when the joystick value for an axis is below the threshold, the motors controlled by that joystick will not move in that direction
   	LY = (abs(vexRT[Ch3]) > threshold) ? vexRT[Ch3] : 0;
   	LX = (abs(vexRT[Ch4]) > threshold) ? vexRT[Ch4] : 0;
