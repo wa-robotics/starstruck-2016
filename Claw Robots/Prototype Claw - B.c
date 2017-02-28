@@ -298,17 +298,75 @@ task progSkills() {
 
 }
 
+int autonClawWait = 0;
+task autonBigClawDelay() {
+	wait1Msec(autonClawWait);
+	startTask(clawTask);
+}
+
+void releaseClaw() {
+	moveClaw(127,3200);
+	setClawMotors(15);
+	while (SensorValue[liftEnc] < 15) {
+		setDumpMotors(127);
+	}
+	while (!SensorValue[liftDown]) {
+		setDumpMotors(-127);
+	}
+	setDumpMotors(0);
+	SensorValue[liftEnc] = 0;
+}
+
 task autonBig() {
-	driveDistancePID(600, STRAIGHT, 1000);
-	moveClaw(127,560);
-	setClawMotors(-20);
-	liftToTargetPIDEnc(74,1250,6,0.00035,.2);
+	releaseClaw();
+	clawTarget = 590; //420
+	autonClawWait = 750;
+	startTask(autonBigClawDelay);
+	//moveClaw(127,560);
+	driveDistancePID(700, STRAIGHT, 1000);
+	////moveClaw(127,560);
+	setClawMotors(-40);
+	waitForClaw(580,20); //430
+	SensorValue[liftEnc] = 0;
+	liftTarget = 69;
+	liftTime = 1000;
+  liftgo = 1;
+	startTask(asyncLiftPID);
 	wait1Msec(250);
-	driveDistancePID(500, STRAIGHT, 750);
-	driveDistancePID(330, ROTATE_RIGHT, 1000);
-	driveDistancePID(600,STRAIGHT,1000);
+	driveDistancePID(500, STRAIGHT, 900);
+	setClawMotors(-80);
+	driveDistancePID(300, ROTATE_LEFT, 750);
+	driveDistancePID(700, STRAIGHT, 750);
+	moveClaw(127,820);
+	setClawMotors(15);
+
+	liftTarget = 80;
+	liftTime = 750;
+  liftgo = 1;
+	startTask(asyncLiftPID);
+
+	driveDistancePID(-300, STRAIGHT, 750);
+	//driveDistancePID(200, ROTATE_RIGHT, 400);
+	liftTarget = 74;
+	liftTime = 500;
+  liftgo = 1;
+	startTask(asyncLiftPID);
 	moveClaw(127,1600);
 	setClawMotors(15);
+	driveDistancePID(600, STRAIGHT, 1000);
+	driveDistancePID(-300, STRAIGHT, 1000);
+
+
+	//driveDistancePID(600, STRAIGHT, 1000);
+	//moveClaw(127,560);
+	//setClawMotors(-20);
+	//liftToTargetPIDEnc(74,1250,6,0.00035,.2);
+	//wait1Msec(250);
+	//driveDistancePID(500, STRAIGHT, 750);
+	//driveDistancePID(330, ROTATE_RIGHT, 1000);
+	//driveDistancePID(600,STRAIGHT,1000);
+	//moveClaw(127,1600);
+	//setClawMotors(15);
 }
 
 
@@ -499,7 +557,8 @@ task liftComp() {
 
 task usercontrol()
 {
-
+	//releaseClaw();
+	//wait1Msec(19999);
 	//startTask(autonBig);
 	//stopTask(usercontrol);
 	//startTask(midfenceStarHeightMacro);
@@ -546,6 +605,10 @@ task usercontrol()
 		//	startTask(clawTask);
 		//	startTask(liftTask);
 		//}
+
+  	if (vexRT[Btn7R]) {
+  		releaseClaw();
+  	}
 
     if (vexRT[Btn5U] && (SensorValue[liftEnc] < armEncMaxLimit || !enableSoftwareArmPosLimit)) {
 	  	stopTask(liftComp);
