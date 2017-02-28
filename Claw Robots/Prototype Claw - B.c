@@ -369,6 +369,54 @@ task autonBig() {
 	//setClawMotors(15);
 }
 
+task autonStars() {
+	//releaseClaw();
+	//move out of the way of the wall and open claw
+	driveDistancePID(-200,STRAIGHT,500);
+	driveDistancePID(-300,STRAFE,750);
+	moveClaw(127,1000);
+	setClawMotors(15);
+
+	//move in line with stars and collect them
+	driveDistancePID(300,STRAFE,750);
+	driveDistancePID(1450,STRAIGHT,2000);
+	moveClaw(127,330);
+	setClawMotors(-40);
+
+	//lift to pick up stars
+	liftTarget = 20;
+	liftTime = 750;
+  liftgo = 1;
+	startTask(asyncLiftPID);
+
+	//move back behind cube to score
+	driveDistancePID(-1400,STRAIGHT,1500);
+	setClawMotors(-20);
+
+	//move away from wall and turn to score backwards on fence
+	driveDistancePID(-600,STRAFE,750);
+	driveDistancePID(400,ROTATE_RIGHT,1000);
+
+	//move back to fence
+	driveDistancePID(-850,STRAIGHT,1750);
+
+	//SCORE!
+	setDumpMotors(127);
+	wait1Msec(1250);
+	clawTarget = 1000;
+	//startTask(clawTask);
+	//waitForClaw(1000,50);
+	moveClaw(127,1000);
+	setClawMotors(15);
+	setDumpMotors(0);
+	wait10Msec(80);
+	driveDistancePID(150,STRAIGHT,1000);
+	setDumpMotors(-127);
+	while(SensorValue[liftDown] == 0)
+	{
+		wait1Msec(25);
+	}
+}
 
 task autonomous() {
 	wait10Msec(250);
@@ -558,8 +606,7 @@ task liftComp() {
 task usercontrol()
 {
 	//releaseClaw();
-	//wait1Msec(19999);
-	//startTask(autonBig);
+	//startTask(autonStars);
 	//stopTask(usercontrol);
 	//startTask(midfenceStarHeightMacro);
 
