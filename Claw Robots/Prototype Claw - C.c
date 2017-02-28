@@ -311,7 +311,7 @@ task asyncLiftPID() {
 			disableLiftComp = true;
 		}
 		if (liftgo) {
-			liftToTargetPIDEnc(liftTarget,liftTime,3.25,0.00050,.2);
+			liftToTargetPIDEnc(liftTarget,liftTime,3.5,0.00050,.2);
 			liftgo = 0;
 		}
 		if (!bIfiAutonomousMode) { //only do this in driver control
@@ -326,12 +326,11 @@ task autonBigClawDelay() {
 }
 
 void releaseClaw() {
-	setClawMotors(-60);
-	wait1Msec(100);
-	setClawMotors(60);
-	setDumpMotors(127);
-	wait1Msec(100);
-	setClawMotors(0);
+	moveClaw(127,3500);
+	setClawMotors(15);
+	while (SensorValue[liftEnc] < 15) {
+		setDumpMotors(127);
+	}
 	while (!SensorValue[armDown]) {
 		setDumpMotors(-127);
 	}
@@ -339,34 +338,45 @@ void releaseClaw() {
 	SensorValue[liftEnc] = 0;
 }
 
+//lift 74, claw  1917
+
 //start left tile:
 //       right wheel at top of outdent #7 left side of tile
 //       left wheel at middle of outdent #6 bottom side of tile (closer to fence)
 task autonBig() {
 	//driveDistancePID(200, STRAIGHT, 500);
-	//releaseClaw();
-	clawTarget = 414;
+
+	releaseClaw();
+	clawTarget = 420;
 	autonClawWait = 750;
 	startTask(autonBigClawDelay);
 	//moveClaw(127,560);
 	driveDistancePID(700, STRAIGHT, 1000);
 	////moveClaw(127,560);
-	waitForClaw(404,20);
+	waitForClaw(410,20);
 	setClawMotors(-40);
-	wait1Msec(750);
 	SensorValue[liftEnc] = 0;
-	liftTarget = 40;
+	liftTarget = 60;
 	liftTime = 1000;
   liftgo = 1;
 	startTask(asyncLiftPID);
 	wait1Msec(250);
-	driveDistancePID(400, STRAIGHT, 750);
+	driveDistancePID(400, STRAIGHT, 900);
 	setClawMotors(-80);
-	driveDistancePID(300, ROTATE_LEFT, 500);
-	driveDistancePID(550, STRAIGHT, 750);
+	driveDistancePID(300, ROTATE_LEFT, 750);
+	driveDistancePID(750, STRAIGHT, 750);
 	moveClaw(127,820);
-	driveDistancePID(-300, STRAIGHT, 500);
-	driveDistancePID(100, ROTATE_LEFT, 400);
+	setClawMotors(15);
+	driveDistancePID(-300, STRAIGHT, 750);
+	//driveDistancePID(200, ROTATE_RIGHT, 400);
+	liftTarget = 74;
+	liftTime = 500;
+  liftgo = 1;
+	startTask(asyncLiftPID);
+	moveClaw(127,1917);
+	setClawMotors(15);
+	driveDistancePID(600, STRAIGHT, 1000);
+	driveDistancePID(-200, STRAIGHT, 1000);
 
 //	liftTarget = 70;
 //	liftTime = 750;
@@ -529,13 +539,15 @@ task liftComp() {
 
 task usercontrol()
 {
+	//releaseClaw();
+	//wait1Msec(500000);
 	//wait10Msec(200);
 	//setClawMotors(127);
 	//wait1Msec(500);
 	//setClawMotors(0);
 	//wait1Msec(1000);
-	startTask(autonBig);
-	stopTask(usercontrol);
+	//startTask(autonBig);
+	//stopTask(usercontrol);
 	//liftToTargetPIDEnc(25,1000,2,.00035,.2);
 	//wait1Msec(10000);
 	//startTask(autonBig);
