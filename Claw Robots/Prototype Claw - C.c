@@ -34,6 +34,8 @@ int AUTON_SIDE = 0; //either LEFT or RIGHT, as above
 int AUTON_PLAY = 0;
 int armPotOffset = 260; //The value of the claw potentiometer when the claw is fully closed and touching the physical limit
 bool disableLiftComp = false;
+bool LCD_CUBE = true;
+bool LCD_STARS = true;
 
 /*int getArmPos() {
 	return SenvsorValue[claw] - armPotOffset;
@@ -43,6 +45,7 @@ bool disableLiftComp = false;
 #include "autonomousLib C.c"
 #include "../State/Position PID - 4 Motor - X Drive.c"
 #include "LCD Wizard.c"
+
 //#include "Position PID - 4 Motor - X Drive.c"
 //setDumpMotors and setClawMotors are in autonomousLib.c
 
@@ -53,10 +56,10 @@ void pre_auton()
 	// Set bDisplayCompetitionStatusOnLcd to false if you don't want the LCD
 	// used by the competition include file, for example, you might want
 	// to display your team name on the LCD in this function.
-	//bDisplayCompetitionStatusOnLcd = false;
+	bDisplayCompetitionStatusOnLcd = false;
 
 	bLCDBacklight = true;
-	bool testLcdWizard = false;
+	bool testLcdWizard = true;
 	if (bIfiRobotDisabled || testLcdWizard) { //Only show auton play wizard when the robot is in competition mode & disabled on initial startup
 		startTask(LCDSelect);
 	}
@@ -393,41 +396,36 @@ task autonBig() {
 
 task autonomous() {
 	//Auton plays and their numbers, for reference.  These numbers are set as the value of the AUTON_PLAY variable to control which auton play runs
-	//#1 Big
-	//#2 Small
-	//#3 Cube (score middle cube and block)
-	//#4 Fence (3 stars, corner)
-	//#5 Nothing
-	//#6 Prog skills
+	//L-R-Sk
+	//#1 Cube
+	//#2 Stars
+	//#3 Prog skills
+	//#4 Nothing (actually run nothing for the play)
 
 	//plays should differentiate between left and right using AUTON_SIDE and changing certain values accordingly (ex: running the right side version of a function)
 	if (AUTON_PLAY == 1) { //uncomment line inside this block when task exists
-		//startTask(autonBig);
+		startTask(autonBig);
 	} else if (AUTON_PLAY == 2) {
-		//startTask(autonSmall);
+		//startTask(autonStars);
 	} else if (AUTON_PLAY == 3) {
-		//startTask(autonCube);
-	} else if (AUTON_PLAY == 4) {
-		//startTask(autonFence);
-	} else if (AUTON_PLAY == 5) {
-		//Do nothing
-	} else if (AUTON_PLAY == 6) {
 		startTask(progSkills);
+	} else if (AUTON_PLAY == 4) {
+		//Do nothing
 	}
 
-	SensorValue[rDriveEnc] = 0;
-	SensorValue[lDriveEnc] = 0;
-	liftTarget = 2060;
-	clawTarget = 2535;
-	startTask(liftTask);
-	startTask(clawTask);
-	diagonalRight(127,400);
-	//waitForLift(2060,100);
-	//waitForClaw(2535,100);//A
-	wait1Msec(250);
-	straight(127,1300);
-	wait1Msec(125);
-	straight(-127,350);
+	//SensorValue[rDriveEnc] = 0;
+	//SensorValue[lDriveEnc] = 0;
+	//liftTarget = 2060;
+	//clawTarget = 2535;
+	//startTask(liftTask);
+	//startTask(clawTask);
+	//diagonalRight(127,400);
+	////waitForLift(2060,100);
+	////waitForClaw(2535,100);//A
+	//wait1Msec(250);
+	//straight(127,1300);
+	//wait1Msec(125);
+	//straight(-127,350);
 	//SensorValue[rDriveEnc] = 0;
 	//while(abs(SensorValue[rDriveEnc]) < 745)
 	//{

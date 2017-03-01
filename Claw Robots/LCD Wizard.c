@@ -52,17 +52,16 @@ task restartAutonSelection() {
 	stopTask(restartAutonSelection);
 }
 	//L-R-Sk
-	//#1 Big
-	//#2 Small
-	//#3 Cube (score middle cube and block)
-	//#4 Fence (3 stars, corner)
-	//#5 Nothing
-	//#6 Prog skills
+	//#1 Cube
+	//#2 Stars
+	//#3 Prog skills
+	//#4 Nothing (actually run nothing for the play)
+
 bool showVersion = true;
 task LCDSelect() {
 	if (showVersion) {
 		clearLCD();
-		displayLCDCenteredString(0,"LCD Select v1.0"); //briefly display version for debug purposes
+		displayLCDCenteredString(0,"LCD Select v2.0-f"); //briefly display version for debug purposes
 		wait1Msec(750);
 	}
 	showVersion = false; //don't show the version again if autonSelection is ever reset
@@ -82,12 +81,21 @@ task LCDSelect() {
 		while (q2PlayChosen == 0) {
 
 			if (q2Page == 1) {
-				showOnLCD("Choose play: 1/3","Big   Small   >>");
+				if (LCD_CUBE && LCD_STARS) {
+					showOnLCD("Choose play: 1/2","Cube   Star   >>");
+				} else if (LCD_CUBE && !LCD_STARS) {
+				  showOnLCD("Choose play:","Cube          >>");
+				} else if (!LCD_CUBE && LCD_STARS) {
+				  showOnLCD("Choose play:","       Star   >>");
+				} else {
+					showOnLCD("Press any btn","");
+				}
+
 				wait1Msec(250); //short delay to prevent button press from triggering multiple times
 				waitForPress();
 				q2Response = nLCDButtons;
 				if (q2Response == 4) {
-					q2Page = 2;
+					q2Page = 3;
 				} else if (q2Response == 1) {
 					q2PlayChosen = 1;
 				} else if (q2Response == 2) {
@@ -98,7 +106,7 @@ task LCDSelect() {
 					break;
 				}
 
-			} else if (q2Page == 2) {
+			}/* else if (q2Page == 2) {
 				showOnLCD("Choose play: 2/3","Cube   Fence  >>");
 				wait1Msec(250);
 			  waitForPress();
@@ -114,15 +122,15 @@ task LCDSelect() {
 				if (q2Response == 1 ||q2Response == 2) {
 					break;
 				}
-			} else if (q2Page == 3) {
-				showOnLCD("Choose play: 3/3","Nothing       >>");
+			} */else if (q2Page == 3) {
+				showOnLCD("Choose play: 2/2","Nothing       >>");
 				wait1Msec(250);
 			  waitForPress();
 				q2Response = nLCDButtons;
 				if (q2Response == 4) {
 					q2Page = 1;
 				} else if (q2Response == 1) {
-					q2PlayChosen = 5;
+					q2PlayChosen = 4;
 				}
 				waitForRelease();
 				if (q2Response == 1 ||q2Response == 2) {
@@ -134,7 +142,7 @@ task LCDSelect() {
 
 
 	if (q1Response == 4) {
-		AUTON_PLAY = 6;
+		AUTON_PLAY = 3;
 		playConfirmName = "Prog. skills";
 	} else {
 		if (q1Response == 1) {
@@ -145,22 +153,15 @@ task LCDSelect() {
 		switch (q2PlayChosen) {
 			case 1:
 				AUTON_PLAY = 1;
-				playConfirmName = "Big";
+				playConfirmName = "Cube";
 				break;
 			case 2:
 				AUTON_PLAY = 2;
-				playConfirmName = "Small";
+				playConfirmName = "Back stars";
 				break;
-			case 3:
-				AUTON_PLAY = 3;
-				playConfirmName = "Cube";
-				break;
+			//case 3 would be programming skills, which is handled above
 			case 4:
 				AUTON_PLAY = 4;
-				playConfirmName = "Fence";
-				break;
-			case 5:
-				AUTON_PLAY = 5;
 				playConfirmName = "NOTHING";
 				break;
 		}
