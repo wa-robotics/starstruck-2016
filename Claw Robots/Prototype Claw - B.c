@@ -1,8 +1,8 @@
 #pragma config(Sensor, in1,    claw,           sensorPotentiometer)
 #pragma config(Sensor, in2,    arm,            sensorNone)
 #pragma config(Sensor, in3,    gyro,           sensorNone)
-#pragma config(Sensor, dgtl1,  rDriveEnc,      sensorQuadEncoder)
-#pragma config(Sensor, dgtl3,  lDriveEnc,      sensorQuadEncoder)
+#pragma config(Sensor, dgtl1,  lDriveEnc,      sensorQuadEncoder)
+#pragma config(Sensor, dgtl3,  rDriveEnc,      sensorQuadEncoder)
 #pragma config(Sensor, dgtl5,  liftDown,       sensorTouch)
 #pragma config(Sensor, dgtl6,  liftEnc,        sensorQuadEncoder)
 #pragma config(Motor,  port1,           leftClaw,      tmotorVex393_HBridge, openLoop)
@@ -108,25 +108,25 @@ task progSkills() {
 	liftTarget = 135;
 	clawTarget = 1750;
 	startTask(clawTask);
-	driveDistancePID(-200,STRAIGHT,1000);
+	driveDistancePID(-250,STRAIGHT,1000);
 	waitForClaw(1750,50);
 	wait10Msec(250);
-	moveClaw(127, 550);
+	moveClaw(127, 650);
 	driveDistancePID(150,STRAIGHT,1000);
 	setClawMotors(-127);
 	wait1Msec(500);
 	setClawMotors(-25);
-	driveDistancePID(-1150,STRAIGHT,1500);
+	driveDistancePID(-900,STRAIGHT,1500);
 	liftgo = 1;
 	startTask(liftTask);
 	waitForLift(115,50);
 	stopTask(liftTask);
 	setDumpMotors(127);
-	wait1Msec(1750);
+	wait1Msec(1400);
 	startTask(clawTask);
-	waitForClaw(1750,50);
+	waitForClaw(1550,50);
 	setDumpMotors(0);
-	wait10Msec(80);
+	wait10Msec(20);
 	driveDistancePID(150,STRAIGHT,1000);
 	setDumpMotors(-127);
 	while(SensorValue[liftDown] == 0)
@@ -135,9 +135,11 @@ task progSkills() {
 	}
 	setDumpMotors(0);
 	startTask(clawTask);
-	driveDistancePID(1075,STRAIGHT,1500);
+	driveDistancePID(-300,STRAIGHT,1000)
+	driveDistancePID(300,STRAIGHT,1000);
+	driveDistancePID(850,STRAIGHT,1300);
 	wait10Msec(100);
-	moveClaw(127, 550);
+	moveClaw(127, 675);
 	driveDistancePID(150,STRAIGHT,1000);
 	setClawMotors(-127);
 	wait1Msec(500);
@@ -148,9 +150,9 @@ task progSkills() {
 	waitForLift(115,50);
 	stopTask(liftTask);
 	setDumpMotors(127);
-	wait1Msec(1850);
+	wait1Msec(1750);
 	startTask(clawTask);
-	waitForClaw(1750,50);
+	waitForClaw(1650,50);
 	setDumpMotors(0);
 	wait10Msec(80);
 	driveDistancePID(150,STRAIGHT,1000);
@@ -160,18 +162,20 @@ task progSkills() {
 		wait1Msec(25);
 	}
 	setDumpMotors(0);
-	driveDistancePID(150,STRAIGHT,1000);
-	strafeleft(100,127);
-	moveClaw(127,1050);
+	driveDistancePID(-300,STRAIGHT,1000)
+	driveDistancePID(300,STRAIGHT,1000);
+	strafeleft(175,127);
+	moveClaw(127,820);
 	SensorValue[rDriveEnc] = 0;
-	while(abs(SensorValue[rDriveEnc]) < 390.5)
+	driveDistancePID(463,ROTATE_RIGHT,1000);
+	/*while(abs(SensorValue[rDriveEnc]) < 390.5)
 	{
 	setRightDtMotors(-85);
 	setLeftDtMotors(85);
-	}
+	}*/
 	setRightDtMotors(0);
 	setLeftDtMotors(0);
-	driveDistancePID(1050,STRAIGHT,1500);
+	driveDistancePID(1125,STRAIGHT,1500);
 	setClawMotors(-127);
 	wait10Msec(100);
 	setClawMotors(-30);
@@ -179,16 +183,13 @@ task progSkills() {
 	liftTarget = 70;
 	startTask(liftTask);
 	SensorValue[rDriveEnc] = 0;
-	while(abs(SensorValue[rDriveEnc]) < 410)
-	{
-	setRightDtMotors(85);
-	setLeftDtMotors(-85);
-	}
+	liftToTargetPIDEnc(55,1000,2.5,0.00035,.2);
+	driveDistancePID(463,ROTATE_LEFT,1000);
 	setRightDtMotors(0);
 	setLeftDtMotors(0);
 	stopTask(liftTask);
 	setDumpMotors(127);
-	wait1Msec(1250);
+	wait1Msec(700);
 	startTask(clawTask);
 	waitForClaw(1750,50);
 	setDumpMotors(0);
@@ -232,6 +233,8 @@ task progSkills() {
 		wait1Msec(25);
 	}
 	setDumpMotors(0);
+	driveDistancePID(-300,STRAIGHT,1000)
+	driveDistancePID(300,STRAIGHT,1000);
 	//straight(127, 200)
 	driveDistancePID(1075,STRAIGHT,1500);
 	moveClaw(127, 550);
@@ -257,6 +260,8 @@ task progSkills() {
 		wait1Msec(25);
 	}
 	setDumpMotors(0);
+	driveDistancePID(-300,STRAIGHT,1000)
+	driveDistancePID(300,STRAIGHT,1000);
 	driveDistancePID(150,STRAIGHT,1000);
 	startTask(clawTask);
 	/*SensorValue[rDriveEnc] = 0;
@@ -269,7 +274,7 @@ task progSkills() {
 	setLeftDtMotors(0);
 	liftToPotTarget(3900, -127)
 	moveClaw(127, 1900);*/
-	strafeRight(700, 127);
+	strafeRight(1000, 127);
 	driveDistancePID(750,STRAIGHT,1500);
 	wait10Msec(100);
 	moveClaw(127, 550);

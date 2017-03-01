@@ -1,5 +1,5 @@
-#pragma config(Sensor, in1,    arm,            sensorPotentiometer)
-#pragma config(Sensor, in2,    claw,           sensorPotentiometer)
+#pragma config(Sensor, in1,    claw,           sensorPotentiometer)
+#pragma config(Sensor, in2,    arm,            sensorPotentiometer)
 #pragma config(Sensor, in3,    gyro,           sensorNone)
 #pragma config(Sensor, dgtl1,  lDriveEnc,      sensorQuadEncoder)
 #pragma config(Sensor, dgtl3,  rDriveEnc,      sensorQuadEncoder)
@@ -87,76 +87,74 @@ task clawTask()
 {
 	moveClaw(127,clawTarget);
 }
-
+void releaseClaw() {
+	moveClaw(127,3500);
+	setClawMotors(15);
+	while (SensorValue[liftEnc] < 15) {
+		setDumpMotors(127);
+	}
+	while (!SensorValue[armDown]) {
+		setDumpMotors(-127);
+	}
+	setDumpMotors(0);
+	SensorValue[liftEnc] = 0;
+}
 
 task progSkills()
 {
-	driveDistancePID(-510,STRAIGHT,1000);
-	moveClaw(-127,850);
-	wait10Msec(10);
-	driveDistancePID(275,STRAIGHT,1000);
-	moveClaw(-127,390);
-	setClawMotors(-50);
-	wait10Msec(25);
-	driveDistancePID(-150,STRAIGHT,1000);
-	liftToTargetPIDEnc(35,750,2.25,0.00035,.2);
-	wait10Msec(100);
-	driveDistancePID(-1100,STRAIGHT,1250);
-	wait10Msec(50);
-	setRightDtMotors(0);
-	setLeftDtMotors(0);
-	liftTarget = 136;
-	liftTime = 3000;
-	startTask(liftTask);
-	while(sensorValue(liftEnc) < 85)
-	{
-		wait1Msec(25);
-	}
-  clawTarget = 1450;
-  startTask(clawTask);
-  /*SensorValue[rDriveEnc] = 0;
+	SensorValue[rDriveEnc] = 0;
 	SensorValue[lDriveEnc] = 0;
-	liftTarget = 800;
+	liftTarget = 135;
 	clawTarget = 1750;
+	moveClaw(127,3500);
+	setClawMotors(15);
+	while (SensorValue[liftEnc] < 15) {
+		setDumpMotors(127);
+	}
+	while (!SensorValue[armDown]) {
+		setDumpMotors(-127);
+	}
+	setDumpMotors(0);
+	SensorValue[liftEnc] = 0;
 	startTask(clawTask);
-	straight(-127, 200);
+	driveDistancePID(-200,STRAIGHT,1000);
 	waitForClaw(1750,50);
 	wait10Msec(250);
-	moveClaw(127, 3200);
-	straight(127,150);
+	moveClaw(127, 550);
+	driveDistancePID(150,STRAIGHT,1000);
 	setClawMotors(-127);
 	wait1Msec(500);
 	setClawMotors(-25);
-	straight(-127,1150);
+	driveDistancePID(-1150,STRAIGHT,1500);
 	liftgo = 1;
 	startTask(liftTask);
-	waitForLift(800,50);
+	waitForLift(115,50);
 	stopTask(liftTask);
 	setDumpMotors(127);
-	wait1Msec(1250);
+	wait1Msec(1750);
 	startTask(clawTask);
 	waitForClaw(1750,50);
 	setDumpMotors(0);
 	wait10Msec(80);
-	straight(127,150)
+	driveDistancePID(150,STRAIGHT,1000);
 	setDumpMotors(-127);
-	while(SensorValue[ArmDown] == 0)
+	while(SensorValue[armDown] == 0)
 	{
 		wait1Msec(25);
 	}
 	setDumpMotors(0);
 	startTask(clawTask);
-	straight(127,1075);
+	driveDistancePID(1075,STRAIGHT,1500);
 	wait10Msec(100);
-	moveClaw(127, 3200);
-	straight(127,150);
+	moveClaw(127, 550);
+	driveDistancePID(150,STRAIGHT,1000);
 	setClawMotors(-127);
 	wait1Msec(500);
 	setClawMotors(-25);
-	straight(-127,1220);
+	driveDistancePID(-1220,STRAIGHT,1500);
 	liftgo = 1;
 	startTask(liftTask);
-	waitForLift(800,50);
+	waitForLift(115,50);
 	stopTask(liftTask);
 	setDumpMotors(127);
 	wait1Msec(1850);
@@ -164,31 +162,33 @@ task progSkills()
 	waitForClaw(1750,50);
 	setDumpMotors(0);
 	wait10Msec(80);
-	straight(127,150);
+	driveDistancePID(150,STRAIGHT,1000);
 	setDumpMotors(-127);
-	while(SensorValue[ArmDown] == 0)
+	while(SensorValue[armDown] == 0)
 	{
 		wait1Msec(25);
 	}
 	setDumpMotors(0);
-	straight(127,150);
+	driveDistancePID(150,STRAIGHT,1000);
 	strafeleft(100,127);
-	moveClaw(127,2550);
+	moveClaw(127,1050);
 	SensorValue[rDriveEnc] = 0;
-	while(abs(SensorValue[rDriveEnc]) < 340.5)
+	while(abs(SensorValue[rDriveEnc]) < 390.5)
 	{
 	setRightDtMotors(-85);
 	setLeftDtMotors(85);
 	}
 	setRightDtMotors(0);
 	setLeftDtMotors(0);
-	straight(127,1050);
+	driveDistancePID(1050,STRAIGHT,1500);
 	setClawMotors(-127);
 	wait10Msec(100);
 	setClawMotors(-30);
-	liftToPotTarget(800,127);
+	liftgo = 1;
+	liftTarget = 70;
+	startTask(liftTask);
 	SensorValue[rDriveEnc] = 0;
-	while(abs(SensorValue[rDriveEnc]) < 340.5)
+	while(abs(SensorValue[rDriveEnc]) < 410)
 	{
 	setRightDtMotors(85);
 	setLeftDtMotors(-85);
@@ -203,7 +203,7 @@ task progSkills()
 	setDumpMotors(0);
 	wait10Msec(80);
 	setDumpMotors(-127);
-	while(SensorValue[ArmDown] == 0)
+	while(SensorValue[armDown] == 0)
 	{
 		wait1Msec(25);
 	}
@@ -217,16 +217,17 @@ task progSkills()
 	setRightDtMotors(0);
 	setLeftDtMotors(0);
 	liftToPotTarget(3900, -127)
-	moveClaw(127, 1900);
-	straight(127, 175);
-	moveClaw(127, 3200);
+	moveClaw(127, 1900);*/
+	driveDistancePID(175,STRAIGHT,1000);
+	moveClaw(127, 550);
 	setClawMotors(-127);
 	wait1Msec(500);
 	setClawMotors(-25);
-	straight(-127, 350);
+	driveDistancePID(-350,STRAIGHT,1000);
+	liftTarget = 135;
 	liftgo = 1;
 	startTask(liftTask);
-	waitForLift(800,50);
+	waitForLift(115,50);
 	stopTask(liftTask);
 	setDumpMotors(127);
 	wait1Msec(1250);
@@ -235,22 +236,22 @@ task progSkills()
 	setDumpMotors(0);
 	wait10Msec(80);
 	setDumpMotors(-127);
-	while(SensorValue[ArmDown] == 0)
+	while(SensorValue[armDown] == 0)
 	{
 		wait1Msec(25);
 	}
 	setDumpMotors(0);
 	//straight(127, 200)
-	straight(127,1075);
-	moveClaw(127, 3200);
+	driveDistancePID(1075,STRAIGHT,1500);
+	moveClaw(127, 550);
 	setClawMotors(-50);
 	wait10Msec(100);
-	straight(-127,1075);
+	driveDistancePID(-1075,STRAIGHT,1500);
 	stopTask(liftTask);
-	liftTarget = 800;
+	liftTarget = 135;
 	liftgo = 1;
 	startTask(liftTask);
-	waitForLift(800,50);
+	waitForLift(115,50);
 	stopTask(liftTask);
 	setDumpMotors(127);
 	wait1Msec(1250);
@@ -258,14 +259,14 @@ task progSkills()
 	waitForClaw(1750,50);
 	setDumpMotors(0);
 	wait10Msec(80);
-	straight(127,150);
+	driveDistancePID(150,STRAIGHT,1000);
 	setDumpMotors(-127);
-	while(SensorValue[ArmDown] == 0)
+	while(SensorValue[armDown] == 0)
 	{
 		wait1Msec(25);
 	}
 	setDumpMotors(0);
-	straight(127,150);
+	driveDistancePID(150,STRAIGHT,1000);
 	startTask(clawTask);
 	/*SensorValue[rDriveEnc] = 0;
 	while(SensorValue[rDriveEnc] < 735)
@@ -276,19 +277,19 @@ task progSkills()
 	setRightDtMotors(0);
 	setLeftDtMotors(0);
 	liftToPotTarget(3900, -127)
-	moveClaw(127, 1900);
+	moveClaw(127, 1900);*/
 	strafeRight(700, 127);
-	straight(127,750);
+	driveDistancePID(750,STRAIGHT,1500);
 	wait10Msec(100);
-	moveClaw(127, 3200);
-	straight(127,150);
+	moveClaw(127, 550);
+	driveDistancePID(150,STRAIGHT,1000);
 	setClawMotors(-127);
 	wait1Msec(500);
 	setClawMotors(-25);
-	straight(-127,1220);
+	driveDistancePID(-1220,STRAIGHT,1500);
 	liftgo = 1;
 	startTask(liftTask);
-	waitForLift(800,50);
+	waitForLift(115,50);
 	stopTask(liftTask);
 	setDumpMotors(127);
 	wait1Msec(1850);
@@ -296,13 +297,13 @@ task progSkills()
 	waitForClaw(1750,50);
 	setDumpMotors(0);
 	wait10Msec(80);
-	straight(127,150);
+	driveDistancePID(150,STRAIGHT,1000);
 	setDumpMotors(-127);
-	while(SensorValue[ArmDown] == 0)
+	while(SensorValue[armDown] == 0)
 	{
 		wait1Msec(25);
 	}
-	setDumpMotors(0);*/
+	setDumpMotors(0);
 }
 
 task asyncLiftPID() {
@@ -346,7 +347,16 @@ void releaseClaw() {
 task autonBig() {
 	//driveDistancePID(200, STRAIGHT, 500);
 
-	releaseClaw();
+	moveClaw(127,3500);
+	setClawMotors(15);
+	while (SensorValue[liftEnc] < 15) {
+		setDumpMotors(127);
+	}
+	while (!SensorValue[armDown]) {
+		setDumpMotors(-127);
+	}
+	setDumpMotors(0);
+	SensorValue[liftEnc] = 0;
 	clawTarget = 420;
 	autonClawWait = 750;
 	startTask(autonBigClawDelay);
@@ -551,7 +561,10 @@ task usercontrol()
 	//liftToTargetPIDEnc(25,1000,2,.00035,.2);
 	//wait1Msec(10000);
 	//startTask(autonBig);
-	//stopTask(usercontrol);
+	//clawTarget = 1750;
+	//startTask(clawTask);
+	startTask(progSkills);
+	stopTask(usercontrol);
 	//driveDistancePID(-1000,STRAFE,5000);
   //writeDebugStreamLine("%d",STRAFE);
 	//liftToTargetPIDEnc(30,1000,2,0.00035,.2);
@@ -571,6 +584,15 @@ task usercontrol()
 	int clawCompPower = 15;
   while(1)
   {
+  	if(vexRT[Btn8D])
+  	{
+  		startTask(progSkills);
+  		stopTask(usercontrol);
+  	}
+  	/*if(vexRT[Btn7R])
+  	{
+  		releaseClaw();
+  	}*/
   	//for deadzones; when the joystick value for an axis is below the threshold, the motors controlled by that joystick will not move in that direction
   	LY = (abs(vexRT[Ch3]) > threshold) ? vexRT[Ch3] : 0;
   	LX = (abs(vexRT[Ch4]) > threshold) ? vexRT[Ch4] : 0;
