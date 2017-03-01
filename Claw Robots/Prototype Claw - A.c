@@ -34,6 +34,8 @@ int AUTON_SIDE = 0; //either LEFT or RIGHT, as above
 int AUTON_PLAY = 0;
 int armPotOffset = 230; //The value of the claw potentiometer when the claw is fully closed and touching the physical limit
 bool disableLiftComp = false;
+bool LCD_CUBE = true;
+bool LCD_STARS = false;
 
 int getArmPos() {
 	return SensorValue[claw] - armPotOffset;
@@ -92,10 +94,25 @@ task asyncLiftPID() {
 int autonClawWait = 0;
 task autonBigClawDelay() {
 	wait1Msec(autonClawWait);
-	startTask(clawTask)
+	startTask(clawTask);
+}
+
+void releaseClaw() {
+	moveClaw(127,3400);
+	setClawMotors(15);
+	while (SensorValue[liftEnc] < 15) {
+		setDumpMotors(127);
+	}
+	while (!SensorValue[armDown]) {
+		setDumpMotors(-127);
+	}
+	setDumpMotors(0);
+	SensorValue[liftEnc] = 0;
 }
 
 task autonBig() {
+	driveDistancePID(200,STRAIGHT,500);
+	releaseClaw();
 	//releaseClaw();
 	clawTarget = 585; //420
 	autonClawWait = 750;
@@ -286,8 +303,11 @@ task liftComp() {
 
 task usercontrol()
 {
-	startTask(autonBig);
-	stopTask(usercontrol);
+
+
+	//startTask(autonBig);
+	//stopTask(usercontrol);
+	//wait1Msec(999999);
 	int LY = 0;
 	int LX = 0;
 	int RY = 0;
@@ -306,6 +326,10 @@ task usercontrol()
 	// stopTask(usercontrol);
 	//}
   	//for deadzones; when the joystick value for an axis is below the threshold, the motors controlled by that joystick will not move in that direction
+  	if (vexRT[Btn7R]) {
+  		releaseClaw();
+  	}
+
   	LY = (abs(vexRT[Ch3]) > threshold) ? vexRT[Ch3] : 0;
   	LX = (abs(vexRT[Ch4]) > threshold) ? vexRT[Ch4] : 0;
   	RY = (abs(vexRT[Ch2]) > threshold) ? vexRT[Ch2] : 0;

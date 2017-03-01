@@ -329,7 +329,7 @@ task autonBigClawDelay() {
 }
 
 void releaseClaw() {
-	moveClaw(127,3500);
+	moveClaw(127,3150); //as of 1:15 3.1.17
 	setClawMotors(15);
 	while (SensorValue[liftEnc] < 15) {
 		setDumpMotors(127);
@@ -347,32 +347,31 @@ void releaseClaw() {
 //       right wheel at top of outdent #7 left side of tile
 //       left wheel at middle of outdent #6 bottom side of tile (closer to fence)
 task autonBig() {
-	//driveDistancePID(200, STRAIGHT, 500);
-
+	driveDistancePID(200, STRAIGHT, 500);
 	releaseClaw();
-	clawTarget = 420;
+	clawTarget = 500;
 	autonClawWait = 750;
 	startTask(autonBigClawDelay);
 	//moveClaw(127,560);
 	driveDistancePID(700, STRAIGHT, 1000);
 	////moveClaw(127,560);
-	waitForClaw(410,20);
+	waitForClaw(500,20);
 	setClawMotors(-40);
 	SensorValue[liftEnc] = 0;
-	liftTarget = 60;
+	liftTarget = 70;
 	liftTime = 1000;
   liftgo = 1;
 	startTask(asyncLiftPID);
 	wait1Msec(250);
 	driveDistancePID(400, STRAIGHT, 900);
-	setClawMotors(-80);
-	driveDistancePID(300, ROTATE_LEFT, 750);
-	driveDistancePID(750, STRAIGHT, 750);
+	setClawMotors(-40);
+	driveDistancePID(250, ROTATE_LEFT, 750);
+	driveDistancePID(950, STRAIGHT, 1250);
 	moveClaw(127,820);
 	setClawMotors(15);
 	driveDistancePID(-300, STRAIGHT, 750);
 	//driveDistancePID(200, ROTATE_RIGHT, 400);
-	liftTarget = 74;
+	liftTarget = 79;
 	liftTime = 500;
   liftgo = 1;
 	startTask(asyncLiftPID);
