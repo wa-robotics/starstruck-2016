@@ -101,7 +101,20 @@ task clawTask()
 {
 	moveClaw(127,clawTarget);
 }
-
+void throw()
+{
+	setClawMotors(-50);
+	liftTarget = 125;
+	liftTime = 2200;
+	liftgo = 1;
+	startTask(liftTask);
+	while(sensorValue[liftEnc] < 95)
+	{
+		wait1Msec(5);
+	}
+	clawTarget = 1750;
+	startTask(clawTask);
+}
 task progSkills() {
 	SensorValue[rDriveEnc] = 0;
 	SensorValue[lDriveEnc] = 0;
@@ -115,17 +128,9 @@ task progSkills() {
 	driveDistancePID(150,STRAIGHT,1000);
 	setClawMotors(-127);
 	wait1Msec(500);
-	setClawMotors(-25);
+	setClawMotors(-75);
 	driveDistancePID(-900,STRAIGHT,1500);
-	liftgo = 1;
-	startTask(liftTask);
-	waitForLift(115,50);
-	stopTask(liftTask);
-	setDumpMotors(127);
-	wait1Msec(1400);
-	startTask(clawTask);
-	waitForClaw(1550,50);
-	setDumpMotors(0);
+	throw();
 	wait10Msec(20);
 	driveDistancePID(150,STRAIGHT,1000);
 	setDumpMotors(-127);
@@ -135,25 +140,16 @@ task progSkills() {
 	}
 	setDumpMotors(0);
 	startTask(clawTask);
-	driveDistancePID(-300,STRAIGHT,1000)
-	driveDistancePID(300,STRAIGHT,1000);
+	//driveDistancePID(-300,STRAIGHT,1000)
 	driveDistancePID(850,STRAIGHT,1300);
 	wait10Msec(100);
 	moveClaw(127, 675);
 	driveDistancePID(150,STRAIGHT,1000);
 	setClawMotors(-127);
 	wait1Msec(500);
-	setClawMotors(-25);
+	setClawMotors(-75);
 	driveDistancePID(-1220,STRAIGHT,1500);
-	liftgo = 1;
-	startTask(liftTask);
-	waitForLift(115,50);
-	stopTask(liftTask);
-	setDumpMotors(127);
-	wait1Msec(1750);
-	startTask(clawTask);
-	waitForClaw(1650,50);
-	setDumpMotors(0);
+	throw();
 	wait10Msec(80);
 	driveDistancePID(150,STRAIGHT,1000);
 	setDumpMotors(-127);
@@ -167,7 +163,7 @@ task progSkills() {
 	strafeleft(175,127);
 	moveClaw(127,820);
 	SensorValue[rDriveEnc] = 0;
-	driveDistancePID(463,ROTATE_RIGHT,1000);
+	driveDistancePID(480,ROTATE_RIGHT,1000);
 	/*while(abs(SensorValue[rDriveEnc]) < 390.5)
 	{
 	setRightDtMotors(-85);
@@ -175,7 +171,7 @@ task progSkills() {
 	}*/
 	setRightDtMotors(0);
 	setLeftDtMotors(0);
-	driveDistancePID(1125,STRAIGHT,1500);
+	driveDistancePID(1250,STRAIGHT,1500);
 	setClawMotors(-127);
 	wait10Msec(100);
 	setClawMotors(-30);
@@ -183,17 +179,15 @@ task progSkills() {
 	liftTarget = 70;
 	startTask(liftTask);
 	SensorValue[rDriveEnc] = 0;
-	liftToTargetPIDEnc(55,1000,2.5,0.00035,.2);
-	driveDistancePID(463,ROTATE_LEFT,1000);
+	//liftToTargetPIDEnc(55,1000,2.5,0.00035,.2);
+	driveDistancePID(480,ROTATE_LEFT,1000);
 	setRightDtMotors(0);
 	setLeftDtMotors(0);
-	stopTask(liftTask);
-	setDumpMotors(127);
-	wait1Msec(700);
-	startTask(clawTask);
-	waitForClaw(1750,50);
-	setDumpMotors(0);
-	wait10Msec(80);
+	throw();
+	liftgo = 1;
+	startTask(liftTask);
+	wait10Msec(200);
+	driveDistancePID(250,STRAIGHT,1000)
 	setDumpMotors(-127);
 	while(SensorValue[liftDown] == 0)
 	{
@@ -216,16 +210,7 @@ task progSkills() {
 	wait1Msec(500);
 	setClawMotors(-25);
 	driveDistancePID(-350,STRAIGHT,1000);
-	liftTarget = 135;
-	liftgo = 1;
-	startTask(liftTask);
-	waitForLift(115,50);
-	stopTask(liftTask);
-	setDumpMotors(127);
-	wait1Msec(1250);
-	startTask(clawTask);
-	waitForClaw(1750,50);
-	setDumpMotors(0);
+	throw();
 	wait10Msec(80);
 	setDumpMotors(-127);
 	while(SensorValue[liftDown] == 0)
@@ -242,16 +227,7 @@ task progSkills() {
 	wait10Msec(100);
 	driveDistancePID(-1075,STRAIGHT,1500);
 	stopTask(liftTask);
-	liftTarget = 135;
-	liftgo = 1;
-	startTask(liftTask);
-	waitForLift(115,50);
-	stopTask(liftTask);
-	setDumpMotors(127);
-	wait1Msec(1250);
-	startTask(clawTask);
-	waitForClaw(1750,50);
-	setDumpMotors(0);
+	throw();
 	wait10Msec(80);
 	driveDistancePID(150,STRAIGHT,1000);
 	setDumpMotors(-127);
@@ -283,15 +259,7 @@ task progSkills() {
 	wait1Msec(500);
 	setClawMotors(-25);
 	driveDistancePID(-1220,STRAIGHT,1500);
-	liftgo = 1;
-	startTask(liftTask);
-	waitForLift(115,50);
-	stopTask(liftTask);
-	setDumpMotors(127);
-	wait1Msec(1850);
-	startTask(clawTask);
-	waitForClaw(1750,50);
-	setDumpMotors(0);
+	throw();
 	wait10Msec(80);
 	driveDistancePID(150,STRAIGHT,1000);
 	setDumpMotors(-127);
@@ -501,14 +469,14 @@ task liftComp() {
 		wait1Msec(500); //keep this task alive until it stops; the wait time here doesn't really matter, since the task will be stopped when it is no longer needed
 	}
 }
-
 task usercontrol()
 {
 
 	//startTask(autonBig);
 	//stopTask(usercontrol);
 	//startTask(midfenceStarHeightMacro);
-
+	//throw();
+	//stopTask(usercontrol);
 	int LY = 0;
 	int LX = 0;
 	int RY = 0;
@@ -521,6 +489,7 @@ task usercontrol()
   while(1)
   {
   	if(vexRT[Btn7D]){
+  		//throw();
   		startTask(autonomous);
   		stopTask(usercontrol);
   	}
@@ -535,14 +504,14 @@ task usercontrol()
   	motor[rDriveBack] = RY + RX;
 
   	//old lift macros
-    //if(vexRT[Btn7U])
-		//{
-		//	liftgo = 1;
-		//	clawTarget = 2000;
-		//	liftTarget = 2000;
-		//	startTask(clawTask);
-		//	startTask(liftTask);
-		//}
+    if(vexRT[Btn7U])
+		{
+			clawTarget = 1750;
+			startTask(clawTask);
+			setClawMotors(18);
+			liftToTargetPIDEnc(75,1000,2.5,0.00035,.2);
+			setDumpMotors(15);
+		}
 		//if(vexRT[Btn7L])
 		//{
 		//	liftgo = 1;
