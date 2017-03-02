@@ -34,6 +34,8 @@ int AUTON_SIDE = 0; //either LEFT or RIGHT, as above
 int AUTON_PLAY = 0;
 int armPotOffset = 0; //The value of the claw potentiometer when the claw is fully closed and touching the physical limit
 bool disableLiftComp = false;
+bool LCD_CUBE = true;
+bool LCD_STARS = true;
 
 int getArmPos() {
 	return SensorValue[claw] - armPotOffset;
@@ -379,12 +381,12 @@ task autonStars() {
 
 	//move in line with stars and collect them
 	driveDistancePID(300,STRAFE,750);
-	driveDistancePID(1450,STRAIGHT,2000);
+	driveDistancePID(1400,STRAIGHT,2000);
 	moveClaw(127,330);
 	setClawMotors(-40);
 
 	//lift to pick up stars
-	liftTarget = 20;
+	liftTarget = 50;
 	liftTime = 750;
   liftgo = 1;
 	startTask(asyncLiftPID);
@@ -394,8 +396,9 @@ task autonStars() {
 	setClawMotors(-20);
 
 	//move away from wall and turn to score backwards on fence
-	driveDistancePID(-600,STRAFE,750);
-	driveDistancePID(400,ROTATE_RIGHT,1000);
+	driveDistancePID(-800,STRAFE,750);
+	wait1Msec(250);
+	driveDistancePID(525,ROTATE_RIGHT,1000);
 
 	//move back to fence
 	driveDistancePID(-850,STRAIGHT,1750);
@@ -606,8 +609,8 @@ task liftComp() {
 task usercontrol()
 {
 	//releaseClaw();
-	//startTask(autonStars);
-	//stopTask(usercontrol);
+	startTask(autonStars);
+	stopTask(usercontrol);
 	//startTask(midfenceStarHeightMacro);
 
 	int LY = 0;

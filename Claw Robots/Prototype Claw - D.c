@@ -33,6 +33,8 @@ int RIGHT = 2;
 int AUTON_SIDE = 0; //either LEFT or RIGHT, as above
 int AUTON_PLAY = 0;
 int armPotOffset = 0; //The value of the claw potentiometer when the claw is fully closed and touching the physical limit
+bool LCD_CUBE = true;
+bool LCD_STARS = true;
 
 int getArmPos() {
 	return SensorValue[claw] - armPotOffset;
