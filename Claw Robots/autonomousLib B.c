@@ -190,7 +190,7 @@ void moveClaw(int power, int potValue)//allows us to move the claw in auto and c
 
 void waitForLift(int target, int variance)
 {
-	while(SensorValue[arm] < target+variance && SensorValue[arm] > target-variance)
+	while(SensorValue[liftEnc] < target-variance && SensorValue[LiftEnc] > target+variance)
 	{
 		wait1Msec(25);
 	}

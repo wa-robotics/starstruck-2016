@@ -53,7 +53,7 @@ void pre_auton()
 	// Set bDisplayCompetitionStatusOnLcd to false if you don't want the LCD
 	// used by the competition include file, for example, you might want
 	// to display your team name on the LCD in this function.
-	bDisplayCompetitionStatusOnLcd = false;
+	//bDisplayCompetitionStatusOnLcd = false;
 
 	bLCDBacklight = true;
 	//bool testLcdWizard = false;
