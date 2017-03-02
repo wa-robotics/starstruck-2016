@@ -96,7 +96,55 @@ void liftToTargetPIDEnc(int target, int time, float kP, float kI, float kD) {
 		wait1Msec(25);
 	}
 }
+void throwFence(int target, int time, float kP, float kI, float kD) {
+	int error = 0,
+	errorSum = 0,
+	lastError = 0,
+	slewRateLimit = 15;
 
+	float pTerm,
+	iTerm,
+	dTerm,
+	power,
+	lastPower = 0;
+
+	time1[T1] = 0;
+
+	while (time1[T1] < time) {
+		//update error terms
+		error = target - SensorValue[liftEnc];
+		errorSum += error;
+
+		pTerm = error * (float) kP;
+		iTerm = errorSum * (float) kI;
+		dTerm = (error - lastError) * (float) kD; //calculate motor power
+		power = pTerm + iTerm + dTerm;
+
+		//limit the values of the power term to only be those that can be taken by the motors
+		if (power > 127) {
+			power = 127;
+		} else if (power < -127) {
+			power = -127;
+		}
+
+		lastError = error; //update last error
+
+		//apply a slew rate to limit acceleration/deceleration
+		if(abs(power-lastPower) > slewRateLimit) {
+			if(power > lastPower) { //if the power is increasing (and the difference is greater than the slew rate allows)
+				power = lastPower + slewRateLimit; //increment the power to only add
+			} else { //if the power is decreasing (and the differene is greater than the slew rate allows)
+				power = lastPower - slewRateLimit;
+			}
+		}
+
+		lastPower = power; //update the last power
+		writeDebugStreamLine("%d,%f,%f,%f,%f,%f,%f,%f",nPgmTime,target,error,SensorValue[liftEnc],pTerm,iTerm,dTerm,power);
+		setDumpMotors(power);
+		wait1Msec(25);
+	}
+	setDumpMotors(-127);
+}
 //positive powers will go forward or right
 //negative powers values go backwards or left
 //encoder counts is how many counts to go, always positive

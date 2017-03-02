@@ -43,7 +43,7 @@ int getArmPos() {
 //Our includes
 #include "autonomousLib B.c"
 #include "../State/Position PID - 4 Motor - X Drive.c"
-#include "LCD Wizard.c"
+//#include "LCD Wizard.c"
 //setDumpMotors and setClawMotors are in autonomousLib.c
 
 
@@ -59,7 +59,7 @@ void pre_auton()
 	bLCDBacklight = true;
 	bool testLcdWizard = false;
 	if (bIfiRobotDisabled || testLcdWizard) { //Only show auton play wizard when the robot is in competition mode & disabled on initial startup
-		startTask(LCDSelect);
+		//startTask(LCDSelect);
 	}
 }
 
@@ -104,7 +104,7 @@ task clawTask()
 void throw()
 {
 	setClawMotors(-50);
-	liftTarget = 125;
+	liftTarget = 133
 	liftTime = 2200;
 	liftgo = 1;
 	startTask(liftTask);
@@ -123,7 +123,7 @@ task progSkills() {
 	startTask(clawTask);
 	driveDistancePID(-250,STRAIGHT,1000);
 	waitForClaw(1750,50);
-	wait10Msec(250);
+	wait10Msec(25000000);
 	moveClaw(127, 650);
 	driveDistancePID(150,STRAIGHT,1000);
 	setClawMotors(-127);
@@ -579,7 +579,9 @@ task usercontrol()
 {
 	//releaseClaw();
 	//startTask(autonStars);
-	//stopTask(usercontrol);
+wait10Msec(500)
+startTask(progSkills)
+	stopTask(usercontrol);
 	//startTask(midfenceStarHeightMacro);
 	//throw();
 	//stopTask(usercontrol);
