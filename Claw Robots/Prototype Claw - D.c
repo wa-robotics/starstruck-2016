@@ -33,8 +33,10 @@ int RIGHT = 2;
 int AUTON_SIDE = 0; //either LEFT or RIGHT, as above
 int AUTON_PLAY = 0;
 int armPotOffset = 0; //The value of the claw potentiometer when the claw is fully closed and touching the physical limit
+bool disableLiftComp = false;
 bool LCD_CUBE = true;
 bool LCD_STARS = true;
+
 
 int getArmPos() {
 	return SensorValue[claw] - armPotOffset;
@@ -60,6 +62,56 @@ void pre_auton()
 	//if (bIfiRobotDisabled || testLcdWizard) { //Only show auton play wizard when the robot is in competition mode & disabled on initial startup
 	//	startTask(LCDSelect);
 	//}
+}
+
+int liftTarget;
+int liftTime;
+int clawTarget;
+int liftgo = 0;
+task liftTask()
+{
+	while(1)
+	{
+		if(liftgo == 1)
+		{
+			liftToTargetPIDEnc(liftTarget,liftTime,2,0.00035,.2);
+			liftgo = 0;
+		}
+	}
+}
+
+task asyncLiftPID() {
+	while(1) {
+		if (!bIfiAutonomousMode) { //only do this in driver control
+			disableLiftComp = true;
+		}
+		if (liftgo) {
+			liftToTargetPIDEnc(liftTarget,liftTime,2.5,0.00035,.2);
+			liftgo = 0;
+		}
+		if (!bIfiAutonomousMode) { //only do this in driver control
+			disableLiftComp = false;
+		}
+	}
+}
+
+task clawTask()
+{
+	moveClaw(127,clawTarget);
+}
+void throw()
+{
+	setClawMotors(-50);
+	liftTarget = 125;
+	liftTime = 2200;
+	liftgo = 1;
+	startTask(liftTask);
+	while(sensorValue[liftEnc] < 95)
+	{
+		wait1Msec(5);
+	}
+	clawTarget = 1750;
+	startTask(clawTask);
 }
 
 //potentiometer value for lift: 2150
@@ -165,32 +217,45 @@ task autonomous() {
 	setClawMotors(15);
 }
 
+bool holdDown = false;
+bool liftCompStarted = false;
+
+//lift to 77
+//claw to 1869
+
+task liftComp() {
+	int target = SensorValue[liftEnc];
+	liftToTargetPIDEnc(target+6,1000,2.25,0.00035,.2);
+	while(1) {
+		wait1Msec(500); //keep this task alive until it stops; the wait time here doesn't really matter, since the task will be stopped when it is no longer needed
+	}
+}
 task usercontrol()
 {
-	//wait10Msec(100);
-	//startTask(autonomous);
+	//releaseClaw();
+//	driveDistancePID(1400,STRAIGHT,2000);
+//wait1Msec(1000000);
+//	startTask(autonStars);
+//	stopTask(usercontrol);
+	//startTask(midfenceStarHeightMacro);
+	//throw();
 	//stopTask(usercontrol);
-	//stopTask(main);
-
-	//setClawMotors(127);
-	//wait1Msec(750);
-	//setClawMotors(-127);
-	//wait1Msec(400);
 	int LY = 0;
 	int LX = 0;
 	int RY = 0;
 	int RX = 0;
 	int threshold = 15;
-	int armCompPower = 12; //compensation power for arm/lift
-	int armPotMaxLimit = 400; //software limit for potentiometer to limit arm movement from going over the top (protects potentiometer)
-	bool enableSoftwareArmPosLimit = true; //experimental software limit for arm, see above
+	int armEncMaxLimit = 118; //software limit for potentiometer to limit arm movement from going over the top (protects potentiometer)
+	bool enableSoftwareArmPosLimit = false; //experimental software limit for arm, see above
 	int clawCompPower = 15;
+	bool btn8UPressed = false;
   while(1)
   {
-  	/*if (vexRT[Btn8u]){
+  	if(vexRT[Btn7D]){
+  		//throw();
   		startTask(autonomous);
   		stopTask(usercontrol);
-  	}*/
+  	}
   	//for deadzones; when the joystick value for an axis is below the threshold, the motors controlled by that joystick will not move in that direction
   	LY = (abs(vexRT[Ch3]) > threshold) ? vexRT[Ch3] : 0;
   	LX = (abs(vexRT[Ch4]) > threshold) ? vexRT[Ch4] : 0;
@@ -201,19 +266,71 @@ task usercontrol()
   	motor[rDriveFront] = RY - RX;
   	motor[rDriveBack] = RY + RX;
 
-  	//untested
-	  if (vexRT[Btn5U] && (SensorValue[arm] > armPotMaxLimit || !enableSoftwareArmPosLimit)) {
+  	//old lift macros
+    if(vexRT[Btn7U])
+		{
+			clawTarget = 1750;
+			startTask(clawTask);
+			setClawMotors(18);
+			liftToTargetPIDEnc(75,1000,2.5,0.00035,.2);
+			setDumpMotors(15);
+		}
+		//if(vexRT[Btn7L])
+		//{
+		//	liftgo = 1;
+		//	clawTarget = 2000;
+		//	liftTarget = 2300;
+		//	startTask(clawTask);
+		//	startTask(liftTask);
+		//}
+
+  	if (vexRT[Btn7R]) {
+  		releaseClaw();
+  	}
+
+    if (vexRT[Btn5U] && (SensorValue[liftEnc] < armEncMaxLimit || !enableSoftwareArmPosLimit)) {
+	  	stopTask(liftComp);
+	  	liftCompStarted = false;
 	  	setDumpMotors(127);
-		} else if (vexRT[Btn5D]) { //second part of condition is to prevent motors from jittering if 5U and 5D are pressed down
+	  	holdDown = false;
+		} else if (vexRT[Btn5D] && !SensorValue[liftDown]) { //second part of condition is to prevent motors from jittering if 5U and 5D are pressed down
+			stopTask(liftComp);
+			liftCompStarted = false;
 			setDumpMotors(-127);
 		} else {
-			if (SensorValue[arm] > 3780) { //arm is all the way down; no compensation power
+			//vertical at 117
+			/*if (SensorValue[arm] > 3890) { //arm is all the way down; no compensation power
 				setDumpMotors(0);
-			} else if (SensorValue[arm] > 1180) { //arm is up but has not gone past vertical (behind back of robot).  Positive compensation power
-				setDumpMotors(armCompPower);
-			} else { //arm is up and behind the back of the robot.  Negative compensation power (and increased compensation power to protect potentiometer from crossing its physical limit and counter momentum)
-				setDumpMotors(-armCompPower);
-			}
+			} else if (SensorValue[arm] > 1350) { *///arm is up but has not gone past vertical (behind back of robot).  Positive compensation power
+				if (SensorValue[liftDown]) {
+					holdDown = true;
+				}
+				if (vexRT[Btn8U] && !btn8UPressed) {
+					stopTask(liftComp);
+					holdDown = false;
+					liftTarget = 77;
+					liftTime = 750;
+					clawTarget = 1869;
+					stopTask(asyncLiftPID);
+					startTask(asyncLiftPID);
+					liftgo = 1;
+					startTask(clawTask);
+					btn8UPressed = true;
+					liftCompStarted = true; //so that when the lifting finishes, the driver control compensation code doesn't raise the lift even higher
+				} else if ((holdDown || SensorValue[liftEnc] >= 117) && !disableLiftComp) {
+					stopTask(liftComp);
+					liftCompStarted = false;
+					setDumpMotors(-12);
+				} else if (!liftCompStarted && !disableLiftComp) { //don't restart this task unless the lift has moved and unless the midfence height macro isn't running
+					startTask(liftComp);
+					liftCompStarted = true;
+				}
+				if (!vexRT[Btn8U] && btn8UPressed) {
+					btn8UPressed = false;
+				}
+			/*} else { //arm is up and behind the back of the robot.  Negative compensation power (and increased compensation power to protect potentiometer from crossing its physical limit and counter momentum)
+				setDumpMotors(-armCompPower - 5);
+			}*/
 		}
 
   	if (vexRT[Btn6U]) {

@@ -371,27 +371,18 @@ task autonStars() {
 	//move away from wall and turn to score backwards on fence
 	driveDistancePID(-800,STRAFE,750);
 	wait1Msec(250);
-	driveDistancePID(525,ROTATE_RIGHT,1000);
+	driveDistancePID(425,ROTATE_RIGHT,1000);
 
 	//move back to fence
 	driveDistancePID(-850,STRAIGHT,1750);
 
 	//SCORE!
-	setDumpMotors(127);
-	wait1Msec(1250);
-	clawTarget = 1000;
-	//startTask(clawTask);
-	//waitForClaw(1000,50);
-	moveClaw(127,1000);
+	throw();
 	setClawMotors(15);
-	setDumpMotors(0);
-	wait10Msec(80);
-	driveDistancePID(150,STRAIGHT,1000);
-	setDumpMotors(-127);
-	while(SensorValue[liftDown] == 0)
-	{
-		wait1Msec(25);
+	while(!SensorValue[liftDown]) {
+		setDumpMotors(-127);
 	}
+	setDumpMotors(0);
 }
 
 task autonomous() {
@@ -581,8 +572,10 @@ task liftComp() {
 task usercontrol()
 {
 	//releaseClaw();
-	startTask(autonStars);
-	stopTask(usercontrol);
+//	driveDistancePID(1400,STRAIGHT,2000);
+//wait1Msec(1000000);
+//	startTask(autonStars);
+//	stopTask(usercontrol);
 	//startTask(midfenceStarHeightMacro);
 	//throw();
 	//stopTask(usercontrol);
