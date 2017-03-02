@@ -34,6 +34,8 @@ int AUTON_SIDE = 0; //either LEFT or RIGHT, as above
 int AUTON_PLAY = 0;
 int armPotOffset = 260; //The value of the claw potentiometer when the claw is fully closed and touching the physical limit
 bool disableLiftComp = false;
+bool LCD_CUBE = true;
+bool LCD_STARS = true;
 
 /*int getArmPos() {
 	return SenvsorValue[claw] - armPotOffset;
@@ -43,6 +45,7 @@ bool disableLiftComp = false;
 #include "autonomousLib C.c"
 #include "../State/Position PID - 4 Motor - X Drive.c"
 #include "LCD Wizard.c"
+
 //#include "Position PID - 4 Motor - X Drive.c"
 //setDumpMotors and setClawMotors are in autonomousLib.c
 
@@ -53,10 +56,10 @@ void pre_auton()
 	// Set bDisplayCompetitionStatusOnLcd to false if you don't want the LCD
 	// used by the competition include file, for example, you might want
 	// to display your team name on the LCD in this function.
-	//bDisplayCompetitionStatusOnLcd = false;
+	bDisplayCompetitionStatusOnLcd = false;
 
 	bLCDBacklight = true;
-	bool testLcdWizard = false;
+	bool testLcdWizard = true;
 	if (bIfiRobotDisabled || testLcdWizard) { //Only show auton play wizard when the robot is in competition mode & disabled on initial startup
 		startTask(LCDSelect);
 	}
@@ -327,7 +330,7 @@ task autonBigClawDelay() {
 }
 
 void releaseClaw() {
-	moveClaw(127,3500);
+	moveClaw(127,3150); //as of 1:15 3.1.17
 	setClawMotors(15);
 	while (SensorValue[liftEnc] < 15) {
 		setDumpMotors(127);
@@ -345,41 +348,31 @@ void releaseClaw() {
 //       right wheel at top of outdent #7 left side of tile
 //       left wheel at middle of outdent #6 bottom side of tile (closer to fence)
 task autonBig() {
-	//driveDistancePID(200, STRAIGHT, 500);
-
-	moveClaw(127,3500);
-	setClawMotors(15);
-	while (SensorValue[liftEnc] < 15) {
-		setDumpMotors(127);
-	}
-	while (!SensorValue[armDown]) {
-		setDumpMotors(-127);
-	}
-	setDumpMotors(0);
-	SensorValue[liftEnc] = 0;
-	clawTarget = 420;
+	driveDistancePID(200, STRAIGHT, 500);
+	releaseClaw();
+	clawTarget = 500;
 	autonClawWait = 750;
 	startTask(autonBigClawDelay);
 	//moveClaw(127,560);
 	driveDistancePID(700, STRAIGHT, 1000);
 	////moveClaw(127,560);
-	waitForClaw(410,20);
+	waitForClaw(500,20);
 	setClawMotors(-40);
 	SensorValue[liftEnc] = 0;
-	liftTarget = 60;
+	liftTarget = 70;
 	liftTime = 1000;
   liftgo = 1;
 	startTask(asyncLiftPID);
 	wait1Msec(250);
 	driveDistancePID(400, STRAIGHT, 900);
-	setClawMotors(-80);
-	driveDistancePID(300, ROTATE_LEFT, 750);
-	driveDistancePID(750, STRAIGHT, 750);
+	setClawMotors(-40);
+	driveDistancePID(250, ROTATE_LEFT, 750);
+	driveDistancePID(950, STRAIGHT, 1250);
 	moveClaw(127,820);
 	setClawMotors(15);
 	driveDistancePID(-300, STRAIGHT, 750);
 	//driveDistancePID(200, ROTATE_RIGHT, 400);
-	liftTarget = 74;
+	liftTarget = 79;
 	liftTime = 500;
   liftgo = 1;
 	startTask(asyncLiftPID);
@@ -403,41 +396,36 @@ task autonBig() {
 
 task autonomous() {
 	//Auton plays and their numbers, for reference.  These numbers are set as the value of the AUTON_PLAY variable to control which auton play runs
-	//#1 Big
-	//#2 Small
-	//#3 Cube (score middle cube and block)
-	//#4 Fence (3 stars, corner)
-	//#5 Nothing
-	//#6 Prog skills
+	//L-R-Sk
+	//#1 Cube
+	//#2 Stars
+	//#3 Prog skills
+	//#4 Nothing (actually run nothing for the play)
 
 	//plays should differentiate between left and right using AUTON_SIDE and changing certain values accordingly (ex: running the right side version of a function)
 	if (AUTON_PLAY == 1) { //uncomment line inside this block when task exists
-		//startTask(autonBig);
+		startTask(autonBig);
 	} else if (AUTON_PLAY == 2) {
-		//startTask(autonSmall);
+		//startTask(autonStars);
 	} else if (AUTON_PLAY == 3) {
-		//startTask(autonCube);
-	} else if (AUTON_PLAY == 4) {
-		//startTask(autonFence);
-	} else if (AUTON_PLAY == 5) {
-		//Do nothing
-	} else if (AUTON_PLAY == 6) {
 		startTask(progSkills);
+	} else if (AUTON_PLAY == 4) {
+		//Do nothing
 	}
 
-	SensorValue[rDriveEnc] = 0;
-	SensorValue[lDriveEnc] = 0;
-	liftTarget = 2060;
-	clawTarget = 2535;
-	startTask(liftTask);
-	startTask(clawTask);
-	diagonalRight(127,400);
-	//waitForLift(2060,100);
-	//waitForClaw(2535,100);//A
-	wait1Msec(250);
-	straight(127,1300);
-	wait1Msec(125);
-	straight(-127,350);
+	//SensorValue[rDriveEnc] = 0;
+	//SensorValue[lDriveEnc] = 0;
+	//liftTarget = 2060;
+	//clawTarget = 2535;
+	//startTask(liftTask);
+	//startTask(clawTask);
+	//diagonalRight(127,400);
+	////waitForLift(2060,100);
+	////waitForClaw(2535,100);//A
+	//wait1Msec(250);
+	//straight(127,1300);
+	//wait1Msec(125);
+	//straight(-127,350);
 	//SensorValue[rDriveEnc] = 0;
 	//while(abs(SensorValue[rDriveEnc]) < 745)
 	//{

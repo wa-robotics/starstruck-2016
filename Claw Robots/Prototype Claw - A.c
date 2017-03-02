@@ -34,6 +34,8 @@ int AUTON_SIDE = 0; //either LEFT or RIGHT, as above
 int AUTON_PLAY = 0;
 int armPotOffset = 230; //The value of the claw potentiometer when the claw is fully closed and touching the physical limit
 bool disableLiftComp = false;
+bool LCD_CUBE = true;
+bool LCD_STARS = false;
 
 int getArmPos() {
 	return SensorValue[claw] - armPotOffset;
@@ -92,27 +94,83 @@ task asyncLiftPID() {
 int autonClawWait = 0;
 task autonBigClawDelay() {
 	wait1Msec(autonClawWait);
-	startTask(clawTask)
+	startTask(clawTask);
+}
+
+void releaseClaw() {
+	moveClaw(127,3400);
+	setClawMotors(15);
+	while (SensorValue[liftEnc] < 15) {
+		setDumpMotors(127);
+	}
+	while (!SensorValue[armDown]) {
+		setDumpMotors(-127);
+	}
+	setDumpMotors(0);
+	SensorValue[liftEnc] = 0;
 }
 
 task autonBig() {
-	clawTarget = 560;
-	autonClawWait = 400;
+	driveDistancePID(200,STRAIGHT,500);
+	releaseClaw();
+	//releaseClaw();
+	clawTarget = 585; //420
+	autonClawWait = 750;
 	startTask(autonBigClawDelay);
 	//moveClaw(127,560);
-	driveDistancePID(600, STRAIGHT, 1000);
+	driveDistancePID(750, STRAIGHT, 1000);
 	//moveClaw(127,560);
-	setClawMotors(-20);
-	waitForClaw(540,20);
-	wait1Msec(500);
-	liftTarget = 45;
-	liftTime = 1500;
-	liftgo = 1;
+	setClawMotors(-40);
+	waitForClaw(550,20); //430
+	SensorValue[liftEnc] = 0;
+	liftTarget = 69;
+	liftTime = 1000;
+  liftgo = 1;
 	startTask(asyncLiftPID);
 	wait1Msec(250);
-	driveDistancePID(600, STRAIGHT, 750);
-	wait1Msec(250);
-	driveDistancePID(200, ROTATE_RIGHT, 1000);
+	driveDistancePID(500, STRAIGHT, 900);
+	setClawMotors(-80);
+	driveDistancePID(350, ROTATE_RIGHT, 750);
+	driveDistancePID(800, STRAIGHT, 750);
+	moveClaw(127,840);
+	setClawMotors(15);
+
+	liftTarget = 80;
+	liftTime = 750;
+  liftgo = 1;
+	startTask(asyncLiftPID);
+
+	driveDistancePID(-300, STRAIGHT, 750);
+	//driveDistancePID(200, ROTATE_RIGHT, 400);
+	liftTarget = 74;
+	liftTime = 500;
+  liftgo = 1;
+	startTask(asyncLiftPID);
+	moveClaw(127,1620);
+	setClawMotors(15);
+	driveDistancePID(700, STRAIGHT, 1000);
+	driveDistancePID(-300, STRAIGHT, 1000);
+
+
+
+
+	//clawTarget = 560;
+	//autonClawWait = 400;
+	//startTask(autonBigClawDelay);
+	////moveClaw(127,560);
+	//driveDistancePID(600, STRAIGHT, 1000);
+	////moveClaw(127,560);
+	//setClawMotors(-20);
+	//waitForClaw(540,20);
+	//wait1Msec(500);
+	//liftTarget = 45;
+	//liftTime = 1500;
+	//liftgo = 1;
+	//startTask(asyncLiftPID);
+	//wait1Msec(250);
+	//driveDistancePID(600, STRAIGHT, 750);
+	//wait1Msec(250);
+	//driveDistancePID(200, ROTATE_RIGHT, 1000);
 	//liftToTargetPIDEnc(35,1000,2.5,0.00035,.2);
 	//wait1Msec(250);
 
@@ -245,8 +303,11 @@ task liftComp() {
 
 task usercontrol()
 {
+
+
 	//startTask(autonBig);
 	//stopTask(usercontrol);
+	//wait1Msec(999999);
 	int LY = 0;
 	int LX = 0;
 	int RY = 0;
@@ -265,6 +326,10 @@ task usercontrol()
 	// stopTask(usercontrol);
 	//}
   	//for deadzones; when the joystick value for an axis is below the threshold, the motors controlled by that joystick will not move in that direction
+  	if (vexRT[Btn7R]) {
+  		releaseClaw();
+  	}
+
   	LY = (abs(vexRT[Ch3]) > threshold) ? vexRT[Ch3] : 0;
   	LX = (abs(vexRT[Ch4]) > threshold) ? vexRT[Ch4] : 0;
   	RY = (abs(vexRT[Ch2]) > threshold) ? vexRT[Ch2] : 0;

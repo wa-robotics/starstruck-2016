@@ -271,19 +271,125 @@ task progSkills() {
 
 }
 
-task autonBig() {
-	driveDistancePID(600, STRAIGHT, 1000);
-	moveClaw(127,560);
-	setClawMotors(-20);
-	liftToTargetPIDEnc(74,1250,6,0.00035,.2);
-	wait1Msec(250);
-	driveDistancePID(500, STRAIGHT, 750);
-	driveDistancePID(330, ROTATE_RIGHT, 1000);
-	driveDistancePID(600,STRAIGHT,1000);
-	moveClaw(127,1600);
-	setClawMotors(15);
+int autonClawWait = 0;
+task autonBigClawDelay() {
+	wait1Msec(autonClawWait);
+	startTask(clawTask);
 }
 
+void releaseClaw() {
+	moveClaw(127,3200);
+	setClawMotors(15);
+	while (SensorValue[liftEnc] < 15) {
+		setDumpMotors(127);
+	}
+	while (!SensorValue[liftDown]) {
+		setDumpMotors(-127);
+	}
+	setDumpMotors(0);
+	SensorValue[liftEnc] = 0;
+}
+
+task autonBig() {
+	releaseClaw();
+	clawTarget = 590; //420
+	autonClawWait = 750;
+	startTask(autonBigClawDelay);
+	//moveClaw(127,560);
+	driveDistancePID(700, STRAIGHT, 1000);
+	////moveClaw(127,560);
+	setClawMotors(-40);
+	waitForClaw(580,20); //430
+	SensorValue[liftEnc] = 0;
+	liftTarget = 69;
+	liftTime = 1000;
+  liftgo = 1;
+	startTask(asyncLiftPID);
+	wait1Msec(250);
+	driveDistancePID(500, STRAIGHT, 900);
+	setClawMotors(-80);
+	driveDistancePID(300, ROTATE_LEFT, 750);
+	driveDistancePID(700, STRAIGHT, 750);
+	moveClaw(127,820);
+	setClawMotors(15);
+
+	liftTarget = 80;
+	liftTime = 750;
+  liftgo = 1;
+	startTask(asyncLiftPID);
+
+	driveDistancePID(-300, STRAIGHT, 750);
+	//driveDistancePID(200, ROTATE_RIGHT, 400);
+	liftTarget = 74;
+	liftTime = 500;
+  liftgo = 1;
+	startTask(asyncLiftPID);
+	moveClaw(127,1600);
+	setClawMotors(15);
+	driveDistancePID(600, STRAIGHT, 1000);
+	driveDistancePID(-300, STRAIGHT, 1000);
+
+
+	//driveDistancePID(600, STRAIGHT, 1000);
+	//moveClaw(127,560);
+	//setClawMotors(-20);
+	//liftToTargetPIDEnc(74,1250,6,0.00035,.2);
+	//wait1Msec(250);
+	//driveDistancePID(500, STRAIGHT, 750);
+	//driveDistancePID(330, ROTATE_RIGHT, 1000);
+	//driveDistancePID(600,STRAIGHT,1000);
+	//moveClaw(127,1600);
+	//setClawMotors(15);
+}
+
+task autonStars() {
+	//releaseClaw();
+	//move out of the way of the wall and open claw
+	driveDistancePID(-200,STRAIGHT,500);
+	driveDistancePID(-300,STRAFE,750);
+	moveClaw(127,1000);
+	setClawMotors(15);
+
+	//move in line with stars and collect them
+	driveDistancePID(300,STRAFE,750);
+	driveDistancePID(1450,STRAIGHT,2000);
+	moveClaw(127,330);
+	setClawMotors(-40);
+
+	//lift to pick up stars
+	liftTarget = 20;
+	liftTime = 750;
+  liftgo = 1;
+	startTask(asyncLiftPID);
+
+	//move back behind cube to score
+	driveDistancePID(-1400,STRAIGHT,1500);
+	setClawMotors(-20);
+
+	//move away from wall and turn to score backwards on fence
+	driveDistancePID(-600,STRAFE,750);
+	driveDistancePID(400,ROTATE_RIGHT,1000);
+
+	//move back to fence
+	driveDistancePID(-850,STRAIGHT,1750);
+
+	//SCORE!
+	setDumpMotors(127);
+	wait1Msec(1250);
+	clawTarget = 1000;
+	//startTask(clawTask);
+	//waitForClaw(1000,50);
+	moveClaw(127,1000);
+	setClawMotors(15);
+	setDumpMotors(0);
+	wait10Msec(80);
+	driveDistancePID(150,STRAIGHT,1000);
+	setDumpMotors(-127);
+	while(SensorValue[liftDown] == 0)
+	{
+		wait1Msec(25);
+	}
+}
 
 task autonomous() {
 	wait10Msec(250);
@@ -471,8 +577,8 @@ task liftComp() {
 }
 task usercontrol()
 {
-
-	//startTask(autonBig);
+	//releaseClaw();
+	//startTask(autonStars);
 	//stopTask(usercontrol);
 	//startTask(midfenceStarHeightMacro);
 	//throw();
@@ -520,6 +626,10 @@ task usercontrol()
 		//	startTask(clawTask);
 		//	startTask(liftTask);
 		//}
+
+  	if (vexRT[Btn7R]) {
+  		releaseClaw();
+  	}
 
     if (vexRT[Btn5U] && (SensorValue[liftEnc] < armEncMaxLimit || !enableSoftwareArmPosLimit)) {
 	  	stopTask(liftComp);
