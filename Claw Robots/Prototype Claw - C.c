@@ -42,7 +42,7 @@ int getArmPos() {
 
 //Our includes
 #include "autonomousLib C.c"
-#include "../State/Position PID - 4 Motor - X Drive.c"
+#include "../State/Position PID - 4 Motor - X Drive C.c"
 //#include "LCD Wizard.c"
 //setDumpMotors and setClawMotors are in autonomousLib.c
 
@@ -113,11 +113,11 @@ task clawTask()
 void throw()
 {
 	setClawMotors(-50);
-	liftTarget = 127;
+	liftTarget = 133;
 	liftTime = 2000;
 	liftgo = 1;
 	startTask(throwTask);
-	while(sensorValue[liftEnc] < 95)
+	while(abs(SensorValue[liftEnc]) < 96)
 	{
 		wait1Msec(5);
 	}
@@ -136,15 +136,28 @@ void down()
 	SensorValue[liftEnc] = 0;
 }
 task progSkills() {
+	moveClaw(127,3200);
+	setClawMotors(15);
+	while (abs(sensorValue[liftEnc]) < 15) {
+		setDumpMotors(127);
+	}
+	while (!SensorValue[liftDown]) {
+		setDumpMotors(-127);
+	}
+	setDumpMotors(0);
+	SensorValue[liftEnc] = 0;
 	SensorValue[liftEnc] = 0;
 	SensorValue[rDriveEnc] = 0;
 	SensorValue[lDriveEnc] = 0;
 	liftTarget = 135;
 	clawTarget = 1750;
+	setClawMotors(127);
+	wait10Msec(90);
+	setClawMotors(0);
 	startTask(clawTask);
 	driveDistancePID(-250,STRAIGHT,1000);
-	waitForClaw(1750,200);
-	wait10Msec(150);
+	waitForClaw(1750,500);
+	wait10Msec(200);
 	moveClaw(127, 650);
 	driveDistancePID(150,STRAIGHT,1000);
 	setClawMotors(-127);
@@ -156,25 +169,26 @@ task progSkills() {
 	driveDistancePID(150,STRAIGHT,1000);
 	down();
 	SensorValue[liftEnc] = 0;
-	strafeRight(35,127);
-	driveDistancePID(-300,STRAIGHT,1000);
-	moveClaw(127, 850);
+	//strafeRight(35,127);
+	driveDistancePID(-510,STRAIGHT,1500);
+	moveClaw(127, 975);
 	//driveDistancePID(-300,STRAIGHT,1000)
 	driveDistancePID(1150,STRAIGHT,1300);
 	wait10Msec(100);
-	moveClaw(-127, 620);
+	moveClaw(-127, 720);
 	driveDistancePID(150,STRAIGHT,1000);
 	setClawMotors(-127);
 	wait1Msec(500);
 	setClawMotors(-45);
-	driveDistancePID(-1220,STRAIGHT,1500);
+	driveDistancePID(-1550,STRAIGHT,1800);
 	throw();
 	driveDistancePID(150,STRAIGHT,1000);
 	down();
-	driveDistancePID(-510,STRAIGHT,1000);
+	strafeLeft(35,127);
+	driveDistancePID(-510,STRAIGHT,1500);
 	driveDistancePID(300,STRAIGHT,1000);
-	moveClaw(127,700);
-	strafeleft(92,127);
+	moveClaw(-127,615);
+	strafeleft(73,127);
 	SensorValue[rDriveEnc] = 0;
 	driveDistancePID(442,ROTATE_RIGHT,1000);
 	/*while(abs(SensorValue[rDriveEnc]) < 390.5)
@@ -207,14 +221,16 @@ task progSkills() {
 	//startTask(clawTask);
 	//liftTarget = 127;
 	//liftTime = 2000;
-	strafeleft(92,127);
-	down();
+	liftTarget = 65;
+	startTask(liftTask);
+	waitForLift(65,5);
 	wait10Msec(75);
 	throw();
-	wait10Msec(200);
-	driveDistancePID(-250,STRAIGHT,1000)
+	setDumpMotors(13);
+	wait10Msec(75);
+	driveDistancePID(-250,STRAIGHT,1000);
+	//strafeLeft(240,127);
 	down();
-	straferight(92,127);
 	/*SensorValue[rDriveEnc] = 0;
 	while(SensorValue[rDriveEnc] < 735)
 	{
@@ -236,6 +252,7 @@ task progSkills() {
 	down();
 	driveDistancePID(-300,STRAIGHT,1000)
 	driveDistancePID(300,STRAIGHT,1000);
+	strafeLeft(55,127)
 	//straight(127, 200)
 	driveDistancePID(1075,STRAIGHT,1500);
 	moveClaw(127, 550);
@@ -286,7 +303,7 @@ task autonBigClawDelay() {
 void releaseClaw() {
 	moveClaw(127,3200);
 	setClawMotors(15);
-	while (SensorValue[liftEnc] < 15) {
+	while (abs(sensorValue[liftEnc]) < 15) {
 		setDumpMotors(127);
 	}
 	while (!SensorValue[liftDown]) {
@@ -300,12 +317,13 @@ task autonBig() {
 	releaseClaw();
 	clawTarget = 590; //420
 	autonClawWait = 750;
-	startTask(autonBigClawDelay);
+	//startTask(autonBigClawDelay);
 	//moveClaw(127,560);
 	driveDistancePID(700, STRAIGHT, 1000);
 	////moveClaw(127,560);
-	setClawMotors(-40);
-	waitForClaw(580,20); //430
+	setClawMotors(-60);
+	wait10Msec(183);
+	//waitForClaw(580,100); //430
 	SensorValue[liftEnc] = 0;
 	liftTarget = 69;
 	liftTime = 1000;
@@ -314,11 +332,10 @@ task autonBig() {
 	wait1Msec(250);
 	driveDistancePID(500, STRAIGHT, 900);
 	setClawMotors(-80);
-	driveDistancePID(300, ROTATE_LEFT, 750);
+	driveDistancePID(392, ROTATE_LEFT, 750);
 	driveDistancePID(700, STRAIGHT, 750);
 	moveClaw(127,820);
 	setClawMotors(15);
-
 	liftTarget = 80;
 	liftTime = 750;
   liftgo = 1;
@@ -398,7 +415,41 @@ task autonStars() {
 }
 
 task autonomous() {
-	wait10Msec(100);
+	/*moveClaw(127,3200);
+	setClawMotors(15);
+	while (abs(sensorValue[liftEnc]) < 15) {
+		setDumpMotors(127);
+	}
+	while (!SensorValue[liftDown]) {
+		setDumpMotors(-127);
+	}
+	setDumpMotors(0);
+	SensorValue[liftEnc] = 0;
+	SensorValue[liftEnc] = 0;
+	SensorValue[rDriveEnc] = 0;
+	SensorValue[lDriveEnc] = 0;
+	liftTarget = 135;
+	clawTarget = 1750;
+	setClawMotors(127);
+	wait10Msec(90);
+	setClawMotors(0);
+	startTask(clawTask);
+	driveDistancePID(-250,STRAIGHT,1000);
+	//waitForClaw(1750,500);
+	wait10Msec(50);
+	moveClaw(127, 650);
+	driveDistancePID(150,STRAIGHT,1000);
+	setClawMotors(-127);
+	wait1Msec(500);
+	setClawMotors(-45);
+	//driveDistancePID(180,ROTATE_LEFT,1000);
+	driveDistancePID(-1200,STRAIGHT,1500);
+	throw();
+	wait10Msec(20);
+	driveDistancePID(150,STRAIGHT,1000);
+	down();
+	SensorValue[liftEnc] = 0;*/
+	/*wait10Msec(100);
 	startTask(progSkills);
 	//Auton plays and their numbers, for reference.  These numbers are set as the value of the AUTON_PLAY variable to control which auton play runs
 	//#1 Big
@@ -448,7 +499,7 @@ task autonomous() {
 	setLeftDtMotors(0);
 	liftToPotTarget(3900, -127)
 	moveClaw(127, 1900);*/
-	strafeRight(1020, 127);
+	/*strafeRight(1020, 127);
 	straight(127, 75);
 	moveClaw(127, 3200);
 	setClawMotors(-127);
@@ -501,7 +552,9 @@ task autonomous() {
 	//wait
 	//raise arm
 	//open claw
-	//wait
+	//wait*/
+	starttask(autonBig);
+	//startTask(progSkills);
 }
 
 /*task progSkills() {
@@ -575,7 +628,7 @@ bool liftCompStarted = false;
 //claw to 1869
 
 task liftComp() {
-	int target = SensorValue[liftEnc];
+	int target = abs(sensorValue[liftEnc]);
 	liftToTargetPIDEnc(target+6,1000,2.25,0.00035,.2);
 	while(1) {
 		wait1Msec(500); //keep this task alive until it stops; the wait time here doesn't really matter, since the task will be stopped when it is no longer needed
@@ -583,6 +636,9 @@ task liftComp() {
 }
 task usercontrol()
 {
+	//wait10Msec(100);
+	//throw();
+	//stopTask(usercontrol);
 	//releaseClaw();
 	//startTask(autonStars);
 	//wait10Msec(500)
@@ -598,14 +654,15 @@ task usercontrol()
 	int RY = 0;
 	int RX = 0;
 	int threshold = 15;
-	int armEncMaxLimit = 118; //software limit for potentiometer to limit arm movement from going over the top (protects potentiometer)
+	int armEncMaxLimit = 133; //software limit for potentiometer to limit arm movement from going over the top (protects potentiometer)
 	bool enableSoftwareArmPosLimit = false; //experimental software limit for arm, see above
 	int clawCompPower = 15;
 	bool btn8UPressed = false;
   while(1)
   {
-  	if(vexRT[Btn7D]){
+  	if(vexRT[Btn7D]&&vexRT[Btn7L]){
   		//throw();
+  		//startTask(autonBig);
   		startTask(autonomous);
   		stopTask(usercontrol);
   	}
@@ -641,7 +698,7 @@ task usercontrol()
   		releaseClaw();
   	}
 
-    if (vexRT[Btn5U] && (SensorValue[liftEnc] < armEncMaxLimit || !enableSoftwareArmPosLimit)) {
+    if (vexRT[Btn5U] && (abs(sensorValue[liftEnc]) < armEncMaxLimit || !enableSoftwareArmPosLimit)) {
 	  	stopTask(liftComp);
 	  	liftCompStarted = false;
 	  	setDumpMotors(127);
@@ -670,7 +727,7 @@ task usercontrol()
 					startTask(clawTask);
 					btn8UPressed = true;
 					liftCompStarted = true; //so that when the lifting finishes, the driver control compensation code doesn't raise the lift even higher
-				} else if ((holdDown || SensorValue[liftEnc] >= 117) && !disableLiftComp) {
+				} else if ((holdDown || abs(sensorValue[liftEnc]) >= 117) && !disableLiftComp) {
 					stopTask(liftComp);
 					liftCompStarted = false;
 					setDumpMotors(-12);
@@ -695,7 +752,10 @@ task usercontrol()
 		}	else {
 			setClawMotors(clawCompPower);
 		}
-
+		if(SensorValue[liftDown])
+		{
+			SensorValue[liftEnc] = 0;
+		}
   	wait1Msec(25);
 	}
 }

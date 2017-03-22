@@ -183,7 +183,7 @@ void moveClaw(int power, int potValue)//allows us to move the claw in auto and c
 			setClawMotors(abs(power)); //the exact opposite of the above codition for positive input (credit to Evan for remembering the number -1 exists)
 		}
 	}
-	//manualCompensation();
+	manualCompensation();
 	//startClawCompensation(potValue); //turns on the compensation code for the claw
 }
 

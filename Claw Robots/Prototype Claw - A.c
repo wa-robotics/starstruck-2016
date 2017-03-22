@@ -54,7 +54,7 @@ void pre_auton()
 	// Set bDisplayCompetitionStatusOnLcd to false if you don't want the LCD
 	// used by the competition include file, for example, you might want
 	// to display your team name on the LCD in this function.
-	bDisplayCompetitionStatusOnLcd = false;
+	//bDisplayCompetitionStatusOnLcd = false;
 
 	bLCDBacklight = true;
 	bool testLcdWizard = false;
@@ -71,19 +71,23 @@ int clawTarget;
 int liftgo = 0;
 task liftTask()
 {
-	liftToPotTarget(liftTarget,127);
+	while(1)
+	{
+		if(liftgo == 1)
+		{
+			liftToTargetPIDEnc(liftTarget,liftTime,2,0.00035,.2);
+			liftgo = 0;
+		}
+	}
 }
-task clawTask()
-{
-	moveClaw(127,clawTarget);
-}
+
 task asyncLiftPID() {
 	while(1) {
 		if (!bIfiAutonomousMode) { //only do this in driver control
 			disableLiftComp = true;
 		}
 		if (liftgo) {
-			liftToTargetPIDEnc(liftTarget,liftTime,3.25,0.00050,.2);
+			liftToTargetPIDEnc(liftTarget,liftTime,2.5,0.00035,.2);
 			liftgo = 0;
 		}
 		if (!bIfiAutonomousMode) { //only do this in driver control
@@ -91,6 +95,208 @@ task asyncLiftPID() {
 		}
 	}
 }
+task throwTask()
+{
+	while(1)
+	{
+		if(liftgo == 1)
+		{
+			throwFence(liftTarget,liftTime,2,0.00035,.2);
+			liftgo = 0;
+		}
+	}
+}
+task clawTask()
+{
+	moveClaw(127,clawTarget);
+}
+void throw()
+{
+	setClawMotors(-50);
+	liftTarget = 134;
+	liftTime = 2000;
+	liftgo = 1;
+	startTask(throwTask);
+	while(sensorValue[liftEnc] < 95)
+	{
+		wait1Msec(5);
+	}
+	clawTarget = 1750;
+	startTask(clawTask);
+}
+void down()
+{
+	wait10Msec(40);
+	setDumpMotors(-127);
+	while(SensorValue[armdown] == 0)
+	{
+		wait1Msec(25);
+	}
+	setDumpMotors(0);
+	SensorValue[liftEnc] = 0;
+}
+task progSkills() {
+	moveClaw(127,3200);
+	setClawMotors(15);
+	while (SensorValue[liftEnc] < 15) {
+		setDumpMotors(127);
+	}
+	while (!SensorValue[armdown]) {
+		setDumpMotors(-127);
+	}
+	setDumpMotors(0);
+	SensorValue[liftEnc] = 0;
+	SensorValue[liftEnc] = 0;
+	SensorValue[rDriveEnc] = 0;
+	SensorValue[lDriveEnc] = 0;
+	liftTarget = 135;
+	clawTarget = 1750;
+	startTask(clawTask);
+	driveDistancePID(-250,STRAIGHT,1000);
+	waitForClaw(1750,200);
+	wait10Msec(90);
+	moveClaw(127, 850);
+	driveDistancePID(150,STRAIGHT,1000);
+	setClawMotors(-127);
+	wait1Msec(500);
+	setClawMotors(-60);
+	driveDistancePID(-900,STRAIGHT,1500);
+	throw();
+	wait10Msec(20);
+	driveDistancePID(150,STRAIGHT,1000);
+	down();
+	SensorValue[liftEnc] = 0;
+	strafeleft(40,127);
+	driveDistancePID(-300,STRAIGHT,1000);
+	moveClaw(127, 975);
+	//driveDistancePID(-300,STRAIGHT,1000)
+	driveDistancePID(1150,STRAIGHT,1300);
+	wait10Msec(100);
+	moveClaw(-127, 620);
+	driveDistancePID(150,STRAIGHT,1000);
+	setClawMotors(-127);
+	wait1Msec(500);
+	setClawMotors(-60);
+	driveDistancePID(-1170,STRAIGHT,1500);
+	throw();
+	driveDistancePID(150,STRAIGHT,1000);
+	down();
+	strafeLeft(110,127);
+	driveDistancePID(-510,STRAIGHT,1000);
+	driveDistancePID(300,STRAIGHT,1000);
+	moveClaw(127,700);
+	strafeleft(92,127);
+	SensorValue[rDriveEnc] = 0;
+	driveDistancePID(442,ROTATE_RIGHT,1000);
+	/*while(abs(SensorValue[rDriveEnc]) < 390.5)
+	{\
+	setRightDtMotors(-85);
+	setLeftDtMotors(85);
+	}*/
+	setRightDtMotors(0);
+	setLeftDtMotors(0);
+	driveDistancePID(1325,STRAIGHT,1500);
+	setClawMotors(-127);
+	wait10Msec(50);
+	setClawMotors(-30);
+	liftgo = 1;
+	liftTarget = 95;
+	startTask(liftTask);
+	wait10Msec(75);
+	SensorValue[rDriveEnc] = 0;
+	//liftToTargetPIDEnc(55,1000,2.5,0.00035,.2);
+	driveDistancePID(480,ROTATE_LEFT,1000);
+	setRightDtMotors(0);
+	setLeftDtMotors(0);
+	wait10Msec(50);
+	//setClawMotors(-50);
+	//liftgo = 1;
+	//liftTarget = 130;
+	//startTask(liftTask);
+	//wait10Msec(90);
+	//clawTarget = 1750;
+	//startTask(clawTask);
+	//liftTarget = 127;
+	//liftTime = 2000;
+	//strafeRight(240,127);
+	//down();
+	liftTarget = 65;
+	startTask(liftTask);
+	waitForLift(65,5);
+	wait10Msec(75);
+	throw();
+	setDumpMotors(13);
+	wait10Msec(75);
+	driveDistancePID(-250,STRAIGHT,1000);
+	//strafeLeft(240,127);
+	down();
+	/*SensorValue[rDriveEnc] = 0;
+	while(SensorValue[rDriveEnc] < 735)
+	{
+	setRightDtMotors(85);
+	setLeftDtMotors(-85);
+	}
+	setRightDtMotors(0);
+	setLeftDtMotors(0);
+	liftToPotTarget(3900, -127)
+	moveClaw(127, 1900);*/
+	driveDistancePID(300,STRAIGHT,1000);
+	moveClaw(127, 550);
+	setClawMotors(-127);
+	wait1Msec(500);
+	setClawMotors(-25);
+	driveDistancePID(-410,STRAIGHT,1000);
+	throw();
+	wait10Msec(40);
+	down();
+	driveDistancePID(-300,STRAIGHT,1000)
+	driveDistancePID(530,STRAIGHT,1700);
+	//straight(127, 200)
+	/*driveDistancePID(1075,STRAIGHT,1500);
+	moveClaw(127, 550);
+	setClawMotors(-50);
+	wait10Msec(50);
+	driveDistancePID(-1075,STRAIGHT,1500);
+	stopTask(liftTask);
+	throw();
+	wait10Msec(40);
+	driveDistancePID(150,STRAIGHT,1000);
+	down();
+	driveDistancePID(-300,STRAIGHT,1000)
+	driveDistancePID(300,STRAIGHT,1000);*/
+	//driveDistancePID(230,STRAIGHT,1000);
+	startTask(clawTask);
+	/*SensorValue[rDriveEnc] = 0;
+	while(SensorValue[rDriveEnc] < 735)
+	{
+	setRightDtMotors(85);
+	setLeftDtMotors(-85);
+	}
+	setRightDtMotors(0);
+	setLeftDtMotors(0);
+	liftToPotTarget(3900, -127)
+	moveClaw(127, 1900);*/
+	strafeRight(900, 127);
+	setRightDtMotors(127);
+	setLeftDtMotors(127);
+	wait10Msec(100);
+	setRightDtMotors(0);
+	setLeftDtMotors(0);
+	wait10Msec(50);
+	moveClaw(127, 550);
+	driveDistancePID(150,STRAIGHT,1000);
+	setClawMotors(-127);
+	wait1Msec(500);
+	setClawMotors(-25);
+	driveDistancePID(-1220,STRAIGHT,1500);
+	throw();
+	wait10Msec(50);
+	driveDistancePID(150,STRAIGHT,1000);
+	setDumpMotors(-127);
+	down();
+}
+
+
 int autonClawWait = 0;
 task autonBigClawDelay() {
 	wait1Msec(autonClawWait);
@@ -98,17 +304,18 @@ task autonBigClawDelay() {
 }
 
 void releaseClaw() {
-	moveClaw(127,3400);
+	moveClaw(127,3200);
 	setClawMotors(15);
 	while (SensorValue[liftEnc] < 15) {
 		setDumpMotors(127);
 	}
-	while (!SensorValue[armDown]) {
+	while (!SensorValue[armdown]) {
 		setDumpMotors(-127);
 	}
 	setDumpMotors(0);
 	SensorValue[liftEnc] = 0;
 }
+
 
 task autonBig() {
 	driveDistancePID(200,STRAIGHT,500);
@@ -183,6 +390,7 @@ task autonBig() {
 
 
 task autonomous() {
+
 	//Auton plays and their numbers, for reference.  These numbers are set as the value of the AUTON_PLAY variable to control which auton play runs
 	//#1 Big
 	//#2 Small
@@ -192,7 +400,7 @@ task autonomous() {
 	//#6 Prog skills
 
 	//plays should differentiate between left and right using AUTON_SIDE and changing certain values accordingly (ex: running the right side version of a function)
-	if (AUTON_PLAY == 1) { //uncomment line inside this block when task exists
+	/*if (AUTON_PLAY == 1) { //uncomment line inside this block when task exists
 		//startTask(autonBig);
 	} else if (AUTON_PLAY == 2) {
 		//startTask(autonSmall);
@@ -254,7 +462,9 @@ task autonomous() {
 	//startTask(liftTask);
 	//wait1Msec(1000);
 	//stopTask(clawTask);
-	//startTask(clawTask);
+	//startTask(clawTask);*/
+	//startTask(autonBig);
+	startTask(progSkills);
 }
 
 task clawControl()
@@ -315,9 +525,9 @@ task usercontrol()
 	int threshold = 15;
 	int armCompPower = 12; //compensation power for arm/lift
 	int armEncMaxLimit = 118; //software limit for potentiometer to limit arm movement from going over the top (protects potentiometer)
-	bool enableSoftwareArmPosLimit = true; //software limit for arm, see above
+	bool enableSoftwareArmPosLimit = false; //software limit for arm, see above
 	int clawCompPower = 15;
-
+	bool btn8UPressed = false;
   while(1)
   {
  // 	if(vexRT[Btn8U])
@@ -329,7 +539,11 @@ task usercontrol()
   	if (vexRT[Btn7R]) {
   		releaseClaw();
   	}
-
+  	if(vexRT[Btn7U])
+  	{
+  		startTask(progSkills);
+  		stopTask(usercontrol);
+		}
   	LY = (abs(vexRT[Ch3]) > threshold) ? vexRT[Ch3] : 0;
   	LX = (abs(vexRT[Ch4]) > threshold) ? vexRT[Ch4] : 0;
   	RY = (abs(vexRT[Ch2]) > threshold) ? vexRT[Ch2] : 0;
@@ -343,7 +557,7 @@ task usercontrol()
   		SensorValue[liftEnc] = 0;
   	}
 
-	  if (vexRT[Btn5U] && (SensorValue[liftEnc] < armEncMaxLimit || !enableSoftwareArmPosLimit || vexRT[Btn8U])) {
+	  if (vexRT[Btn5U] && (SensorValue[liftEnc] < armEncMaxLimit || !enableSoftwareArmPosLimit)) {
 	  	stopTask(liftComp);
 	  	liftCompStarted = false;
 	  	setDumpMotors(127);
@@ -353,7 +567,6 @@ task usercontrol()
 			liftCompStarted = false;
 			setDumpMotors(-127);
 		} else {
-
 			//vertical at 117
 			/*if (SensorValue[arm] > 3890) { //arm is all the way down; no compensation power
 				setDumpMotors(0);
@@ -361,19 +574,41 @@ task usercontrol()
 				if (SensorValue[armDown]) {
 					holdDown = true;
 				}
-				if (holdDown || SensorValue[liftEnc] >= 117) {
+				if (vexRT[Btn8U] && !btn8UPressed) {
+					stopTask(liftComp);
+					holdDown = false;
+					//liftTarget = 77;
+					//liftTime = 750;
+					clawTarget = 1869;
+					setDumpMotors(127)
+					while(SensorValue[liftEnc] < 64)
+					{
+						wait1Msec(8);
+					}
+					setDumpMotors(15);
+					//stopTask(asyncLiftPID);
+					//startTask(asyncLiftPID);
+					liftgo = 1;
+					startTask(clawTask);
+					setClawMotors(15);
+					btn8UPressed = true;
+					liftCompStarted = true; //so that when the lifting finishes, the driver control compensation code doesn't raise the lift even higher
+				} else if ((holdDown || SensorValue[liftEnc] >= 117) && !disableLiftComp) {
 					stopTask(liftComp);
 					liftCompStarted = false;
 					setDumpMotors(-12);
-				} else if (!liftCompStarted) { //don't restart this task unless the lift has moved
+				} else if (!liftCompStarted && !disableLiftComp) { //don't restart this task unless the lift has moved and unless the midfence height macro isn't running
 					startTask(liftComp);
 					liftCompStarted = true;
 				}
-			/*} else { //arm is up and behind the back of the robot.  Negative compensation power (and increased compensation power to protect potentiometer from crossing its physical limit and counter momentum)
+				if (!vexRT[Btn8U] && btn8UPressed) {
+					btn8UPressed = false;
+				}
+			/*} else { //arm is up and beh
+			ind the back of the robot.  Negative compensation power (and increased compensation power to protect potentiometer from crossing its physical limit and counter momentum)
 				setDumpMotors(-armCompPower - 5);
 			}*/
 		}
-
 		if (vexRT[Btn6U]) {
 			setClawMotors(127);
 			clawCompPower = 15;
