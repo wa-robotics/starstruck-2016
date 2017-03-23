@@ -1,3 +1,6 @@
+#pragma config(Sensor, dgtl7,  liftEnc,        sensorQuadEncoder)
+#pragma config(Sensor, dgtl9,  rDriveEnc,      sensorQuadEncoder)
+#pragma config(Sensor, dgtl11, lDriveEnc,      sensorQuadEncoder)
 #pragma config(Motor,  port1,           leftClaw,      tmotorVex393_HBridge, openLoop, reversed)
 #pragma config(Motor,  port2,           lDriveFront,   tmotorVex393TurboSpeed_MC29, openLoop)
 #pragma config(Motor,  port3,           rDriveFront,   tmotorVex393TurboSpeed_MC29, openLoop, reversed)
@@ -39,8 +42,8 @@ task main()
 {
 
 	while(1) {
-		setLeftDtMotors(vexRT[Ch3]);
-		setRightDtMotors(vexRT[Ch2]);
+		setLeftDtMotors(vexRT[AccelX]);
+		setRightDtMotors(vexRT[AccelY]);
 
 	}
 
