@@ -589,8 +589,8 @@ task usercontrol()
 	int LY = 0;
 	int RY = 0;
 	int threshold = 15;
-	int armEncMaxLimit = 118; //software limit for potentiometer to limit arm movement from going over the top (protects potentiometer)
-	bool enableSoftwareArmPosLimit = false; //experimental software limit for arm, see above
+	int armEncMaxLimit = 97; //software limit for potentiometer to limit arm movement from going over the top (protects potentiometer)
+	bool enableSoftwareArmPosLimit = true; //experimental software limit for arm, see above
 	int clawCompPower = 15;
 	bool btn8UPressed = false;
   while(1)
@@ -619,12 +619,12 @@ task usercontrol()
   		//releaseClaw();
   	}
 
-    if (vexRT[Btn5U] && (SensorValue[liftEnc] < armEncMaxLimit || !enableSoftwareArmPosLimit)) {
+    if (vexRT[Btn5U] && (SensorValue[liftEnc] < armEncMaxLimit || !SensorValue[liftDown] || !enableSoftwareArmPosLimit)) {
 	  	stopTask(liftComp);
 	  	liftCompStarted = false;
 	  	setDumpMotors(127);
 	  	holdDown = false;
-		} else if (vexRT[Btn5D] && !SensorValue[liftDown]) { //second part of condition is to prevent motors from jittering if 5U and 5D are pressed down
+		} else if (vexRT[Btn5D] && (!SensorValue[liftDown] || SensorValue[liftEnc] > 10)) { //second part of condition is to prevent motors from jittering if 5U and 5D are pressed down
 			stopTask(liftComp);
 			liftCompStarted = false;
 			setDumpMotors(-127);
@@ -666,12 +666,16 @@ task usercontrol()
 
   	if (vexRT[Btn6U]) {
 			setClawMotors(127);
-			clawCompPower = 15;
+			clawCompPower = 0;
 		} else if (vexRT[Btn6D]) {
 			setClawMotors(-127);
 			clawCompPower = -20;
 		}	else {
 			setClawMotors(clawCompPower);
+		}
+
+		if (SensorValue[liftDown] && (SensorValue[liftEnc] < 95 || SensorValue[liftEnc] > 110)) {
+				SensorValue[liftEnc] = 0;
 		}
 
   	wait1Msec(25);
