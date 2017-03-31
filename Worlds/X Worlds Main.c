@@ -576,8 +576,9 @@ task liftComp() {
 }
 task usercontrol()
 {
-	driveDistancePID(-800,STRAFE,750);
-
+	//writeDebugStreamLine("%f",encoderScale);
+	//driveDistancePID(400,ROTATE_RIGHT,5000);
+	//wait1Msec(10000);
 	//releaseClaw();
 //	driveDistancePID(1400,STRAIGHT,2000);
 //wait1Msec(1000000);
