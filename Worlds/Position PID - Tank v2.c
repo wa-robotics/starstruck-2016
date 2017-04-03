@@ -45,7 +45,7 @@ void liftToTargetPIDEnc(int target, int time, float kP, float kI, float kD) {
 
 	time1[T1] = 0;
 
-	while (time1[T1] < time || time1[T1] < 250 || abs(error) > abs(target*.1) || abs(dTerm) > 3) { //the PID can stop early if a little time as passed and the error is low and not changing much
+		while (time1[T1] < time) {
 		//update error terms
 		error = target - SensorValue[liftEnc];
 		errorSum += error;
@@ -113,7 +113,7 @@ void driveDistancePID(int encoderCounts, int direction, int time) {
 	if (direction == STRAIGHT || direction == ROTATE_LEFT || direction == ROTATE_RIGHT) { //validate direction
 
 	 if (direction == STRAIGHT) {
-		while ((time1[T1] < time) && (time1[T1] < 250 || abs(error) > 5 || abs(lEncVal - rEncVal) > 15 || abs(error - lastError) > 5)) { //the PID can stop early if a little time as passed and the error is low and not changing much
+		while ((time1[T1] < time) && (time1[T1] < 250 || abs(lEncVal - rEncVal) > 15 || abs(error) > 15 || abs(error - lastError) > 5)) { //the PID can stop early if a little time as passed and the error is low and not changing much
 
 					//get scaled encoder values
 					lEncVal = getScaledEncVal(SensorValue[lDriveEnc]);
@@ -170,7 +170,7 @@ void driveDistancePID(int encoderCounts, int direction, int time) {
 					setLeftDtMotors(0);
 					setRightDtMotors(0);
 		 } else if (direction == ROTATE_LEFT || direction == ROTATE_RIGHT) {
-					while ((time1[T1] < time) && (time1[T1] < 250 || abs(error) > 5 || abs(abs(lEncVal) - abs(rEncVal)) > 15 || abs(error - lastError) > 5)) { //the PID can stop early if a little time as passed and the error is low and not changing much
+					while ((time1[T1] < time) && (time1[T1] < 250 || abs(error) > 5 || fabs(abs(lEncVal) - abs(rEncVal)) > 15 || abs(error - lastError) > 5)) { //the PID can stop early if a little time as passed and the error is low and not changing much
 						//get scaled encoder values
 						lEncVal = getScaledEncVal(SensorValue[lDriveEnc]);
 						rEncVal = getScaledEncVal(SensorValue[rDriveEnc]);

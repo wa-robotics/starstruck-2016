@@ -298,55 +298,50 @@ void releaseClaw() {
 }
 
 task autonBig() {
-	releaseClaw();
-	clawTarget = 590; //420
-	autonClawWait = 750;
-	startTask(autonBigClawDelay);
-	//moveClaw(127,560);
-	driveDistancePID(700, STRAIGHT, 1000);
-	////moveClaw(127,560);
-	setClawMotors(-40);
-	waitForClaw(580,20); //430
-	SensorValue[liftEnc] = 0;
-	liftTarget = 69;
+	//releaseClaw();
+	setDumpMotors(-12);
+	moveClaw(127,1290);
+	setClawMotors(15);
+	driveDistancePID(700, STRAIGHT, 3000);
+	moveClaw(127,740,3000);
+	setClawMotors(-20);
+	liftTarget = 55;
 	liftTime = 1000;
   liftgo = 1;
 	startTask(asyncLiftPID);
-	wait1Msec(250);
-	driveDistancePID(500, STRAIGHT, 900);
-	setClawMotors(-80);
-	driveDistancePID(300, ROTATE_LEFT, 750);
-	driveDistancePID(700, STRAIGHT, 750);
-	moveClaw(127,820);
-	setClawMotors(15);
-
-	liftTarget = 80;
-	liftTime = 750;
-  liftgo = 1;
-	startTask(asyncLiftPID);
-
-	driveDistancePID(-300, STRAIGHT, 750);
-	//driveDistancePID(200, ROTATE_RIGHT, 400);
-	liftTarget = 74;
-	liftTime = 500;
-  liftgo = 1;
-	startTask(asyncLiftPID);
-	moveClaw(127,1600);
-	setClawMotors(15);
-	driveDistancePID(600, STRAIGHT, 1000);
-	driveDistancePID(-300, STRAIGHT, 1000);
-
-
-	//driveDistancePID(600, STRAIGHT, 1000);
-	//moveClaw(127,560);
-	//setClawMotors(-20);
-	//liftToTargetPIDEnc(74,1250,6,0.00035,.2);
+	waitForLift(20,0); //move once lift has gone up some
+	driveDistancePID(300,STRAIGHT,1200); //TODO: needs to go farther here
+	wait1Msec(5000);
+	stopTask(autonBig);
+	//setClawMotors(-40);
+	//waitForClaw(580,20); //430
+	//SensorValue[liftEnc] = 0;
+	//liftTarget = 69;
+	//liftTime = 1000;
+ // liftgo = 1;
+	//startTask(asyncLiftPID);
 	//wait1Msec(250);
-	//driveDistancePID(500, STRAIGHT, 750);
-	//driveDistancePID(330, ROTATE_RIGHT, 1000);
-	//driveDistancePID(600,STRAIGHT,1000);
+	//driveDistancePID(500, STRAIGHT, 900);
+	//setClawMotors(-80);
+	//driveDistancePID(300, ROTATE_LEFT, 750);
+	//driveDistancePID(700, STRAIGHT, 750);
+	//moveClaw(127,820);
+	//setClawMotors(15);
+
+	//liftTarget = 80;
+	//liftTime = 750;
+ // liftgo = 1;
+	//startTask(asyncLiftPID);
+
+	//driveDistancePID(-300, STRAIGHT, 750);
+	//liftTarget = 74;
+	//liftTime = 500;
+ // liftgo = 1;
+	//startTask(asyncLiftPID);
 	//moveClaw(127,1600);
 	//setClawMotors(15);
+	//driveDistancePID(600, STRAIGHT, 1000);
+	//driveDistancePID(-300, STRAIGHT, 1000);
 }
 
 task autonStars() {
@@ -576,17 +571,9 @@ task liftComp() {
 }
 task usercontrol()
 {
-	//writeDebugStreamLine("%f",encoderScale);
-	//driveDistancePID(400,ROTATE_RIGHT,5000);
-	//wait1Msec(10000);
-	//releaseClaw();
-//	driveDistancePID(1400,STRAIGHT,2000);
-//wait1Msec(1000000);
-//	startTask(autonStars);
-//	stopTask(usercontrol);
-	//startTask(midfenceStarHeightMacro);
-	//throw();
+	//startTask(autonBig);
 	//stopTask(usercontrol);
+
 	int LY = 0;
 	int RY = 0;
 	int threshold = 15;

@@ -159,24 +159,27 @@ void manualCompensation() //allows us to use the single power compensation
 	killClawCompensation(); //very important to do this before manually controlling the motors because PID is doing its thing
 	setClawMotors(15);
 }
-void moveClaw(int power, int potValue)//allows us to move the claw in auto and compensate
+void moveClaw(unsigned int power, int potValue, int maxTime = 3000)//allows us to move the claw in auto and compensate
 {
 	int lastVal = SensorValue[claw];
+	time1[T2] = 0; //using T2 here to prevent interference with other functions that could run concurrently and use T1 or T3
 	//killClawCompensation(); //very important to do this before manually controlling the motors because PID is doing its thing
 	if(SensorValue[claw] > potValue)
 	{
-		while(SensorValue[claw] > potValue || abs(SensorValue[claw] - lastVal) > 100)
+		while(time1[T2] < maxTime && (SensorValue[claw] > potValue || abs(SensorValue[claw] - lastVal) > 100))
 		{
 			lastVal = SensorValue[claw];
-			setClawMotors(-abs(power)); //if the claw needs to be opened, this makes sure you are using a positive power so that it doesn't try to move forever
+			setClawMotors(-power); //if the claw needs to be opened, this makes sure you are using a positive power so that it doesn't try to move forever
+			wait1Msec(25);
 		}
 	}
 	else if(SensorValue[claw] < potValue)
 	{
-		while(SensorValue[claw] < potValue)
+		while(time1[T2] < maxTime && SensorValue[claw] < potValue)
 		{
 			lastVal = SensorValue[claw];
-			setClawMotors(abs(power)); //the exact opposite of the above codition for positive input (credit to Evan for remembering the number -1 exists)
+			setClawMotors(power); //the exact opposite of the above codition for positive input (credit to Evan for remembering the number -1 exists)
+			wait1Msec(25);
 		}
 	}
 	//manualCompensation();
@@ -192,13 +195,14 @@ void waitForLift(int target, int variance)
 	}
 }
 
-void waitForClaw(int target, int variance)
+void waitForClaw(int target, int variance, int maxTime = 3000)
 {
 	writeDebugStreamLine("inside waiting for claw");
 	writeDebugStreamLine("%d,%d,%d",SensorValue[claw],target+variance,target+variance);
 	int lower = target - variance;
 	int upper = target + variance;
-	while(SensorValue[claw] > upper || SensorValue[claw] < lower)
+	time1[T3] = 0; //T1 is used elsewhere in code, don't want to risk interference so used T3
+	while(time1[T3] < maxTime && (SensorValue[claw] > upper || SensorValue[claw] < lower))
 	{
 		writeDebugStreamLine("waiting for claw");
 		wait1Msec(25);
