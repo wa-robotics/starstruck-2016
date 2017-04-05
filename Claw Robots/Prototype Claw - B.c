@@ -34,6 +34,8 @@ int AUTON_SIDE = 0; //either LEFT or RIGHT, as above
 int AUTON_PLAY = 0;
 int armPotOffset = 0; //The value of the claw potentiometer when the claw is fully closed and touching the physical limit
 bool disableLiftComp = false;
+bool LCD_CUBE = true;
+bool LCD_STARS = true;
 
 int getArmPos() {
 	return SensorValue[claw] - armPotOffset;
@@ -374,12 +376,12 @@ task autonStars() {
 
 	//move in line with stars and collect them
 	driveDistancePID(300,STRAFE,750);
-	driveDistancePID(1450,STRAIGHT,2000);
+	driveDistancePID(1400,STRAIGHT,2000);
 	moveClaw(127,330);
 	setClawMotors(-40);
 
 	//lift to pick up stars
-	liftTarget = 20;
+	liftTarget = 50;
 	liftTime = 750;
   liftgo = 1;
 	startTask(asyncLiftPID);
@@ -389,28 +391,20 @@ task autonStars() {
 	setClawMotors(-20);
 
 	//move away from wall and turn to score backwards on fence
-	driveDistancePID(-600,STRAFE,750);
-	driveDistancePID(400,ROTATE_RIGHT,1000);
+	driveDistancePID(-800,STRAFE,750);
+	wait1Msec(250);
+	driveDistancePID(425,ROTATE_RIGHT,1000);
 
 	//move back to fence
 	driveDistancePID(-850,STRAIGHT,1750);
 
 	//SCORE!
-	setDumpMotors(127);
-	wait1Msec(1250);
-	clawTarget = 1000;
-	//startTask(clawTask);
-	//waitForClaw(1000,50);
-	moveClaw(127,1000);
+	throw();
 	setClawMotors(15);
-	setDumpMotors(0);
-	wait10Msec(80);
-	driveDistancePID(150,STRAIGHT,1000);
-	setDumpMotors(-127);
-	while(SensorValue[liftDown] == 0)
-	{
-		wait1Msec(25);
+	while(!SensorValue[liftDown]) {
+		setDumpMotors(-127);
 	}
+	setDumpMotors(0);
 }
 
 task autonomous() {
@@ -602,10 +596,17 @@ task liftComp() {
 task usercontrol()
 {
 	//releaseClaw();
+<<<<<<< HEAD
 	//startTask(autonStars);
 //wait10Msec(500)
 //startTask(progSkills)
 	//stopTask(usercontrol);
+=======
+//	driveDistancePID(1400,STRAIGHT,2000);
+//wait1Msec(1000000);
+//	startTask(autonStars);
+//	stopTask(usercontrol);
+>>>>>>> e4313686b997f7298dd55836dac3962d04a721ba
 	//startTask(midfenceStarHeightMacro);
 	//throw();
 	//stopTask(usercontrol);

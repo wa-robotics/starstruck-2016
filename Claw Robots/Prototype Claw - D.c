@@ -34,6 +34,12 @@ int AUTON_SIDE = 0; //either LEFT or RIGHT, as above
 int AUTON_PLAY = 0;
 int armPotOffset = 0; //The value of the claw potentiometer when the claw is fully closed and touching the physical limit
 bool disableLiftComp = false;
+<<<<<<< HEAD
+=======
+bool LCD_CUBE = true;
+bool LCD_STARS = true;
+
+>>>>>>> e4313686b997f7298dd55836dac3962d04a721ba
 
 int getArmPos() {
 	return SensorValue[claw] - armPotOffset;
@@ -63,8 +69,11 @@ void pre_auton()
 	}
 }
 
+<<<<<<< HEAD
 
 
+=======
+>>>>>>> e4313686b997f7298dd55836dac3962d04a721ba
 int liftTarget;
 int liftTime;
 int clawTarget;
@@ -95,6 +104,7 @@ task asyncLiftPID() {
 		}
 	}
 }
+<<<<<<< HEAD
 task throwTask()
 {
 	while(1)
@@ -106,6 +116,9 @@ task throwTask()
 		}
 	}
 }
+=======
+
+>>>>>>> e4313686b997f7298dd55836dac3962d04a721ba
 task clawTask()
 {
 	moveClaw(127,clawTarget);
@@ -113,10 +126,17 @@ task clawTask()
 void throw()
 {
 	setClawMotors(-50);
+<<<<<<< HEAD
 	liftTarget = 134;
 	liftTime = 2000;
 	liftgo = 1;
 	startTask(throwTask);
+=======
+	liftTarget = 125;
+	liftTime = 2200;
+	liftgo = 1;
+	startTask(liftTask);
+>>>>>>> e4313686b997f7298dd55836dac3962d04a721ba
 	while(sensorValue[liftEnc] < 95)
 	{
 		wait1Msec(5);
@@ -124,6 +144,7 @@ void throw()
 	clawTarget = 1750;
 	startTask(clawTask);
 }
+<<<<<<< HEAD
 void down()
 {
 	wait10Msec(40);
@@ -147,6 +168,15 @@ task progSkills() {
 	setDumpMotors(0);
 	SensorValue[liftEnc] = 0;
 	SensorValue[liftEnc] = 0;
+=======
+
+//potentiometer value for lift: 2150
+task autonomous() {
+	//strafeLeft(450,127);
+	setClawMotors(-127);
+	wait10Msec(135);
+	setClawMotors(20);
+>>>>>>> e4313686b997f7298dd55836dac3962d04a721ba
 	SensorValue[rDriveEnc] = 0;
 	SensorValue[lDriveEnc] = 0;
 	liftTarget = 135;
@@ -643,7 +673,10 @@ task clawControl()
 	}
 }
 
+<<<<<<< HEAD
 
+=======
+>>>>>>> e4313686b997f7298dd55836dac3962d04a721ba
 bool holdDown = false;
 bool liftCompStarted = false;
 
@@ -660,10 +693,17 @@ task liftComp() {
 task usercontrol()
 {
 	//releaseClaw();
+<<<<<<< HEAD
 	//startTask(autonStars);
 //wait10Msec(500)
 //startTask(progSkills)
 	//stopTask(usercontrol);
+=======
+//	driveDistancePID(1400,STRAIGHT,2000);
+//wait1Msec(1000000);
+//	startTask(autonStars);
+//	stopTask(usercontrol);
+>>>>>>> e4313686b997f7298dd55836dac3962d04a721ba
 	//startTask(midfenceStarHeightMacro);
 	//throw();
 	//stopTask(usercontrol);
