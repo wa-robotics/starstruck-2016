@@ -45,7 +45,7 @@ void liftToTargetPIDEnc(int target, int time, float kP, float kI, float kD) {
 
 	time1[T1] = 0;
 
-		while (time1[T1] < time) {
+	while (time1[T1] < time) {
 		//update error terms
 		error = target - SensorValue[liftEnc];
 		errorSum += error;
@@ -85,7 +85,7 @@ void liftToTargetPIDEnc(int target, int time, float kP, float kI, float kD) {
 //encoder counts is how many counts to go, always positive
 //power is the power to run the motors at before straightening is applied
 //time is a maximum time to complete the operation
-void driveDistancePID(int encoderCounts, int direction, int time) {
+void driveDistancePID(int encoderCounts, int direction, int time, unsigned int maxPower = 127) {
 	writeDebugStreamLine("nPgmTime,target,error,lEncVal,rEncVal,pTerm,iTerm,dTerm,lPower,rPower");
 	//reset encoder values
 	Sensorvalue[lDriveEnc] = 0;
@@ -129,10 +129,8 @@ void driveDistancePID(int encoderCounts, int direction, int time) {
 					power = pTerm + iTerm + dTerm;
 
 					//limit the values of the power term to only be those that can be taken by the motors
-					if (power > 127) {
-						power = 127;
-					} else if (power < -127) {
-						power = -127;
+					if (abs(power) > 127) {
+						power = sgn(power)*maxPower;
 					}
 
 					lastError = error; //update last error
@@ -150,12 +148,12 @@ void driveDistancePID(int encoderCounts, int direction, int time) {
 					straighteningError = abs(lEncVal) - abs(rEncVal);
 
 					if (straighteningError < 0) { //right side is ahead, so speed up the right side
-						rPower = power + straighteningError*straighteningKpRight;
+						rPower = power + straighteningError*straighteningKpRight*sgn(power);
 					} else { //otherwise, just set the right side to the power
 						rPower = power;
 					}
 					if (straighteningError > 0) { //left side is ahead, so speed up the left side
-						lPower = power - straighteningError*straighteningKpLeft;
+						lPower = power - straighteningError*straighteningKpLeft*sgn(power);
 					} else { //otherwise, just set the right side to the power
 						lPower = power;
 					}

@@ -288,8 +288,9 @@ task autonBigClawDelay() {
 }
 
 void releaseClaw() {
-	moveClaw(127,3200);
-	setClawMotors(15);
+	driveDistancePID(300,STRAIGHT,1000);
+	moveClaw(127,850);
+	setClawMotors(0);
 	while (SensorValue[liftEnc] < 15) {
 		setDumpMotors(127);
 	}
@@ -302,20 +303,45 @@ void releaseClaw() {
 
 task autonBig() {
 	//releaseClaw();
+	driveDistancePID(-1600,STRAIGHT,1750);
+	driveDistancePID(200,ROTATE_RIGHT,1000);
+	clawTarget = 1800;
+	startTask(clawTask);
+	waitForClaw(1850,50);
+	setClawMotors(-10);
+	wait1Msec(100);
+	setClawMotors(0);
+	if (SensorValue[claw] < 2000) {
+		while(!SensorValue[liftDown]) {
+			setDumpMotors(-127);
+		}
+		setDumpMotors(0);
+		moveClaw(127,500,1500);
+	}
+	//driveDistancePID(200,STRAIGHT,1000);
+	//forward version
+	/*
+	while (!SensorValue[liftDown]) {
+		setDumpMotors(-127);
+	}
+	setDumpMotors(0);
+	SensorValue[liftEnc] = 0;
 	setDumpMotors(-12);
 	moveClaw(127,1290);
 	setClawMotors(15);
 	driveDistancePID(700, STRAIGHT, 3000);
-	moveClaw(127,740,3000);
+	moveClaw(127,740,1200);
 	setClawMotors(-20);
 	liftTarget = 55;
 	liftTime = 1000;
   liftgo = 1;
 	startTask(asyncLiftPID);
 	waitForLift(20,0); //move once lift has gone up some
-	driveDistancePID(300,STRAIGHT,1200); //TODO: needs to go farther here
-	wait1Msec(5000);
-	stopTask(autonBig);
+	driveDistancePID(530,STRAIGHT,1500,50); //TODO: needs to go farther here
+	driveDistancePID(400,ROTATE_RIGHT,1000)*/
+	//end forward version
+
+
 	//setClawMotors(-40);
 	//waitForClaw(580,20); //430
 	//SensorValue[liftEnc] = 0;
@@ -574,8 +600,8 @@ task liftComp() {
 }
 task usercontrol()
 {
-	//startTask(autonBig);
-	//stopTask(usercontrol);
+	startTask(autonBig);
+	stopTask(usercontrol);
 
 	int LY = 0;
 	int RY = 0;

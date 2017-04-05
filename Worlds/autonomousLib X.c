@@ -198,13 +198,13 @@ void waitForLift(int target, int variance)
 void waitForClaw(int target, int variance, int maxTime = 3000)
 {
 	writeDebugStreamLine("inside waiting for claw");
-	writeDebugStreamLine("%d,%d,%d",SensorValue[claw],target+variance,target+variance);
+	writeDebugStreamLine("%d,%d,%d",SensorValue[claw],target+variance,target-variance);
 	int lower = target - variance;
 	int upper = target + variance;
 	time1[T3] = 0; //T1 is used elsewhere in code, don't want to risk interference so used T3
 	while(time1[T3] < maxTime && (SensorValue[claw] > upper || SensorValue[claw] < lower))
 	{
-		writeDebugStreamLine("waiting for claw");
+		writeDebugStreamLine("waiting for claw: %d",SensorValue[claw]);
 		wait1Msec(25);
 	}
 }
