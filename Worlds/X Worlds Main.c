@@ -303,11 +303,12 @@ void releaseClaw() {
 
 task autonBig() {
 	//releaseClaw();
-	driveDistancePID(-1600,STRAIGHT,1750);
+	driveDistancePID(-1700,STRAIGHT,1750);
 	driveDistancePID(200,ROTATE_RIGHT,1000);
-	clawTarget = 1800;
+	driveDistancePID(-400,STRAIGHT,1000);
+	clawTarget = 1200;
 	startTask(clawTask);
-	waitForClaw(1850,50);
+	waitForClaw(1200,50);
 	setClawMotors(-10);
 	wait1Msec(100);
 	setClawMotors(0);
@@ -315,8 +316,24 @@ task autonBig() {
 		while(!SensorValue[liftDown]) {
 			setDumpMotors(-127);
 		}
+		setDumpMotors(-12);
+		driveDistancePID(200,STRAIGHT,500);
+		moveClaw(127,890,1500);
+		setClawMotors(0);
+		driveDistancePID(-200,STRAIGHT,500);
+		liftTarget = 65;
+		liftTime = 1250;
+  	liftgo = 1;
+		startTask(asyncLiftPID);
+		waitForLift(70,8);
 		setDumpMotors(0);
-		moveClaw(127,500,1500);
+		moveClaw(127,1000,500);
+		setClawMotors(0);
+		while(!SensorValue[liftDown]) {
+			setDumpMotors(-127);
+		}
+		setDumpMotors(-12);
+
 	}
 	//driveDistancePID(200,STRAIGHT,1000);
 	//forward version
@@ -600,8 +617,26 @@ task liftComp() {
 }
 task usercontrol()
 {
-	startTask(autonBig);
-	stopTask(usercontrol);
+	bool ENABLE_DEBUG_MODE = true;
+	bool DEBUG_RUN_AUTON = false;
+	displayLCDCenteredString(0,"Debug - center");
+	displayLCDCenteredString(1,"drvr mv joystck");
+	while(ENABLE_DEBUG_MODE && abs(vexRT[Ch1]) < 30 && abs(vexRT[Ch2]) < 30 && abs(vexRT[Ch3]) < 30 && abs(vexRT[Ch4]) < 30) {
+		wait1Msec(25);
+		if (nPgmTime > 15000) {
+			break;
+		}
+		if (nLCDButtons == 2) {
+			DEBUG_RUN_AUTON = true;
+			break;
+		}
+	}
+	clearLCD();
+	if (DEBUG_RUN_AUTON) {
+		wait1Msec(1000);
+		startTask(autonBig);
+		stopTask(usercontrol);
+	}
 
 	int LY = 0;
 	int RY = 0;
