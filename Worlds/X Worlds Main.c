@@ -303,12 +303,12 @@ void releaseClaw() {
 
 task autonBig() {
 	//releaseClaw();
-	driveDistancePID(-1700,STRAIGHT,1750);
+	driveDistancePID(-1900,STRAIGHT,3000);
 	driveDistancePID(200,ROTATE_RIGHT,1000);
-	driveDistancePID(-400,STRAIGHT,1000);
-	clawTarget = 1200;
+	driveDistancePID(-100,STRAIGHT,1000);
+	clawTarget = 1250;
 	startTask(clawTask);
-	waitForClaw(1200,50);
+	waitForClaw(1250,50);
 	setClawMotors(-10);
 	wait1Msec(100);
 	setClawMotors(0);
@@ -327,12 +327,12 @@ task autonBig() {
 		startTask(asyncLiftPID);
 		waitForLift(70,8);
 		setDumpMotors(0);
-		moveClaw(127,1000,500);
-		setClawMotors(0);
-		while(!SensorValue[liftDown]) {
-			setDumpMotors(-127);
-		}
-		setDumpMotors(-12);
+		//moveClaw(127,1000,500);
+		//setClawMotors(0);
+		//while(!SensorValue[liftDown]) {
+		//	setDumpMotors(-127);
+		//}
+		//setDumpMotors(-12);
 
 	}
 	//driveDistancePID(200,STRAIGHT,1000);
@@ -432,8 +432,9 @@ task autonStars() {
 }
 
 task autonomous() {
-	wait10Msec(250);
-	startTask(progSkills);
+	//wait10Msec(250);
+	//startTask(progSkills);
+	startTask(autonBig);
 	//Auton plays and their numbers, for reference.  These numbers are set as the value of the AUTON_PLAY variable to control which auton play runs
 	//#1 Big
 	//#2 Small
@@ -608,9 +609,14 @@ bool liftCompStarted = false;
 //lift to 77
 //claw to 1869
 
+float LIFT_COMP_P = 3;
+float LIFT_COMP_I = 0;
+float LIFT_COMP_D = .4;
 task liftComp() {
+	setDumpMotors(0);
+	wait1Msec(400);
 	int target = SensorValue[liftEnc];
-	liftToTargetPIDEnc(target+6,1000,2.25,0.00035,.2);
+	liftToTargetPIDEnc(target,1000,LIFT_COMP_P,LIFT_COMP_I,LIFT_COMP_D);
 	while(1) {
 		wait1Msec(500); //keep this task alive until it stops; the wait time here doesn't really matter, since the task will be stopped when it is no longer needed
 	}
@@ -726,7 +732,7 @@ task usercontrol()
 			setClawMotors(clawCompPower);
 		}
 
-		if (SensorValue[liftDown] && (SensorValue[liftEnc] < 95 || SensorValue[liftEnc] > 110)) {
+		if (SensorValue[liftDown] && (SensorValue[liftEnc] < 70 || SensorValue[liftEnc] > 110)) {
 				SensorValue[liftEnc] = 0;
 		}
 
