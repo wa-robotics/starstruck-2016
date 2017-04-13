@@ -187,11 +187,15 @@ void moveClaw(unsigned int power, int potValue, int maxTime = 3000)//allows us t
 }
 
 
-void waitForLift(int target, int variance)
+void waitForLift(int target, int variance, int maxTime = 2000)
 {
-	while(SensorValue[liftEnc] < target-variance && SensorValue[LiftEnc] > target+variance)
+	//this function uses T4
+	writeDebugStreamLine("inside waiting for claw");
+	writeDebugStreamLine("%d,%d,%d",SensorValue[liftEnc],target+variance,target-variance);
+	while(time1[T4] < maxTime && (SensorValue[liftEnc] < target-variance || SensorValue[liftEnc] > target+variance))
 	{
-		wait1Msec(25);
+		writeDebugStreamLine("waiting for lift: %d",SensorValue[liftEnc]);
+		wait1Msec(15);
 	}
 }
 
@@ -205,6 +209,6 @@ void waitForClaw(int target, int variance, int maxTime = 3000)
 	while(time1[T3] < maxTime && (SensorValue[claw] > upper || SensorValue[claw] < lower))
 	{
 		writeDebugStreamLine("waiting for claw: %d",SensorValue[claw]);
-		wait1Msec(25);
+		wait1Msec(15);
 	}
 }

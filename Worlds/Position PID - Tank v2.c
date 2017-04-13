@@ -42,7 +42,7 @@ void liftToTargetPIDEnc(int target, int time, float kP, float kI, float kD) {
 	error = 0,
 	errorSum = 0,
 	lastError = 0;
-
+	displayLCDString(0,0,"Lift PID");
 	time1[T1] = 0;
 
 	while (time1[T1] < time) {
@@ -72,12 +72,17 @@ void liftToTargetPIDEnc(int target, int time, float kP, float kI, float kD) {
 				power = lastPower - slewRateLimit;
 			}
 		}
-
+		displayLCDNumber(1,0,pTerm);
+		displayLCDNumber(1,3,power);
+		displayLCDNumber(1,6,SensorValue[liftEnc]);
 		lastPower = power; //update the last power
 		writeDebugStreamLine("%d,%f,%f,%f,%f,%f,%f,%f",nPgmTime,target,error,SensorValue[liftEnc],pTerm,iTerm,dTerm,power);
 		setDumpMotors(power);
 		wait1Msec(25);
 	}
+	clearLCD();
+	displayLCDCenteredString(0,"Lift PID ended");
+	displayLCDNumber(1,3,power);
 }
 
 //positive powers will go forward or right
