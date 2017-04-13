@@ -600,8 +600,8 @@ task liftComp() {
 }
 task usercontrol()
 {
-	startTask(autonBig);
-	stopTask(usercontrol);
+	//startTask(autonBig);
+	//stopTask(usercontrol);
 
 	int LY = 0;
 	int RY = 0;
