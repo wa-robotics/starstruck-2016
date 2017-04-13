@@ -190,7 +190,8 @@ void moveClaw(unsigned int power, int potValue, int maxTime = 3000)//allows us t
 void waitForLift(int target, int variance, int maxTime = 2000)
 {
 	//this function uses T4
-	writeDebugStreamLine("inside waiting for claw");
+	time1[T4] = 0;
+	writeDebugStreamLine("inside waiting for lift");
 	writeDebugStreamLine("%d,%d,%d",SensorValue[liftEnc],target+variance,target-variance);
 	while(time1[T4] < maxTime && (SensorValue[liftEnc] < target-variance || SensorValue[liftEnc] > target+variance))
 	{
@@ -211,4 +212,42 @@ void waitForClaw(int target, int variance, int maxTime = 3000)
 		writeDebugStreamLine("waiting for claw: %d",SensorValue[claw]);
 		wait1Msec(15);
 	}
+	writeDebugStreamLine("waitForClaw exiting");
+}
+
+void liftToBottom(int maxTime = 3000) {
+	time1[T3] = 0;
+	if (time1[T3] < maxTime && SensorValue[liftDown]) {
+		while(SensorValue[liftDown]) {
+			setDumpMotors(-127);
+			writeDebugStreamLine("liftToTop, liftDown: %d, liftEnc: %d",SensorValue[liftDown],SensorValue[liftEnc]);
+			wait1Msec(25);
+		}
+	}
+	while(time1[T3] < maxTime && !SensorValue[liftDown]) {
+		setDumpMotors(-127);
+		writeDebugStreamLine("liftToTop, liftDown: %d, liftEnc: %d",SensorValue[liftDown],SensorValue[liftEnc]);
+		wait1Msec(25);
+	}
+	setDumpMotors(-12);
+}
+
+void liftToTop(int maxTime = 3000) {
+	writeDebugStreamLine("hi");
+	time1[T3] = 0;
+	if (SensorValue[liftDown]) {
+		writeDebugStreamLine("liftToTop, liftDown: %d, liftEnc: %d",SensorValue[liftDown],SensorValue[liftEnc]);
+		while(time1[T3] < maxTime && SensorValue[liftDown]) {
+			setDumpMotors(127);
+			writeDebugStreamLine("liftToTop, liftDown: %d, liftEnc: %d",SensorValue[liftDown],SensorValue[liftEnc]);
+			wait1Msec(25);
+		}
+	}
+	writeDebugStreamLine("liftToTop, liftDown: %d, liftEnc: %d",SensorValue[liftDown],SensorValue[liftEnc]);
+	while(time1[T3] < maxTime && !SensorValue[liftDown]) {
+		setDumpMotors(127);
+		writeDebugStreamLine("liftToTop, liftDown: %d, liftEnc: %d",SensorValue[liftDown],SensorValue[liftEnc]);
+		wait1Msec(25);
+	}
+	setDumpMotors(0);
 }

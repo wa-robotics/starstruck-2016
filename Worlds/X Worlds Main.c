@@ -301,11 +301,17 @@ void releaseClaw() {
 	SensorValue[liftEnc] = 0;
 }
 
+task liftToBottomAsync() {
+	liftToBottom();
+}
+
 task autonBig() {
 	//releaseClaw();
-	driveDistancePID(-1900,STRAIGHT,3000);
-	driveDistancePID(200,ROTATE_RIGHT,1000);
-	driveDistancePID(-100,STRAIGHT,1000);
+	//liftToBottom();
+	//SensorValue[liftEnc] = 0;
+	driveDistancePID(-1700,STRAIGHT,3000);
+	driveDistancePID(225,ROTATE_RIGHT,750);
+	driveDistancePID(-100,STRAIGHT,500);
 	clawTarget = 1250;
 	startTask(clawTask);
 	waitForClaw(1250,50);
@@ -313,20 +319,21 @@ task autonBig() {
 	wait1Msec(100);
 	setClawMotors(0);
 	if (SensorValue[claw] < 2000) {
-		while(!SensorValue[liftDown]) {
-			setDumpMotors(-127);
-		}
+		liftToBottom();
+		SensorValue[liftEnc] = 0;
 		setDumpMotors(-12);
 		driveDistancePID(200,STRAIGHT,500);
-		moveClaw(127,890,1500);
+		moveClaw(127,700,1500);
 		setClawMotors(0);
 		driveDistancePID(-200,STRAIGHT,500);
-		liftTarget = 65;
-		liftTime = 1250;
-  	liftgo = 1;
-		startTask(asyncLiftPID);
-		waitForLift(70,8);
-		setDumpMotors(0);
+		liftToTop();
+		wait1Msec(250);
+		clawTarget = 1250;
+		startTask(clawTask);
+		startTask(liftToBottomAsync);
+		waitForClaw(1250,50);
+		setClawMotors(0);
+		driveDistancePID(1200,STRAIGHT,3000);
 		//moveClaw(127,1000,500);
 		//setClawMotors(0);
 		//while(!SensorValue[liftDown]) {
@@ -641,6 +648,7 @@ task usercontrol()
 	if (DEBUG_RUN_AUTON) {
 		wait1Msec(1000);
 		startTask(autonBig);
+		//liftToTop();
 		stopTask(usercontrol);
 	}
 
