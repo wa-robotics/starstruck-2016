@@ -621,8 +621,10 @@ bool liftCompStarted = false;
 //claw to 1869
 
 task liftComp() {
+	setDumpMotors(0);
+	wait1Msec(400);
 	int target = SensorValue[liftEnc];
-	liftToTargetPIDEnc(target+6,1000,2.25,0.00035,.2);
+	liftToTargetPIDEnc(target,1000,3,0,0.4);
 	while(1) {
 		wait1Msec(500); //keep this task alive until it stops; the wait time here doesn't really matter, since the task will be stopped when it is no longer needed
 	}
