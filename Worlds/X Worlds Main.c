@@ -300,9 +300,14 @@ void releaseClaw() {
 	setDumpMotors(0);
 	SensorValue[liftEnc] = 0;
 }
-
+task releaseClaw()
+{
+	wait10Msec(50);
+	moveClaw(127,900);
+	setClawMotors(0);
+}
 task autonBig() {
-	//releaseClaw();
+	starttask(releaseClaw);
 	driveDistancePID(-1600,STRAIGHT,1750);
 	driveDistancePID(200,ROTATE_RIGHT,1000);
 	clawTarget = 1800;
@@ -600,8 +605,10 @@ task liftComp() {
 }
 task usercontrol()
 {
-	//startTask(autonBig);
-	//stopTask(usercontrol);
+	startTask(autonBig);
+	//moveClaw(127,900);
+	//wait10Msec(5000);
+	stopTask(usercontrol);
 
 	int LY = 0;
 	int RY = 0;
