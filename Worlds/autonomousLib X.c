@@ -206,10 +206,10 @@ void waitForClaw(int target, int variance, int maxTime = 3000)
 	writeDebugStreamLine("%d,%d,%d",SensorValue[claw],target+variance,target-variance);
 	int lower = target - variance;
 	int upper = target + variance;
-	time1[T3] = 0; //T1 is used elsewhere in code, don't want to risk interference so used T3
-	while(time1[T3] < maxTime && (SensorValue[claw] > upper || SensorValue[claw] < lower))
+	time1[T4] = 0; //T1 is used elsewhere in code, don't want to risk interference so used T3
+	while(time1[T4] < maxTime && (SensorValue[claw] > upper || SensorValue[claw] < lower))
 	{
-		writeDebugStreamLine("waiting for claw: %d",SensorValue[claw]);
+		writeDebugStreamLine("waiting for claw: %d (T4: %d)",SensorValue[claw],time1[T4]);
 		wait1Msec(15);
 	}
 	writeDebugStreamLine("waitForClaw exiting");

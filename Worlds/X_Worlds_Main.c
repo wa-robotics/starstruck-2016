@@ -301,11 +301,21 @@ task autonBigClawDelay() {
 //	SensorValue[liftEnc] = 0;
 //}
 
+bool testAuton = true;
+
 task releaseClaw()
 {
-	wait10Msec(50);
+	wait1Msec(500);
 	moveClaw(127,1250);
 	setClawMotors(0);
+	setDumpMotors(127);
+	wait1Msec(300);
+	liftToBottom();
+	liftTarget = 36;
+	liftTime = 1000;
+	liftgo = 1;
+	startTask(liftTask);
+
 }
 
 task liftToBottomAsync() {
@@ -313,30 +323,18 @@ task liftToBottomAsync() {
 }
 
 task autonBig() {
-	//releaseClaw();
-
-	//liftToBottom();
-	//SensorValue[liftEnc] = 0;
 	startTask(releaseClaw);
-  waitForClaw(1250,50);
-  wait10Msec(200);
-	setDumpMotors(127);
-  wait10Msec(80);
-  setDumpMotors(-15);
+	//wait1Msec(1000000);
 	driveDistancePID(-1700,STRAIGHT,3000);
+	//driveDistancePID(-100,STRAIGHT,500);
+	//clawTarget = 1250;
+	//startTask(clawTask);
+	//waitForClaw(1250,50); //value previously 1850, but 1250 makes more sense given clawTarget above
+	//setClawMotors(-10);
+	//wait1Msec(100);
+	//setClawMotors(0);
+	waitForLift(44,10);
 	driveDistancePID(225,ROTATE_RIGHT,750);
-	driveDistancePID(-100,STRAIGHT,500);
-	clawTarget = 1250;
-	/*
-	driveDistancePID(-1600,STRAIGHT,1750);
-	driveDistancePID(200,ROTATE_RIGHT,1000);
-	clawTarget = 1800;
-	*/
-	startTask(clawTask);
-	waitForClaw(1250,50); //value previously 1850, but 1250 makes more sense given clawTarget above
-	setClawMotors(-10);
-	wait1Msec(100);
-	setClawMotors(0);
 	if (SensorValue[claw] < 2000) {
 		liftToBottom();
 		SensorValue[liftEnc] = 0;
@@ -347,12 +345,12 @@ task autonBig() {
 		driveDistancePID(-200,STRAIGHT,500);
 		liftToTop();
 		wait1Msec(250);
-		clawTarget = 1250;
-		startTask(clawTask);
+		//clawTarget = 1250;
+		//startTask(clawTask);
 		startTask(liftToBottomAsync);
-		waitForClaw(1250,50);
-		setClawMotors(0);
-		driveDistancePID(1200,STRAIGHT,3000);
+		//waitForClaw(1250,50);
+		//setClawMotors(0);
+		//driveDistancePID(1200,STRAIGHT,3000);
 		//moveClaw(127,1000,500);
 		//setClawMotors(0);
 		//while(!SensorValue[liftDown]) {
@@ -644,7 +642,7 @@ task liftComp() {
 }
 task usercontrol()
 {
-	bool ENABLE_DEBUG_MODE = true;
+	bool ENABLE_DEBUG_MODE = false;
 	bool DEBUG_RUN_AUTON = false;
 	displayLCDCenteredString(0,"Debug - center");
 	displayLCDCenteredString(1,"drvr mv joystck");
@@ -674,11 +672,11 @@ task usercontrol()
 	bool btn8UPressed = false;
   while(1)
   {
-  	if(vexRT[Btn7D]){
-  		//throw();
-  		startTask(autonomous);
-  		stopTask(usercontrol);
-  	}
+  	//if(vexRT[Btn7D]){
+  	//	//throw();
+  	//	startTask(autonomous);
+  	//	stopTask(usercontrol);
+  	//}
   	//for deadzones; when the joystick value for an axis is below the threshold, the motors controlled by that joystick will not move in that direction
   	LY = (abs(vexRT[Ch3]) > threshold) ? vexRT[Ch3] : 0;
   	RY = (abs(vexRT[Ch2]) > threshold) ? vexRT[Ch2] : 0;
@@ -753,7 +751,7 @@ task usercontrol()
 			setClawMotors(clawCompPower);
 		}
 
-		if (SensorValue[liftDown] && (SensorValue[liftEnc] < 95 || SensorValue[liftEnc] > 110)) {
+		if (SensorValue[liftDown] && (SensorValue[liftEnc] < 75 || SensorValue[liftEnc] > 110)) {
 				SensorValue[liftEnc] = 0;
 		}
 
