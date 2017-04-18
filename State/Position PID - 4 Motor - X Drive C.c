@@ -64,7 +64,7 @@ void liftToTargetPIDEnc(int target, int time, float kP, float kI, float kD) {
 
 	while (time1[T1] < time) {
 		//update error terms
-		error = target - SensorValue[liftEnc];
+		error = target - abs(SensorValue[liftEnc]);
 		errorSum += error;
 
 		pTerm = error * (float) kP;
@@ -91,7 +91,7 @@ void liftToTargetPIDEnc(int target, int time, float kP, float kI, float kD) {
 		}
 
 		lastPower = power; //update the last power
-		writeDebugStreamLine("%d,%f,%f,%f,%f,%f,%f,%f",nPgmTime,target,error,SensorValue[liftEnc],pTerm,iTerm,dTerm,power);
+		writeDebugStreamLine("%d,%f,%f,%f,%f,%f,%f,%f",nPgmTime,target,error,abs(SensorValue[liftEnc]),pTerm,iTerm,dTerm,power);
 		setDumpMotors(power);
 		wait1Msec(25);
 	}
@@ -112,7 +112,7 @@ void throwFence(int target, int time, float kP, float kI, float kD) {
 
 	while (time1[T1] < time) {
 		//update error terms
-		error = target - SensorValue[liftEnc];
+		error = target - abs(SensorValue[liftEnc]);
 		errorSum += error;
 
 		pTerm = error * (float) kP;
@@ -139,7 +139,7 @@ void throwFence(int target, int time, float kP, float kI, float kD) {
 		}
 
 		lastPower = power; //update the last power
-		writeDebugStreamLine("%d,%f,%f,%f,%f,%f,%f,%f",nPgmTime,target,error,SensorValue[liftEnc],pTerm,iTerm,dTerm,power);
+		writeDebugStreamLine("%d,%f,%f,%f,%f,%f,%f,%f",nPgmTime,target,error,abs(SensorValue[liftEnc]),pTerm,iTerm,dTerm,power);
 		setDumpMotors(power);
 		wait1Msec(25);
 	}

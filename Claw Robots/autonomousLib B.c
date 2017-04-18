@@ -169,7 +169,7 @@ void moveClaw(int power, int potValue)//allows us to move the claw in auto and c
 	//killClawCompensation(); //very important to do this before manually controlling the motors because PID is doing its thing
 	if(SensorValue[claw] > potValue)
 	{
-		while(SensorValue[claw] > potValue || abs(SensorValue[claw] - lastVal) > 100)
+		while(SensorValue[claw] > potValue /*|| abs(SensorValue[claw] - lastVal) > 100*/)
 		{
 			lastVal = SensorValue[claw];
 			setClawMotors(-abs(power)); //if the claw needs to be opened, this makes sure you are using a positive power so that it doesn't try to move forever
@@ -183,7 +183,7 @@ void moveClaw(int power, int potValue)//allows us to move the claw in auto and c
 			setClawMotors(abs(power)); //the exact opposite of the above codition for positive input (credit to Evan for remembering the number -1 exists)
 		}
 	}
-	//manualCompensation();
+	manualCompensation();
 	//startClawCompensation(potValue); //turns on the compensation code for the claw
 }
 
@@ -199,7 +199,7 @@ void waitForLift(int target, int variance)
 void waitForClaw(int target, int variance)
 {
 	writeDebugStreamLine("inside waiting for claw");
-	writeDebugStreamLine("%d,%d,%d",SensorValue[claw],target+variance,target+variance);
+	writeDebugStreamLine("%d,%d,%d",SensorValue[claw],target+variance,target-variance);
 	int lower = target - variance;
 	int upper = target + variance;
 	while(SensorValue[claw] > upper || SensorValue[claw] < lower)

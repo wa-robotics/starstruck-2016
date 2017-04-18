@@ -73,29 +73,10 @@ void diagonalLeft(int power, int dist) {
 	motor[rDriveBack] = 0;
 }
 
-void diagonalRight(int power, int dist) {
-	SensorValue[rDriveEnc] = 0;
-	while(abs(SensorValue[rDriveEnc]) < dist) {
-		writeDebugStreamLine("%d",SensorValue[lDriveEnc]);
-		motor[rDriveFront] = power;
-		motor[lDriveBack] = power;
-	}
-	if (power > 0) {
-		motor[rDriveFront] = -10;
-		motor[lDriveBack] = -10;
-	} else if (power < 0) {
-		motor[rDriveFront] = 10;
-		motor[lDriveBack] = 10;
-	}
-	wait1Msec(75);
-	motor[rDriveFront] = 0;
-	motor[lDriveBack] = 0;
-}
-
 void straight(int power, int dist) {
 	SensorValue[rDriveEnc] = 0;
 	while(abs(SensorValue[rDriveEnc]) < dist) {
-		setLeftDtMotors(power-10);
+		setLeftDtMotors(power);
 		setRightDtMotors(power);
 	}
 	if (power > 0) {
@@ -124,7 +105,6 @@ void strafeRight(int target, int speed)
 	motor[rDriveFront] = 0;
 	motor[rDriveBack] = 0;
 }
-
 void strafeLeft(int target, int speed)
 {
 	SensorValue[rDriveEnc] = 0;
@@ -144,11 +124,12 @@ void strafeLeft(int target, int speed)
 //low pot value = top
 void liftToPotTarget(int target, int maxPower) {
 	int potStart = SensorValue[arm];
-	if (potStart > target) { //potentiometer value is above target.  New target is UP
-		while (SensorValue[arm] > target + 500) {
+	int difference = abs(target - potStart);
+	if (potStart > target && difference > 50) { //potentiometer value is above target.  New target is UP
+		while (SensorValue[arm] > target + 500 || SensorValue[arm] < target) {
 			setDumpMotors(abs(maxPower));
 		}
-		while (SensorValue[arm] > target) {
+		while (SensorValue[arm] > target || SensorValue[arm] < target - 50) {
 			setDumpMotors(abs(.3*maxPower));
 		}
 		setDumpMotors(-20);
@@ -188,7 +169,7 @@ void moveClaw(int power, int potValue)//allows us to move the claw in auto and c
 	//killClawCompensation(); //very important to do this before manually controlling the motors because PID is doing its thing
 	if(SensorValue[claw] > potValue)
 	{
-		while(SensorValue[claw] > potValue || abs(SensorValue[claw] - lastVal) > 100)
+		while(SensorValue[claw] > potValue /*|| abs(SensorValue[claw] - lastVal) > 100*/)
 		{
 			lastVal = SensorValue[claw];
 			setClawMotors(-abs(power)); //if the claw needs to be opened, this makes sure you are using a positive power so that it doesn't try to move forever
@@ -209,7 +190,7 @@ void moveClaw(int power, int potValue)//allows us to move the claw in auto and c
 
 void waitForLift(int target, int variance)
 {
-	while(SensorValue[arm] < target+variance && SensorValue[arm] > target-variance)
+	while(abs(sensorValue[liftEnc]) < target-variance && abs(sensorValue[liftEnc]) > target+variance)
 	{
 		wait1Msec(25);
 	}
@@ -218,13 +199,13 @@ void waitForLift(int target, int variance)
 void waitForClaw(int target, int variance)
 {
 	writeDebugStreamLine("inside waiting for claw");
-	writeDebugStreamLine("%d,%d,%d",SensorValue[claw],target+variance,target+variance);
+	writeDebugStreamLine("%d,%d,%d",SensorValue[claw],target+variance,target-variance);
 	int lower = target - variance;
 	int upper = target + variance;
 	while(SensorValue[claw] > upper || SensorValue[claw] < lower)
 	{
-		writeDebugStreamLine("waiting for claw");
-		wait1Msec(25);
+		writeDebugStreamLine("waiting for claw, %d",SensorValue[claw]);
+		wait1Msec(8);
 	}
 }
 

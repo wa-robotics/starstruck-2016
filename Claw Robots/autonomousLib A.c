@@ -93,12 +93,27 @@ void straight(int power, int dist) {
 void strafeRight(int target, int speed)
 {
 	SensorValue[rDriveEnc] = 0;
-	while(abs(SensorValue[rDriveEnc]) < target)
+	while(abs(sensorValue[rDriveEnc]) < target)
 	{
 		motor[lDriveFront] = speed;
 		motor[lDriveBack] = -speed;
 		motor[rDriveFront] = -speed;
 		motor[rDriveBack] = speed;
+	}
+	motor[lDriveFront] = 0;
+	motor[lDriveBack] = 0;
+	motor[rDriveFront] = 0;
+	motor[rDriveBack] = 0;
+}
+void strafeLeft(int target, int speed)
+{
+	SensorValue[rDriveEnc] = 0;
+	while(abs(sensorValue[rDriveEnc]) < target)
+	{
+		motor[lDriveFront] = -speed;
+		motor[lDriveBack] = speed;
+		motor[rDriveFront] = speed;
+		motor[rDriveBack] = -speed;
 	}
 	motor[lDriveFront] = 0;
 	motor[lDriveBack] = 0;
@@ -167,7 +182,7 @@ void moveClaw(int power, int potValue)//allows us to move the claw in auto and c
 			setClawMotors(abs(power)); //the exact opposite of the above codition for positive input (credit to Evan for remembering the number -1 exists)
 		}
 	}
-	//manualCompensation();
+	manualCompensation();
 	//startClawCompensation(potValue); //turns on the compensation code for the claw
 }
 

@@ -61,13 +61,12 @@ void pre_auton()
 	bLCDBacklight = true;
 	bool testLcdWizard = false;
 	if (bIfiRobotDisabled || testLcdWizard) { //Only show auton play wizard when the robot is in competition mode & disabled on initial startup
-		startTask(LCDSelect);
+		//startTask(LCDSelect);
 	}
 }
 
 
 
-//potentiometer value for lift: 2150
 int liftTarget;
 int liftTime;
 int clawTarget;
@@ -98,7 +97,17 @@ task asyncLiftPID() {
 		}
 	}
 }
-
+task throwTask()
+{
+	while(1)
+	{
+		if(liftgo == 1)
+		{
+			throwFence(liftTarget,liftTime,2,0.00035,.2);
+			liftgo = 0;
+		}
+	}
+}
 task clawTask()
 {
 	moveClaw(127,clawTarget);
@@ -106,10 +115,10 @@ task clawTask()
 void throw()
 {
 	setClawMotors(-50);
-	liftTarget = 125;
-	liftTime = 2200;
+	liftTarget = 134;
+	liftTime = 2000;
 	liftgo = 1;
-	startTask(liftTask);
+	startTask(throwTask);
 	while(sensorValue[liftEnc] < 95)
 	{
 		wait1Msec(5);
@@ -117,55 +126,70 @@ void throw()
 	clawTarget = 1750;
 	startTask(clawTask);
 }
+void down()
+{
+	wait10Msec(40);
+	setDumpMotors(-127);
+	while(SensorValue[liftDown] == 0)
+	{
+		wait1Msec(25);
+	}
+	setDumpMotors(0);
+	SensorValue[liftEnc] = 0;
+}
 task progSkills() {
+	moveClaw(127,3200);
+	setClawMotors(15);
+	while (SensorValue[liftEnc] < 15) {
+		setDumpMotors(127);
+	}
+	while (!SensorValue[liftDown]) {
+		setDumpMotors(-127);
+	}
+	setDumpMotors(0);
+	SensorValue[liftEnc] = 0;
+	SensorValue[liftEnc] = 0;
 	SensorValue[rDriveEnc] = 0;
 	SensorValue[lDriveEnc] = 0;
 	liftTarget = 135;
 	clawTarget = 1750;
 	startTask(clawTask);
 	driveDistancePID(-250,STRAIGHT,1000);
-	waitForClaw(1750,50);
-	wait10Msec(250);
-	moveClaw(127, 650);
+	waitForClaw(1750,200);
+	wait10Msec(150);
+	moveClaw(127, 850);
 	driveDistancePID(150,STRAIGHT,1000);
 	setClawMotors(-127);
 	wait1Msec(500);
-	setClawMotors(-75);
+	setClawMotors(-60);
 	driveDistancePID(-900,STRAIGHT,1500);
 	throw();
 	wait10Msec(20);
 	driveDistancePID(150,STRAIGHT,1000);
-	setDumpMotors(-127);
-	while(SensorValue[liftDown] == 0)
-	{
-		wait1Msec(25);
-	}
-	setDumpMotors(0);
-	startTask(clawTask);
+	down();
+	SensorValue[liftEnc] = 0;
+	strafeRight(35,127);
+	driveDistancePID(-300,STRAIGHT,1000);
+	moveClaw(127, 975);
 	//driveDistancePID(-300,STRAIGHT,1000)
-	driveDistancePID(850,STRAIGHT,1300);
+	driveDistancePID(1150,STRAIGHT,1300);
 	wait10Msec(100);
-	moveClaw(127, 675);
+	moveClaw(-127, 620);
 	driveDistancePID(150,STRAIGHT,1000);
 	setClawMotors(-127);
 	wait1Msec(500);
-	setClawMotors(-75);
+	setClawMotors(-60);
 	driveDistancePID(-1220,STRAIGHT,1500);
 	throw();
-	wait10Msec(80);
 	driveDistancePID(150,STRAIGHT,1000);
-	setDumpMotors(-127);
-	while(SensorValue[liftDown] == 0)
-	{
-		wait1Msec(25);
-	}
-	setDumpMotors(0);
-	driveDistancePID(-300,STRAIGHT,1000)
+	down();
+	strafeLeft(100,127);
+	driveDistancePID(-510,STRAIGHT,1000);
 	driveDistancePID(300,STRAIGHT,1000);
-	strafeleft(175,127);
-	moveClaw(127,820);
+	moveClaw(127,700);
+	strafeleft(92,127);
 	SensorValue[rDriveEnc] = 0;
-	driveDistancePID(480,ROTATE_RIGHT,1000);
+	driveDistancePID(442,ROTATE_RIGHT,1000);
 	/*while(abs(SensorValue[rDriveEnc]) < 390.5)
 	{
 	setRightDtMotors(-85);
@@ -173,29 +197,41 @@ task progSkills() {
 	}*/
 	setRightDtMotors(0);
 	setLeftDtMotors(0);
-	driveDistancePID(1250,STRAIGHT,1500);
+	driveDistancePID(1325,STRAIGHT,1500);
 	setClawMotors(-127);
 	wait10Msec(100);
 	setClawMotors(-30);
 	liftgo = 1;
-	liftTarget = 70;
+	liftTarget = 95;
 	startTask(liftTask);
+	wait10Msec(75);
 	SensorValue[rDriveEnc] = 0;
 	//liftToTargetPIDEnc(55,1000,2.5,0.00035,.2);
 	driveDistancePID(480,ROTATE_LEFT,1000);
 	setRightDtMotors(0);
 	setLeftDtMotors(0);
-	throw();
-	liftgo = 1;
+	wait10Msec(50);
+	//setClawMotors(-50);
+	//liftgo = 1;
+	//liftTarget = 130;
+	//startTask(liftTask);
+	//wait10Msec(90);
+	//clawTarget = 1750;
+	//startTask(clawTask);
+	//liftTarget = 127;
+	//liftTime = 2000;
+	//strafeRight(240,127);
+	//down();
+	liftTarget = 65;
 	startTask(liftTask);
-	wait10Msec(200);
-	driveDistancePID(250,STRAIGHT,1000)
-	setDumpMotors(-127);
-	while(SensorValue[liftDown] == 0)
-	{
-		wait1Msec(25);
-	}
-	setDumpMotors(0);
+	waitForLift(65,5);
+	wait10Msec(75);
+	throw();
+	setDumpMotors(13);
+	wait10Msec(75);
+	driveDistancePID(-250,STRAIGHT,1000);
+	//strafeLeft(240,127);
+	down();
 	/*SensorValue[rDriveEnc] = 0;
 	while(SensorValue[rDriveEnc] < 735)
 	{
@@ -206,20 +242,15 @@ task progSkills() {
 	setLeftDtMotors(0);
 	liftToPotTarget(3900, -127)
 	moveClaw(127, 1900);*/
-	driveDistancePID(175,STRAIGHT,1000);
+	driveDistancePID(300,STRAIGHT,1000);
 	moveClaw(127, 550);
 	setClawMotors(-127);
 	wait1Msec(500);
 	setClawMotors(-25);
-	driveDistancePID(-350,STRAIGHT,1000);
+	driveDistancePID(-410,STRAIGHT,1000);
 	throw();
 	wait10Msec(80);
-	setDumpMotors(-127);
-	while(SensorValue[liftDown] == 0)
-	{
-		wait1Msec(25);
-	}
-	setDumpMotors(0);
+	down();
 	driveDistancePID(-300,STRAIGHT,1000)
 	driveDistancePID(300,STRAIGHT,1000);
 	//straight(127, 200)
@@ -232,12 +263,7 @@ task progSkills() {
 	throw();
 	wait10Msec(80);
 	driveDistancePID(150,STRAIGHT,1000);
-	setDumpMotors(-127);
-	while(SensorValue[liftDown] == 0)
-	{
-		wait1Msec(25);
-	}
-	setDumpMotors(0);
+	down();
 	driveDistancePID(-300,STRAIGHT,1000)
 	driveDistancePID(300,STRAIGHT,1000);
 	driveDistancePID(150,STRAIGHT,1000);
@@ -252,7 +278,7 @@ task progSkills() {
 	setLeftDtMotors(0);
 	liftToPotTarget(3900, -127)
 	moveClaw(127, 1900);*/
-	strafeRight(1000, 127);
+	strafeRight(1050, 127);
 	driveDistancePID(750,STRAIGHT,1500);
 	wait10Msec(100);
 	moveClaw(127, 550);
@@ -265,13 +291,9 @@ task progSkills() {
 	wait10Msec(80);
 	driveDistancePID(150,STRAIGHT,1000);
 	setDumpMotors(-127);
-	while(SensorValue[liftDown] == 0)
-	{
-		wait1Msec(25);
-	}
-	setDumpMotors(0);
-
+	down();
 }
+
 
 int autonClawWait = 0;
 task autonBigClawDelay() {
@@ -404,7 +426,7 @@ task autonStars() {
 }
 
 task autonomous() {
-	wait10Msec(250);
+	/*wait10Msec(250);
 	startTask(progSkills);
 	//Auton plays and their numbers, for reference.  These numbers are set as the value of the AUTON_PLAY variable to control which auton play runs
 	//#1 Big
@@ -454,7 +476,7 @@ task autonomous() {
 	setLeftDtMotors(0);
 	liftToPotTarget(3900, -127)
 	moveClaw(127, 1900);*/
-	strafeRight(1020, 127);
+	/*strafeRight(1020, 127);
 	straight(127, 75);
 	moveClaw(127, 3200);
 	setClawMotors(-127);
@@ -507,7 +529,9 @@ task autonomous() {
 	//wait
 	//raise arm
 	//open claw
-	//wait
+	//wait*/
+	startTask(autonBig);
+	//starttask(progSkills);
 }
 
 /*task progSkills() {
@@ -591,6 +615,7 @@ task liftComp() {
 }
 task usercontrol()
 {
+
 	bool ENABLE_DEBUG_MODE = true;
 	bool DEBUG_RUN_AUTON = false;
 	displayLCDCenteredString(0,"Debug - center");
@@ -623,11 +648,11 @@ task usercontrol()
 	bool btn8UPressed = false;
   while(1)
   {
-  	if(vexRT[Btn7D]){
+  	/*if(vexRT[Btn7D]){
   		//throw();
   		startTask(autonomous);
   		stopTask(usercontrol);
-  	}
+  	}*/
   	//for deadzones; when the joystick value for an axis is below the threshold, the motors controlled by that joystick will not move in that direction
   	LY = (abs(vexRT[Ch3]) > threshold) ? vexRT[Ch3] : 0;
   	LX = (abs(vexRT[Ch4]) > threshold) ? vexRT[Ch4] : 0;
