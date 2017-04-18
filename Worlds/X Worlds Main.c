@@ -631,7 +631,7 @@ task liftComp() {
 }
 task usercontrol()
 {
-	bool ENABLE_DEBUG_MODE = true;
+	bool ENABLE_DEBUG_MODE = false;
 	bool DEBUG_RUN_AUTON = false;
 	displayLCDCenteredString(0,"Debug - center");
 	displayLCDCenteredString(1,"drvr mv joystck");
