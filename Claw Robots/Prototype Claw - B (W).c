@@ -302,11 +302,15 @@ task autonBigClawDelay() {
 }
 
 void releaseClaw() {
-	moveClaw(127,3200);
-	setClawMotors(15);
-	while (SensorValue[liftEnc] < 15) {
+	moveClaw(127,3100);
+	//setClawMotors(15);
+	while (SensorValue[liftEnc] < 17.5) {
 		setDumpMotors(127);
 	}
+	setDumpMotors(0);
+	moveClaw(127,400);
+	setDumpMotors(127);
+	wait10Msec(30);
 	while (!SensorValue[liftDown]) {
 		setDumpMotors(-127);
 	}
@@ -615,7 +619,9 @@ task liftComp() {
 }
 task usercontrol()
 {
-
+	//releaseClaw();
+	//wait10Msec(100000000000000);
+  //stopTask(usercontrol);
 	bool ENABLE_DEBUG_MODE = true;
 	bool DEBUG_RUN_AUTON = false;
 	displayLCDCenteredString(0,"Debug - center");
